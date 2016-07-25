@@ -65,8 +65,7 @@ extern char* joystick_name (const int index);
 extern void joystick_update_hat (const int index, const int hat, const DS_Hat angle);
 extern void joystick_update_axis (const int index, const int axis, const double value);
 extern void joystick_add (const char* name, const int axes, const int hats, const int buttons);
-extern void joystick_update_button (const int index, const int button,
-                                    const DS_Button pressedState);
+extern void joystick_update_button (const int index, const int button, const DS_Button pressed);
 
 /* netconsole.c */
 extern void netconsole_set_input_port (const int port);
