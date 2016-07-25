@@ -170,10 +170,10 @@ extern void DS_SetRobotAddress (const char* ip);
 /**
  * Registers a new joystick with the given \a data
  */
-extern int DS_RegisterJoystick (const char* name,
-                                const int axes,
-                                const int hats,
-                                const int buttons);
+extern void DS_RegisterJoystick (const char* name,
+                                 const int axes,
+                                 const int hats,
+                                 const int buttons);
 
 /**
  * Returns the number of joysticks attached to the DS

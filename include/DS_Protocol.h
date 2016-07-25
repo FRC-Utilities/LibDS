@@ -71,9 +71,20 @@ typedef struct {
     struct _protocol* base;
 } Protocol;
 
-Protocol* DS_GetProtocol2014();
+/**
+ * Returns an instance of the 2014 protocol
+ */
+Protocol* DS_Protocol2014();
+
+/**
+ * Returns an instance of the 2015 protocol
+ */
 Protocol* DS_Protocol2015();
-Protocol* DS_GetProtocol2016();
+
+/**
+ * Returns an instance of the 2016 protocol
+ */
+Protocol* DS_Protocol2016();
 
 /**
  * Constructs an static IP using the given \a team number.

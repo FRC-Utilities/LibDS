@@ -141,10 +141,8 @@ void DS_ProtocolConfigure (Protocol* protocol)
 
         /* Change default addresses */
         sockets_set_default_fms_address (DS_CurrentProtocol()->recommendedFMSAddress);
-        sockets_set_default_radio_address (
-            DS_CurrentProtocol()->recommendedRadioAddress);
-        sockets_set_default_robot_address (
-            DS_CurrentProtocol()->recommendedRobotAddress);
+        sockets_set_default_radio_address (DS_CurrentProtocol()->recommendedRadioAddress);
+        sockets_set_default_robot_address (DS_CurrentProtocol()->recommendedRobotAddress);
 
         /* Change NetConsole settings */
         netconsole_set_input_port (DS_CurrentProtocol()->netconsoleInputPort);

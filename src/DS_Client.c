@@ -138,12 +138,9 @@ void DS_SetRobotAddress (const char* ip)
     sockets_set_robot_address (ip);
 }
 
-int DS_RegisterJoystick (const char* name,
-                         const int axes,
-                         const int hats,
-                         const int buttons)
+void DS_RegisterJoystick (const char* name, const int axes, const int hats, const int buttons)
 {
-    return joystick_add (name, axes, hats, buttons);
+    joystick_add (name, axes, hats, buttons);
 }
 
 int DS_JoystickCount()

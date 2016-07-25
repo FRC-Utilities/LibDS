@@ -48,11 +48,17 @@ typedef enum {
     DS_SOCKET_INVALID,
 } DS_SocketType;
 
+/**
+ * Represents the available button states
+ */
 typedef enum {
     DS_BUTTON_PRESSED  = 0x01,
     DS_BUTTON_RELEASED = 0x00,
 } DS_Button;
 
+/**
+ * Represents the available POV/hat states
+ */
 typedef enum {
     DS_HAT_UP        = 0x01,
     DS_HAT_DOWN      = 0x02,

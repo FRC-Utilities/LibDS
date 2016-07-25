@@ -33,10 +33,15 @@ void startTeleoperated();
 int main()
 {
     DS_Init();
+    DS_ProtocolConfigure (DS_Protocol2015());
+
+#ifdef _WIN32
+    system ("cls");
+#else
+    system ("clear");
+#endif
 
     printf ("Welcome! Type \"help\" to get started!\n");
-
-    DS_ProtocolConfigure (DS_Protocol2015());
 
     while (DS_TRUE) {
         char input [BUFSIZ];
@@ -98,7 +103,7 @@ void help()
                       "   quit          exit this application            \n"
                       "   help          display this menu                \n";
 
-    printf (str);
+    printf ("%s", str);
 }
 
 void enable()
