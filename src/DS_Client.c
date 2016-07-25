@@ -15,6 +15,7 @@ void DS_Init()
 {
     cfg_init();
     sockets_init();
+    handler_init();
     joystick_init();
     netconsole_init();
 }

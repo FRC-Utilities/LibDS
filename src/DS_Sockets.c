@@ -8,6 +8,36 @@
 
 #include "DS_Private.h"
 
+#include <sys/types.h>
+#include <sys/socket.h>
+#include <netinet/in.h>
+
+//==============================================================================
+// Socket definition
+//==============================================================================
+
+/* FMS sockets */
+int fms_udp_socket_in;
+int fms_tcp_socket_in;
+int fms_udp_socket_out;
+int fms_tcp_socket_out;
+
+/* Radio sockets */
+int radio_udp_socket_in;
+int radio_tcp_socket_in;
+int radio_udp_socket_out;
+int radio_tcp_socket_out;
+
+/* Robot sockets */
+int robot_udp_socket_in;
+int robot_tcp_socket_in;
+int robot_udp_socket_out;
+int robot_tcp_socket_out;
+
+//==============================================================================
+// Module init
+//==============================================================================
+
 void sockets_init()
 {
 

@@ -8,29 +8,22 @@
 
 #include "DS_Private.h"
 
-#include <sys/types.h>
-#include <sys/socket.h>
-#include <netinet/in.h>
-
-int in_socket;
-int out_socket;
-
-void netconsole_init()
+void handler_init()
 {
 
 }
 
-void netconsole_set_input_port (const int port)
+void handler_send_fms_data()
 {
 
 }
 
-void netconsole_set_output_port (const int port)
+void handler_send_radio_data()
 {
 
 }
 
-void netconsole_send_message (const char* message)
+void handler_send_robot_data()
 {
 
 }

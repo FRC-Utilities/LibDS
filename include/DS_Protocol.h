@@ -20,6 +20,21 @@ extern "C" {
  * interact with the LibDS system
  */
 struct _protocol {
+    /* Packet interpretation functions */
+    DS_Bool (*readFMSPacket) (char* data);
+    DS_Bool (*readRadioPacket) (char* data);
+    DS_Bool (*readRobotPacket) (char* data);
+
+    /* Packet generation functions */
+    char* (*createFMSPacket) (char* data);
+    char* (*createRadioPacket) (char* data);
+    char* (*createRobotPacket) (char* data);
+
+    /* Recommended addresses */
+    char* (*recommendedFMSAddress) (char* string);
+    char* (*recommendedRadioAddress) (char* string);
+    char* (*recommendedRobotAddress) (char* string);
+
     /* Packet generation intervals */
     int fmsInterval;
     int radioInterval;
@@ -47,21 +62,6 @@ struct _protocol {
     DS_SocketType fmsSocket;
     DS_SocketType radioSocket;
     DS_SocketType robotSocket;
-
-    /* Packet interpretation functions */
-    DS_Bool (*readFMSPacket) (char* data);
-    DS_Bool (*readRadioPacket) (char* data);
-    DS_Bool (*readRobotPacket) (char* data);
-
-    /* Packet generation functions */
-    char* (*createFMSPacket) (char* data);
-    char* (*createRadioPacket) (char* data);
-    char* (*createRobotPacket) (char* data);
-
-    /* Recommended addresses */
-    char* (*recommendedFMSAddress) (char* string);
-    char* (*recommendedRadioAddress) (char* string);
-    char* (*recommendedRobotAddress) (char* string);
 };
 
 /**

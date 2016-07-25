@@ -17,6 +17,7 @@ extern "C" {
 
 /* init functions */
 extern void cfg_init();
+extern void handler_init();
 extern void sockets_init();
 extern void joystick_init();
 extern void netconsole_init();
@@ -54,6 +55,11 @@ extern void cfg_update_lib_version (const char* version);
 extern void cfg_update_fms_connected (const DS_Bool connected);
 extern void cfg_update_radio_connected (const DS_Bool connected);
 extern void cfg_update_robot_connected (const DS_Bool connected);
+
+/* handler.c */
+extern void handler_send_fms_data();
+extern void handler_send_radio_data();
+extern void handler_send_robot_data();
 
 /* joysticks.c */
 extern int joystick_count();
