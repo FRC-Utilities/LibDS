@@ -69,7 +69,7 @@ void joystick_add (const char* name, const int axes, const int hats, const int b
 
 }
 
-void joystick_update_button (const int index, const int button, const DS_Button pressedState)
+void joystick_update_button (const int index, const int button, const DS_Button pressed)
 {
 
 }
