@@ -33,6 +33,17 @@ typedef enum {
     DS_CONTROL_AUTONOMOUS,
     DS_CONTROL_TELEOPERATED,
 } DS_ControlMode;
+    
+typedef enum {
+    DS_ALLIANCE_RED,
+    DS_ALLIANCE_BLUE,
+} DS_Alliance;
+    
+typedef enum {
+    DS_POSITION_1,
+    DS_POSITION_2,
+    DS_POSITION_3,
+} DS_Position;
 
 typedef enum {
     DS_SOCKET_UDP,

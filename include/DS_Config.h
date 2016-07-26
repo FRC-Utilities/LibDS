@@ -50,10 +50,13 @@ extern int CFG_GetRobotCPUUsage();
 extern int CFG_GetRobotRAMUsage();
 extern int CFG_GetRobotDiskUsage();
 extern double CFG_GetRobotVoltage();
+extern DS_Alliance CFG_GetAlliance();
+extern DS_Position CFG_GetPosition();
 extern bool CFG_GetEmergencyStopped();
 extern bool CFG_GetFMSCommunications();
 extern bool CFG_GetRadioCommunications();
 extern bool CFG_GetRobotCommunications();
+extern DS_ControlMode CFG_GetControlMode();
 
 /* Setters */
 extern void CFG_SetRobotCode (bool code);
@@ -63,6 +66,9 @@ extern void CFG_SetRobotRAMUsage (int percent);
 extern void CFG_SetRobotDiskUsage (int percent);
 extern void CFG_SetRobotVoltage (double voltage);
 extern void CFG_SetEmergencyStopped (bool stopped);
+extern void CFG_SetAlliance (DS_Alliance alliance);
+extern void CFG_SetPosition (DS_Position position);
+extern void CFG_SetControlMode (DS_ControlMode mode);
 extern void CFG_SetFMSCommunications (bool communications);
 extern void CFG_SetRadioCommunications (bool communications);
 extern void CFG_SetRobotCommunications (bool communications);

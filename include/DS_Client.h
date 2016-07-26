@@ -40,6 +40,8 @@ extern void DS_RebootRobot();
 extern void DS_RestartRobotCode();
 extern void DS_SetRobotEnabled (bool enabled);
 extern void DS_SetEmergencyStop (bool enabled);
+extern void DS_SetAlliance (DS_Alliance alliance);
+extern void DS_SetPosition (DS_Position position);
 extern void DS_SetControlMode (DS_ControlMode mode);
 
 extern int DS_GetTeam();
@@ -53,7 +55,10 @@ extern int DS_GetRobotDiskUsage();
 extern bool DS_GetRadioConnected();
 extern bool DS_GetRobotConnected();
 extern double DS_GetRobotVoltage();
+extern DS_Alliance DS_GetAlliance();
+extern DS_Position DS_GetPosition();
 extern bool DS_GetRobotEmergencyStop();
+extern DS_ControlMode DS_GetControlMode();
 
 #ifdef __cplusplus
 }
