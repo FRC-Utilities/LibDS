@@ -21,19 +21,24 @@
  *     DEALINGS IN THE SOFTWARE.
  */
 
-#ifndef _LIB_DS_MAIN_H
-#define _LIB_DS_MAIN_H
+#ifndef _LIB_DS_PROTOCOLS_H
+#define _LIB_DS_PROTOCOLS_H
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-#include "DS_Types.h"
-#include "DS_Events.h"
-#include "DS_Client.h"
-#include "DS_Objects.h"
-#include "DS_Joysticks.h"
-#include "DS_Protocols.h"
+typedef enum {
+    DS_CONTROL_TEST,
+    DS_CONTROL_AUTONOMOUS,
+    DS_CONTROL_TELEOPERATED,
+} DS_ControlMode;
+
+typedef enum {
+    DS_SOCKET_UDP,
+    DS_SOCKET_TCP,
+    DS_SOCKET_INVALID
+} DS_SocketType;
 
 #ifdef __cplusplus
 }

@@ -21,19 +21,49 @@
  *     DEALINGS IN THE SOFTWARE.
  */
 
-#ifndef _LIB_DS_MAIN_H
-#define _LIB_DS_MAIN_H
+#ifndef _LIB_DS_OBJECTS_H
+#define _LIB_DS_OBJECTS_H
+
+#include <stdint.h>
+#include <stdbool.h>
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-#include "DS_Types.h"
-#include "DS_Events.h"
-#include "DS_Client.h"
-#include "DS_Objects.h"
-#include "DS_Joysticks.h"
-#include "DS_Protocols.h"
+typedef struct {
+    int socket;
+    unsigned long address;
+    unsigned short int type;
+    unsigned short int input_port;
+    unsigned short int output_port;
+} DS_Socket;
+
+typedef struct {
+    char* (*fmsAddress)();
+    char* (*radioAddress)();
+    char* (*robotAddress)();
+
+    char* (*fmsPacket)();
+    char* (*radioPacket)();
+    char* (*robotPacket)();
+
+    bool (*readFmsPacket) (char* const data);
+    bool (*readRadioPacket) (char* const data);
+    bool (*readRadioPacket) (char* const data);
+
+    void (*resetFMS)();
+    void (*resetRadio)();
+    void (*resetRobot)();
+
+    void (*rebootRobot)();
+    void (*restartRobotCode)();
+
+    DS_Socket fmsSocket;
+    DS_Socket radioSocket;
+    DS_Socket robotSocket;
+    DS_Socket netconsoleSocket;
+} DS_Protocol;
 
 #ifdef __cplusplus
 }

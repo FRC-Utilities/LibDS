@@ -21,19 +21,23 @@
  *     DEALINGS IN THE SOFTWARE.
  */
 
-#ifndef _LIB_DS_MAIN_H
-#define _LIB_DS_MAIN_H
+#ifndef _LIB_DS_JOYSTICKS_H
+#define _LIB_DS_JOYSTICKS_H
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-#include "DS_Types.h"
-#include "DS_Events.h"
-#include "DS_Client.h"
-#include "DS_Objects.h"
-#include "DS_Joysticks.h"
-#include "DS_Protocols.h"
+extern int DS_GetJoystickCount();
+extern int DS_GetJoystickNumHats (int joystick);
+extern int DS_GetJoystickNumAxes (int joystick);
+extern int DS_GetJoystickNumButtons (int joystick);
+
+extern void DS_JoystickRemove (int joystick);
+extern void DS_SetJoystickHat (int joystick, int hat, int angle);
+extern void DS_SetJoystickAxis (int joystick, int axis, double value);
+extern void DS_SetJoystickButton (int joystick, int button, bool pressed);
+extern void DS_JoystickRegister (int joystick, int axes, int hats, int buttons);
 
 #ifdef __cplusplus
 }

@@ -21,19 +21,20 @@
  *     DEALINGS IN THE SOFTWARE.
  */
 
-#ifndef _LIB_DS_MAIN_H
-#define _LIB_DS_MAIN_H
+#ifndef _LIB_DS_PROTOCOLS_H
+#define _LIB_DS_PROTOCOLS_H
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-#include "DS_Types.h"
-#include "DS_Events.h"
-#include "DS_Client.h"
-#include "DS_Objects.h"
-#include "DS_Joysticks.h"
-#include "DS_Protocols.h"
+typedef struct DS_Protocol;
+
+extern DS_Protocol* DS_ProtocolFRC_2014();
+extern DS_Protocol* DS_ProtocolFRC_2015();
+extern DS_Protocol* DS_ProtocolFRC_2016();
+
+extern void DS_ConfigureProtocol (DS_Protocol* p);
 
 #ifdef __cplusplus
 }

@@ -1,1 +1,0 @@
-include ($$PWD/LibDS.pri)
