@@ -15,13 +15,13 @@ My current idea is to design LibDS in a similar way that [SDL](http://libsdl.org
 
 #### 'Private' vs. 'Public' members
 
-- All the functions that a client application would be interested in are located in `LibDS.h`. 
+- All the functions that a client application would be interested in are located in [`LibDS.h`](https://github.com/FRC-Utilities/LibDS-C/blob/master/include/LibDS.h). 
 
-- Functions that are used by the protocols to update the state of the LibDS are made available in `DS_Config.h`. Calling any of the 'setter' functions in `DS_Config` will trigger an event (which can later be used by the client application).
+- Functions that are used by the protocols to update the state of the LibDS are made available in [`DS_Config.h`](https://github.com/FRC-Utilities/LibDS-C/blob/master/include/DS_Config.h). Calling any of the 'setter' functions in [`DS_Config`](https://github.com/FRC-Utilities/LibDS-C/blob/master/include/DS_Config.h) will trigger an event (which can later be used by the client application).
 
 #### Event system
 
-For the moment, I am designing an event system that is very similar to SDL's event system. You can check `DS_Events.h` for current state, I still haven't done any actual implementation of the events system.
+For the moment, I am designing an event system that is very similar to SDL's event system. You can check [`DS_Events.h`](https://github.com/FRC-Utilities/LibDS-C/blob/master/include/DS_Events.h) for current state, I still haven't done any actual implementation of the events system.
 
 #### Protocols
 
@@ -29,10 +29,10 @@ Protocols are encapsulated structures. When a protocol is initialized, it define
 
 As with the original LibDS, protocols have access to the `DS_Config` to update the state of the LibDS.
 
-The base protocol (and other object/structures) is located in the `DS_Objects` header.
+The base protocol is implemented in the [`DS_Protocol`](https://github.com/FRC-Utilities/LibDS-C/blob/master/include/DS_Objects.h#L42) structure.
 
 ##### Sockets
 
-Instead of manually initializing a socket for each target, data direction and protocol type (UDP and TCP). The LibDS will use the `DS_Socket` object to define ports, protocol type and remote targets. 
+Instead of manually initializing a socket for each target, data direction and protocol type (UDP and TCP). The LibDS will use the [`DS_Socket`](https://github.com/FRC-Utilities/LibDS-C/blob/master/include/DS_Objects.h#L34) object to define ports, protocol type and remote targets. 
 
-I will write all the logic code in `socket.c`, which will be in charge of managing the system sockets with the information given by a `DS_Socket` object.
+I will write all the logic code in [`socket.c`](https://github.com/FRC-Utilities/LibDS-C/blob/master/src/socket.c), which will be in charge of managing the system sockets with the information given by a [`DS_Socket`](https://github.com/FRC-Utilities/LibDS-C/blob/master/include/DS_Objects.h#L34) object.
