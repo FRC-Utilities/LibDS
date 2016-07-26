@@ -20,6 +20,7 @@ void quit();
 void help();
 void enable();
 void disable();
+void netconsole();
 void setRobotIP();
 void updateTeam();
 void startTestMode();
@@ -61,6 +62,9 @@ int main()
         else if (strcmp (input, "disable") == 0)
             disable();
 
+        else if (strcmp (input, "netconsole") == 0)
+            netconsole();
+
         else if (strcmp (input, "test") == 0)
             startTestMode();
 
@@ -97,6 +101,7 @@ void help()
                       "   team          set team number                  \n"
                       "   enable        enable the robot                 \n"
                       "   disable       disable the robot                \n"
+                      "   netconsole    display netconsole messages      \n"
                       "   test          switch the robot to test mode    \n"
                       "   autonomous    switch the robot to autonomous   \n"
                       "   teleoperated  switch the robot to teleoperated \n"
@@ -114,6 +119,11 @@ void enable()
 void disable()
 {
     DS_SetEnabled (DS_FALSE);
+}
+
+void netconsole()
+{
+    printf ("%s", DS_NetConsoleData());
 }
 
 void setRobotIP()

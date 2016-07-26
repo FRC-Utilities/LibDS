@@ -19,7 +19,12 @@ typedef struct {
 
 Joystick* JOYSTICKS[];
 
-void joystick_init()
+DS_Bool joystick_init()
+{
+    return DS_TRUE;
+}
+
+void joystick_close()
 {
 
 }

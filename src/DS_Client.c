@@ -11,17 +11,52 @@
 
 #include <stdio.h>
 
-void DS_Init()
+DS_Bool initialized = DS_FALSE;
+
+DS_Bool DS_Init()
 {
-    cfg_init();
-    sockets_init();
-    handler_init();
-    joystick_init();
-    netconsole_init();
+    if (initialized == DS_TRUE)
+        return DS_FALSE;
+
+    initialized = DS_TRUE;
+    DS_Bool no_errors = DS_TRUE;
+
+    if (!cfg_init()) {
+        no_errors = DS_FALSE;
+        fprintf (stderr, "LibDS: CFG module init error!");
+    }
+
+    if (!sockets_init()) {
+        no_errors = DS_FALSE;
+        fprintf (stderr, "LibDS: Sockets module init error!");
+    }
+
+    if (!joystick_init()) {
+        no_errors = DS_FALSE;
+        fprintf (stderr, "LibDS: Joystick module init error!");
+    }
+
+    if (!netconsole_init()) {
+        no_errors = DS_FALSE;
+        fprintf (stderr, "LibDS: Netconsole module init error!");
+    }
+
+    if (!events_init()) {
+        no_errors = DS_FALSE;
+        fprintf (stderr, "LibDS: Event module init error!");
+    }
+
+    return no_errors;
 }
 
 void DS_Close()
 {
+    events_close();
+
+    cfg_close();
+    sockets_close();
+    joystick_close();
+    netconsole_close();
 }
 
 int DS_Team()
@@ -49,19 +84,24 @@ int DS_RobotDiskUsage()
     return cfg_disk_usage();
 }
 
-char* DS_RobotPDPVersion()
+const char* DS_RobotPDPVersion()
 {
     return cfg_pdp_version();
 }
 
-char* DS_RobotPCMVersion()
+const char* DS_RobotPCMVersion()
 {
     return cfg_pcm_version();
 }
 
-char* DS_RobotLibVersion()
+const char* DS_RobotLibVersion()
 {
     return cfg_lib_version();
+}
+
+const char* DS_NetConsoleData()
+{
+    return netconsole_data();
 }
 
 DS_Bool DS_Enabled()

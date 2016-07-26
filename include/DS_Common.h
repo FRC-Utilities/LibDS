@@ -26,8 +26,13 @@ static const int DS_INVALID = -1;
  * Represents a simple value that can have two states
  */
 typedef enum {
+#ifndef __cplusplus
     DS_TRUE  = 1,
     DS_FALSE = 0,
+#else
+    DS_TRUE  = true,
+    DS_FALSE = false,
+#endif
 } DS_Bool;
 
 /**

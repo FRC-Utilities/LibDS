@@ -27,7 +27,12 @@ static DS_Bool ROBOT_CONNECTED = DS_FALSE;
 
 static DS_Control CONTROL_MODE = DS_CONTROL_TELEOPERATED;
 
-void cfg_init()
+DS_Bool cfg_init()
+{
+    return DS_TRUE;
+}
+
+void cfg_close()
 {
 
 }

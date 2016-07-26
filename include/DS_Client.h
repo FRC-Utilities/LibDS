@@ -19,7 +19,7 @@ extern "C" {
  * Initializes all the modules of the LibDS, you should call this function
  * as soon as possible.
  */
-extern void DS_Init();
+extern DS_Bool DS_Init();
 
 /**
  * Closes all the modules of the LibDS, call this before quiting the
@@ -55,17 +55,22 @@ extern int DS_RobotDiskUsage();
 /**
  * Returns the current PDP version of the robot
  */
-extern char* DS_RobotPDPVersion();
+extern const char* DS_RobotPDPVersion();
 
 /**
  * Returns the current PCM version of the robot
  */
-extern char* DS_RobotPCMVersion();
+extern const char* DS_RobotPCMVersion();
 
 /**
  * Returns the current library version of the robot
  */
-extern char* DS_RobotLibVersion();
+extern const char* DS_RobotLibVersion();
+
+/**
+ * Returns the received NetConsole data
+ */
+extern const char* DS_NetConsoleData();
 
 /**
  * Returns \c DS_TRUE if the robot is enabled, otherwise, it returns \c DS_FALSE

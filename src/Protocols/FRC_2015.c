@@ -45,47 +45,47 @@ static int sent_fms_packets = 0;
 static int sent_radio_packets = 0;
 static int sent_robot_packets = 0;
 
-DS_Bool read_fms_packet (char* data)
+DS_Bool read_fms_packet (const char* data)
 {
     return DS_TRUE;
 }
 
-DS_Bool read_radio_packet (char* data)
+DS_Bool read_radio_packet (const char* data)
 {
     return DS_TRUE;
 }
 
-DS_Bool read_robot_packet (char* data)
+DS_Bool read_robot_packet (const char* data)
 {
     return DS_TRUE;
 }
 
-char* create_fms_packet (char* data)
+char* create_fms_packet (const char* data)
 {
     return data;
 }
 
-char* create_radio_packet (char* data)
+char* create_radio_packet (const char* data)
 {
     return data;
 }
 
-char* create_robot_packet (char* data)
+char* create_robot_packet (const char* data)
 {
     return data;
 }
 
-char* recommended_fms_address (char* string)
+char* recommended_fms_address (const char* string)
 {
     return string;
 }
 
-char* recommended_radio_address (char* string)
+char* recommended_radio_address (const char* string)
 {
     return string;
 }
 
-char* recommended_robot_address (char* string)
+char* recommended_robot_address (const char* string)
 {
     return string;
 }
@@ -94,52 +94,56 @@ Protocol* DS_Protocol2015()
 {
     /* Ensure that protocol is created only once */
     if (!instance) {
-        struct _protocol base;
+        struct _protocol* base = (struct _protocol*) malloc (sizeof (struct _protocol));
 
         /* Setup the intervals */
-        base.fmsInterval = 500;
-        base.robotInterval = 20;
-        base.radioInterval = DS_INVALID;
+        base->fmsInterval = 500;
+        base->robotInterval = 20;
+        base->radioInterval = DS_INVALID;
 
         /* Setup input ports */
-        base.fmsInputPort = 1120;
-        base.robotInputPort = 1150;
-        base.radioInputPort = DS_INVALID;
+        base->fmsInputPort = 1120;
+        base->robotInputPort = 1150;
+        base->radioInputPort = DS_INVALID;
 
         /* Setup output ports */
-        base.fmsOutputPort = 1160;
-        base.robotOutputPort = 1110;
-        base.radioOutputPort = DS_INVALID;
+        base->fmsOutputPort = 1160;
+        base->robotOutputPort = 1110;
+        base->radioOutputPort = DS_INVALID;
+
+        /* Setup netconsole */
+        base->netconsoleInputPort = 6666;
+        base->netconsoleOutputPort = DS_INVALID;
 
         /* Setup socket types */
-        base.fmsSocket = DS_SOCKET_UDP;
-        base.robotSocket = DS_SOCKET_UDP;
-        base.radioSocket = DS_SOCKET_INVALID;
+        base->fmsSocket = DS_SOCKET_UDP;
+        base->robotSocket = DS_SOCKET_UDP;
+        base->radioSocket = DS_SOCKET_INVALID;
 
         /* Setup joystick properties */
-        base.maxHats = 1;
-        base.maxAxes = 12;
-        base.maxButtons = 12;
-        base.maxJoysticks = 6;
+        base->maxHats = 1;
+        base->maxAxes = 12;
+        base->maxButtons = 12;
+        base->maxJoysticks = 6;
 
         /* Setup interpreter functions */
-        base.readFMSPacket = &read_fms_packet;
-        base.readRadioPacket = &read_radio_packet;
-        base.readRobotPacket = &read_robot_packet;
+        base->readFMSPacket = &read_fms_packet;
+        base->readRadioPacket = &read_radio_packet;
+        base->readRobotPacket = &read_robot_packet;
 
         /* Setup generator functions */
-        base.createFMSPacket = &create_fms_packet;
-        base.createRadioPacket = &create_radio_packet;
-        base.createRobotPacket = &create_robot_packet;
+        base->createFMSPacket = &create_fms_packet;
+        base->createRadioPacket = &create_radio_packet;
+        base->createRobotPacket = &create_robot_packet;
 
         /* Setup default address functions */
-        base.recommendedFMSAddress = &recommended_fms_address;
-        base.recommendedRadioAddress = &recommended_radio_address;
-        base.recommendedRobotAddress = &recommended_robot_address;
+        base->recommendedFMSAddress = &recommended_fms_address;
+        base->recommendedRadioAddress = &recommended_radio_address;
+        base->recommendedRobotAddress = &recommended_robot_address;
 
         /* Create protocol */
         instance = (Protocol*) malloc (sizeof (Protocol));
-        instance->base = &base;
+        instance->base = base;
     }
 
     /* Return the protocol pointer */

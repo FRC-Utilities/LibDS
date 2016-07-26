@@ -8,3 +8,13 @@
 
 #include "DS_Events.h"
 #include "DS_Private.h"
+
+DS_Bool events_init()
+{
+    return DS_TRUE;
+}
+
+void events_close()
+{
+
+}

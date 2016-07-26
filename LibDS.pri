@@ -13,7 +13,6 @@ SOURCES += \
     $$PWD/src/DS_Client.c \
     $$PWD/src/DS_Config.c \
     $$PWD/src/DS_Events.c \
-    $$PWD/src/DS_Handler.c \
     $$PWD/src/DS_Joysticks.c \
     $$PWD/src/DS_NetConsole.c \
     $$PWD/src/DS_Protocol.c \

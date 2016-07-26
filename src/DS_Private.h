@@ -9,6 +9,8 @@
 #ifndef _LIBDS_PRIVATE_H
 #define _LIBDS_PRIVATE_H
 
+#include <stdbool.h>
+
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -16,11 +18,18 @@ extern "C" {
 #include "DS_Common.h"
 
 /* init functions */
-extern void cfg_init();
-extern void handler_init();
-extern void sockets_init();
-extern void joystick_init();
-extern void netconsole_init();
+extern DS_Bool cfg_init();
+extern DS_Bool events_init();
+extern DS_Bool sockets_init();
+extern DS_Bool joystick_init();
+extern DS_Bool netconsole_init();
+
+/* termination functions */
+extern void cfg_close();
+extern void events_close();
+extern void sockets_close();
+extern void joystick_close();
+extern void netconsole_close();
 
 /* config.c - getters */
 extern int cfg_team();
@@ -56,11 +65,6 @@ extern void cfg_update_fms_connected (const DS_Bool connected);
 extern void cfg_update_radio_connected (const DS_Bool connected);
 extern void cfg_update_robot_connected (const DS_Bool connected);
 
-/* handler.c */
-extern void handler_send_fms_data();
-extern void handler_send_radio_data();
-extern void handler_send_robot_data();
-
 /* joysticks.c */
 extern int joystick_count();
 extern int joystick_remove (const int index);
@@ -74,12 +78,14 @@ extern void joystick_add (const char* name, const int axes, const int hats, cons
 extern void joystick_update_button (const int index, const int button, const DS_Button pressed);
 
 /* netconsole.c */
+extern void netconsole_read();
+extern const char* netconsole_data();
 extern void netconsole_set_input_port (const int port);
 extern void netconsole_set_output_port (const int port);
 extern void netconsole_send_message (const char* message);
 
 /* sockets.c - FMS functions */
-extern void sockets_send_to_fms (const char* data);
+extern void sockets_send_to_fms();
 extern void sockets_set_fms_address (const char* ip);
 extern void sockets_set_fms_input_port (const int port);
 extern void sockets_set_fms_output_port (const int port);
@@ -87,7 +93,7 @@ extern void sockets_set_default_fms_address (const char* ip);
 extern void sockets_set_fms_socket_type (const DS_SocketType type);
 
 /* sockets.c - Radio/Bridge functions */
-extern void sockets_send_to_radio (const char* data);
+extern void sockets_send_to_radio();
 extern void sockets_set_radio_address (const char* ip);
 extern void sockets_set_radio_input_port (const int port);
 extern void sockets_set_radio_output_port (const int port);
@@ -95,7 +101,7 @@ extern void sockets_set_default_radio_address (const char* ip);
 extern void sockets_set_radio_socket_type (const DS_SocketType type);
 
 /* sockets.c - Robot functions */
-extern void sockets_send_to_robot (const char* data);
+extern void sockets_send_to_robot();
 extern void sockets_set_robot_address (const char* ip);
 extern void sockets_set_robot_input_port (const int port);
 extern void sockets_set_robot_output_port (const int port);

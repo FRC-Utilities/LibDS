@@ -7,6 +7,7 @@
  */
 
 #include "DS_Private.h"
+#include "DS_Protocol.h"
 
 #include <sys/types.h>
 #include <sys/socket.h>
@@ -34,11 +35,21 @@ int robot_tcp_socket_in;
 int robot_udp_socket_out;
 int robot_tcp_socket_out;
 
+/* TCP/UDP selectors */
+DS_SocketType fms_socket_type;
+DS_SocketType radio_socket_type;
+DS_SocketType robot_socket_type;
+
 //==============================================================================
-// Module init
+// Module init & close
 //==============================================================================
 
-void sockets_init()
+DS_Bool sockets_init()
+{
+    return DS_TRUE;
+}
+
+void sockets_close()
 {
 
 }
@@ -47,9 +58,29 @@ void sockets_init()
 // FMS networking
 //==============================================================================
 
-void sockets_send_to_fms (const char* data)
+int fms_socket_in()
+{
+    if (fms_socket_type == DS_SOCKET_TCP)
+        return fms_tcp_socket_in;
+
+    return fms_udp_socket_in;
+}
+
+int fms_socket_out()
+{
+    if (fms_socket_type == DS_SOCKET_TCP)
+        return fms_tcp_socket_out;
+
+    return fms_udp_socket_out;
+}
+
+void update_fms_callbacks()
 {
 
+}
+
+void sockets_send_to_fms()
+{
 }
 
 void sockets_set_fms_address (const char* ip)
@@ -81,7 +112,28 @@ void sockets_set_fms_socket_type (const DS_SocketType type)
 // Radio networking
 //==============================================================================
 
-void sockets_send_to_radio (const char* data)
+int radio_socket_in()
+{
+    if (radio_socket_type == DS_SOCKET_TCP)
+        return radio_tcp_socket_in;
+
+    return radio_udp_socket_in;
+}
+
+int radio_socket_out()
+{
+    if (radio_socket_type == DS_SOCKET_TCP)
+        return radio_tcp_socket_out;
+
+    return radio_udp_socket_out;
+}
+
+void update_radio_callbacks()
+{
+
+}
+
+void sockets_send_to_radio()
 {
 
 }
@@ -113,7 +165,33 @@ void sockets_set_radio_socket_type (const DS_SocketType type)
 // Robot networking
 //==============================================================================
 
-void sockets_send_to_robot (const char* data)
+int robot_socket_in()
+{
+    if (robot_socket_type == DS_SOCKET_TCP)
+        return robot_tcp_socket_in;
+
+    return robot_udp_socket_in;
+}
+
+int robot_socket_out()
+{
+    if (robot_socket_type == DS_SOCKET_TCP)
+        return robot_tcp_socket_out;
+
+    return robot_udp_socket_out;
+}
+
+void update_robot_callbacks()
+{
+
+}
+
+int robot_socket()
+{
+
+}
+
+void sockets_send_to_robot()
 {
 
 }
