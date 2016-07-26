@@ -44,6 +44,7 @@ extern "C" {
 #endif
 
 /* Getters */
+extern int CFG_GetTeamNumber();
 extern bool CFG_GetRobotCode();
 extern bool CFG_GetRobotEnabled();
 extern int CFG_GetRobotCPUUsage();
@@ -59,6 +60,7 @@ extern bool CFG_GetRobotCommunications();
 extern DS_ControlMode CFG_GetControlMode();
 
 /* Setters */
+extern void CFG_SetTeamNumber (int team);
 extern void CFG_SetRobotCode (bool code);
 extern void CFG_SetRobotEnabled (bool enabled);
 extern void CFG_SetRobotCPUUsage (int percent);

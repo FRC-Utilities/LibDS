@@ -38,13 +38,14 @@ extern void DS_Close();
 
 extern void DS_RebootRobot();
 extern void DS_RestartRobotCode();
+extern void DS_SetTeamNumber (int team);
 extern void DS_SetRobotEnabled (bool enabled);
 extern void DS_SetEmergencyStop (bool enabled);
 extern void DS_SetAlliance (DS_Alliance alliance);
 extern void DS_SetPosition (DS_Position position);
 extern void DS_SetControlMode (DS_ControlMode mode);
 
-extern int DS_GetTeam();
+extern int DS_GetTeamNumber();
 extern bool DS_GetRobotCode();
 extern bool DS_GetCanBeEnabled();
 extern bool DS_GetRobotEnabled();
