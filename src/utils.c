@@ -21,52 +21,11 @@
  * DEALINGS IN THE SOFTWARE.
  */
 
-#ifndef _LIB_DS_OBJECTS_H
-#define _LIB_DS_OBJECTS_H
+#include "DS_Utils.h"
 
-#include <stdint.h>
-#include <stdbool.h>
+#include <string.h>
 
-#ifdef __cplusplus
-extern "C" {
-#endif
-
-typedef struct _socket {
-    int socket;
-    unsigned long address;
-    unsigned short int type;
-    unsigned short int input_port;
-    unsigned short int output_port;
-} DS_Socket;
-
-typedef struct _protocol {
-    char* (*fmsAddress)();
-    char* (*radioAddress)();
-    char* (*robotAddress)();
-
-    char* (*fmsPacket)();
-    char* (*radioPacket)();
-    char* (*robotPacket)();
-
-    bool (*readFmsPacket) (char* const data);
-    bool (*readRadioPacket) (char* const data);
-    bool (*readRobotPacket) (char* const data);
-
-    void (*resetFMS)();
-    void (*resetRadio)();
-    void (*resetRobot)();
-
-    void (*rebootRobot)();
-    void (*restartRobotCode)();
-
-    DS_Socket fmsSocket;
-    DS_Socket radioSocket;
-    DS_Socket robotSocket;
-    DS_Socket netconsoleSocket;
-} DS_Protocol;
-
-#ifdef __cplusplus
+bool DS_StringIsEmpty (const char* string)
+{
+    return string [0] == "\0";
 }
-#endif
-
-#endif

@@ -6,19 +6,19 @@
  * a copy of this software and associated documentation files (the "Software"),
  * to deal in the Software without restriction, including without limitation
  * the rights to use, copy, modify, merge, publish, distribute, sublicense,
- * and/or sell copies of the Software, and to permit persons to whom the Software
- * is furnished to do so, subject to the following conditions:
+ * and/or sell copies of the Software, and to permit persons to whom the
+ * SOftware is furnished to do so, subject to the following conditions:
  *
- *  1. The above copyright notice and this permission notice shall be included in
- *     all copies or substantial portions of the Software.
+ * The above copyright notice and this permission notice shall be included
+ * in all copies or substantial portions of the Software.
  *
- *  2. THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS
- *     OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
- *     FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL
- *     THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
- *     LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
- *     FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
- *     DEALINGS IN THE SOFTWARE.
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS
+ * OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL
+ * THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
+ * FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
+ * DEALINGS IN THE SOFTWARE.
  */
 
 #ifndef _LIB_DS_CLIENT_H
@@ -33,33 +33,50 @@ extern "C" {
 
 #include "DS_Types.h"
 
-extern void DS_Init();
-extern void DS_Close();
+/* User-set addresses */
+extern const char* DS_GetCustomFMSAddress();
+extern const char* DS_GetCustomRadioAddress();
+extern const char* DS_GetCustomRobotAddress();
 
-extern void DS_RebootRobot();
-extern void DS_RestartRobotCode();
-extern void DS_SetTeamNumber (int team);
-extern void DS_SetRobotEnabled (bool enabled);
-extern void DS_SetEmergencyStop (bool enabled);
-extern void DS_SetAlliance (DS_Alliance alliance);
-extern void DS_SetPosition (DS_Position position);
-extern void DS_SetControlMode (DS_ControlMode mode);
+/* Protocol-set addresses */
+extern const char* DS_GetDefaultFMSAddress();
+extern const char* DS_GetDefaultRadioAddress();
+extern const char* DS_GetDefaultRobotAddress();
 
+/* Used addresses */
+extern const char* DS_GetAppliedFMSAddress();
+extern const char* DS_GetAppliedRadioAddress();
+extern const char* DS_GetAppliedRobotAddress();
+
+/* Getters */
 extern int DS_GetTeamNumber();
 extern bool DS_GetRobotCode();
 extern bool DS_GetCanBeEnabled();
 extern bool DS_GetRobotEnabled();
-extern bool DS_GetFMSConnected();
 extern int DS_GetRobotCPUUsage();
 extern int DS_GetRobotRAMUsage();
 extern int DS_GetRobotDiskUsage();
-extern bool DS_GetRadioConnected();
-extern bool DS_GetRobotConnected();
 extern double DS_GetRobotVoltage();
 extern DS_Alliance DS_GetAlliance();
 extern DS_Position DS_GetPosition();
-extern bool DS_GetRobotEmergencyStop();
+extern bool DS_GetEmergencyStopped();
+extern bool DS_GetFMSCommunications();
+extern bool DS_GetRadioCommunications();
+extern bool DS_GetRobotCommunications();
 extern DS_ControlMode DS_GetControlMode();
+
+/* Setters */
+extern void DS_RebootRobot();
+extern void DS_RestartRobotCode();
+extern void DS_SetTeamNumber (const int team);
+extern void DS_SetRobotEnabled (const bool enabled);
+extern void DS_SetEmergencyStopped (const bool stop);
+extern void DS_SetAlliance (const DS_Alliance alliance);
+extern void DS_SetPosition (const DS_Position position);
+extern void DS_SetControlMode (const DS_ControlMode mode);
+extern void DS_SetCustomFMSAddress (const char* address);
+extern void DS_SetCustomRadioAddress (const char* address);
+extern void DS_SetCustomRobotAddress (const char* address);
 
 #ifdef __cplusplus
 }

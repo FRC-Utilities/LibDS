@@ -6,19 +6,19 @@
  * a copy of this software and associated documentation files (the "Software"),
  * to deal in the Software without restriction, including without limitation
  * the rights to use, copy, modify, merge, publish, distribute, sublicense,
- * and/or sell copies of the Software, and to permit persons to whom the Software
- * is furnished to do so, subject to the following conditions:
+ * and/or sell copies of the Software, and to permit persons to whom the
+ * SOftware is furnished to do so, subject to the following conditions:
  *
- *  1. The above copyright notice and this permission notice shall be included in
- *     all copies or substantial portions of the Software.
+ * The above copyright notice and this permission notice shall be included
+ * in all copies or substantial portions of the Software.
  *
- *  2. THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS
- *     OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
- *     FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL
- *     THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
- *     LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
- *     FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
- *     DEALINGS IN THE SOFTWARE.
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS
+ * OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL
+ * THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
+ * FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
+ * DEALINGS IN THE SOFTWARE.
  */
 
 #ifndef _LIB_DS_INTERNAL_H
@@ -60,20 +60,20 @@ extern bool CFG_GetRobotCommunications();
 extern DS_ControlMode CFG_GetControlMode();
 
 /* Setters */
-extern void CFG_SetTeamNumber (int team);
-extern void CFG_SetRobotCode (bool code);
-extern void CFG_SetRobotEnabled (bool enabled);
-extern void CFG_SetRobotCPUUsage (int percent);
-extern void CFG_SetRobotRAMUsage (int percent);
-extern void CFG_SetRobotDiskUsage (int percent);
-extern void CFG_SetRobotVoltage (double voltage);
-extern void CFG_SetEmergencyStopped (bool stopped);
-extern void CFG_SetAlliance (DS_Alliance alliance);
-extern void CFG_SetPosition (DS_Position position);
-extern void CFG_SetControlMode (DS_ControlMode mode);
-extern void CFG_SetFMSCommunications (bool communications);
-extern void CFG_SetRadioCommunications (bool communications);
-extern void CFG_SetRobotCommunications (bool communications);
+extern void CFG_SetTeamNumber (const int team);
+extern void CFG_SetRobotCode (const bool code);
+extern void CFG_SetRobotEnabled (const bool enabled);
+extern void CFG_SetRobotCPUUsage (const int percent);
+extern void CFG_SetRobotRAMUsage (const int percent);
+extern void CFG_SetRobotDiskUsage (const int percent);
+extern void CFG_SetRobotVoltage (const double voltage);
+extern void CFG_SetEmergencyStopped (const bool stopped);
+extern void CFG_SetAlliance (const DS_Alliance alliance);
+extern void CFG_SetPosition (const DS_Position position);
+extern void CFG_SetControlMode (const DS_ControlMode mode);
+extern void CFG_SetFMSCommunications (const bool communications);
+extern void CFG_SetRadioCommunications (const bool communications);
+extern void CFG_SetRobotCommunications (const bool communications);
 
 /* Networking functions */
 extern int CFG_GetSocket (DS_Socket* socket);
