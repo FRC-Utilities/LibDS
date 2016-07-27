@@ -20,3 +20,10 @@
  * FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
  * DEALINGS IN THE SOFTWARE.
  */
+
+#include "DS_Events.h"
+
+int DS_PollEvent (DS_Event* event)
+{
+    return 0;
+}

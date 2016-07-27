@@ -35,16 +35,8 @@
     #define CLEAR_SCREEN AVOID_WARNINGS (system ("clear"))
 #endif
 
-void quit();
-void help();
-void enable();
-void disable();
-void netconsole();
-void updateTeam();
-void startTestMode();
-void setRobotAddress();
-void startAutonomous();
-void startTeleoperated();
+void read_user_input();
+void read_libds_events();
 
 int main ()
 {
@@ -54,116 +46,97 @@ int main ()
     printf ("Welcome! Type \"help\" to get started!\n");
 
     while (true) {
-        char input [BUFSIZ];
-
-        printf ("\n> ");
-
-        if (scanf ("%s", input) > 0) {
-            if (strcmp (input, "ip") == 0)
-                setRobotAddress();
-
-            else if (strcmp (input, "team") == 0)
-                updateTeam();
-
-            else if (strcmp (input, "enable") == 0)
-                enable();
-
-            else if (strcmp (input, "disable") == 0)
-                disable();
-
-            else if (strcmp (input, "netconsole") == 0)
-                netconsole();
-
-            else if (strcmp (input, "test") == 0)
-                startTestMode();
-
-            else if (strcmp (input, "autonomous") == 0)
-                startAutonomous();
-
-            else if (strcmp (input, "teleoperated") == 0)
-                startTeleoperated();
-
-            else if (strcmp (input, "quit") == 0)
-                quit();
-
-            else
-                help();
-        }
+        read_user_input();
+        read_libds_events();
     }
 
     return 0;
 }
 
-void quit()
+void read_user_input()
 {
-    DS_Close();
-    exit (0);
-}
+    printf ("\n> ");
 
-void help()
-{
-    const char* str = "Available commands are:                           \n"
-                      "   ip            change robot IP                  \n"
-                      "   team          set team number                  \n"
-                      "   enable        enable the robot                 \n"
-                      "   disable       disable the robot                \n"
-                      "   netconsole    display netconsole messages      \n"
-                      "   test          switch the robot to test mode    \n"
-                      "   autonomous    switch the robot to autonomous   \n"
-                      "   teleoperated  switch the robot to teleoperated \n"
-                      "   quit          exit this application            \n"
-                      "   help          display this menu                \n";
-
-    printf ("%s", str);
-}
-
-void enable()
-{
-    DS_SetRobotEnabled (true);
-}
-
-void disable()
-{
-    DS_SetRobotEnabled (false);
-}
-
-void netconsole()
-{
-}
-
-void updateTeam()
-{
-    int team = 0;
-    DS_SetTeamNumber (team);
-}
-
-void startTestMode()
-{
-    disable();
-    DS_SetControlMode (DS_CONTROL_TEST);
-}
-
-void setRobotAddress()
-{
+    /* Get user input */
     char input [BUFSIZ];
+    if (scanf ("%s", input) <= 0)
+        return;
 
-    printf ("New address: ");
+    /* User wants to change robot IP */
+    if (strcmp (input, "ip") == 0) {
+        char ip [BUFSIZ];
+        if (scanf ("%s", ip) > 0)
+            DS_SetCustomRobotAddress (ip);
+    }
 
-    if (scanf ("%s", input) > 0)
-        DS_SetCustomRobotAddress (input);
+    /* User wants to change team number */
+    else if (strcmp (input, "team") == 0) {
+        int team = 0;
+        if (scanf ("%d", &team) > 0)
+            DS_SetTeamNumber (team);
+    }
 
-    else
-        printf ("Invalid address!\n");
+    /* User wants to enable the robot */
+    else if (strcmp (input, "enable") == 0)
+        DS_SetRobotEnabled (true);
+
+    /* User wants to disable the robot */
+    else if (strcmp (input, "disable") == 0)
+        DS_SetRobotEnabled (false);
+
+    /* User wants to see NetConsole output */
+    else if (strcmp (input, "netconsole") == 0) {
+
+    }
+
+    /* User switched to test mode */
+    else if (strcmp (input, "test") == 0) {
+        DS_SetRobotEnabled (false);
+        DS_SetControlMode (DS_CONTROL_TEST);
+    }
+
+    /* User switched to autonomous */
+    else if (strcmp (input, "autonomous") == 0) {
+        DS_SetRobotEnabled (false);
+        DS_SetControlMode (DS_CONTROL_AUTONOMOUS);
+    }
+
+    /* User switched to teleoperated */
+    else if (strcmp (input, "teleoperated") == 0) {
+        DS_SetRobotEnabled (false);
+        DS_SetControlMode (DS_CONTROL_TELEOPERATED);
+    }
+
+    /* User wants to quit the application */
+    else if (strcmp (input, "quit") == 0) {
+        DS_Close();
+        exit (0);
+    }
+
+    /* User inputed an illegal command */
+    else {
+        const char* str = "Available commands are:                      \n"
+                          "   ip         change robot IP                \n"
+                          "   team       set team number                \n"
+                          "   enable     enable the robot               \n"
+                          "   disable    disable the robot              \n"
+                          "   netconsole display netconsole messages    \n"
+                          "   test       switch the robot to test mode  \n"
+                          "   autonomous switch the robot to autonomous \n"
+                          "   operator   switch the robot to teleop     \n"
+                          "   quit       exit this application          \n"
+                          "   help       display this menu              \n";
+
+        printf ("%s", str);
+    }
 }
 
-void startAutonomous()
+void read_libds_events()
 {
-    disable();
-    DS_SetControlMode (DS_CONTROL_AUTONOMOUS);
-}
+    DS_Event event;
 
-void startTeleoperated()
-{
-    disable();
-    DS_SetControlMode (DS_CONTROL_TELEOPERATED);
+    /* Get one item from the event list until the list is empty */
+    while (DS_PollEvent (&event) != 0) {
+
+    }
 }
