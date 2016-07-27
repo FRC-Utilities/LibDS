@@ -27,6 +27,14 @@
 #include <stdlib.h>
 #include <string.h>
 
+#define AVOID_WARNINGS(x) (void)(x + 1)
+
+#if defined MSDOS || defined WIN32
+    #define CLEAR_SCREEN AVOID_WARNINGS (system ("cls"))
+#else
+    #define CLEAR_SCREEN AVOID_WARNINGS (system ("clear"))
+#endif
+
 void quit();
 void help();
 void enable();
@@ -40,49 +48,47 @@ void startTeleoperated();
 
 int main ()
 {
-    DS_Init();
+    CLEAR_SCREEN;
 
-#ifdef _WIN32
-    system ("cls");
-#else
-    system ("clear");
-#endif
+    DS_Init();
+    printf ("Welcome! Type \"help\" to get started!\n");
 
     while (true) {
         char input [BUFSIZ];
 
         printf ("\n> ");
-        scanf ("%s", input);
 
-        if (strcmp (input, "ip") == 0)
-            setRobotAddress();
+        if (scanf ("%s", input) > 0) {
+            if (strcmp (input, "ip") == 0)
+                setRobotAddress();
 
-        else if (strcmp (input, "team") == 0)
-            updateTeam();
+            else if (strcmp (input, "team") == 0)
+                updateTeam();
 
-        else if (strcmp (input, "enable") == 0)
-            enable();
+            else if (strcmp (input, "enable") == 0)
+                enable();
 
-        else if (strcmp (input, "disable") == 0)
-            disable();
+            else if (strcmp (input, "disable") == 0)
+                disable();
 
-        else if (strcmp (input, "netconsole") == 0)
-            netconsole();
+            else if (strcmp (input, "netconsole") == 0)
+                netconsole();
 
-        else if (strcmp (input, "test") == 0)
-            startTestMode();
+            else if (strcmp (input, "test") == 0)
+                startTestMode();
 
-        else if (strcmp (input, "autonomous") == 0)
-            startAutonomous();
+            else if (strcmp (input, "autonomous") == 0)
+                startAutonomous();
 
-        else if (strcmp (input, "teleoperated") == 0)
-            startTeleoperated();
+            else if (strcmp (input, "teleoperated") == 0)
+                startTeleoperated();
 
-        else if (strcmp (input, "quit") == 0)
-            quit();
+            else if (strcmp (input, "quit") == 0)
+                quit();
 
-        else
-            help();
+            else
+                help();
+        }
     }
 
     return 0;
@@ -142,9 +148,12 @@ void setRobotAddress()
     char input [BUFSIZ];
 
     printf ("New address: ");
-    scanf ("%s", input);
 
-    DS_SetCustomRobotAddress (input);
+    if (scanf ("%s", input) > 0)
+        DS_SetCustomRobotAddress (input);
+
+    else
+        printf ("Invalid address!\n");
 }
 
 void startAutonomous()
