@@ -22,10 +22,11 @@
  */
 
 #include "LibDS.h"
+#include "DS_Config.h"
 
 void DS_Init()
 {
-
+    CFG_Init();
 }
 
 void DS_Close()
