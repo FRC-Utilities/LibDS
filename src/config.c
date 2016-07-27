@@ -40,7 +40,20 @@ static DS_ControlMode control_mode;
 
 void CFG_Init()
 {
-
+    team = 0;
+    cpu_usage = 0;
+    ram_usage = 0;
+    disk_usage = 0;
+    robot_code = 0;
+    robot_enabled = 0;
+    robot_voltage = 0;
+    emergency_stopped = 0;
+    fms_communications = 0;
+    radio_communications = 0;
+    robot_communications = 0;
+    robot_position = DS_POSITION_1;
+    robot_alliance = DS_ALLIANCE_RED;
+    control_mode = DS_CONTROL_TELEOPERATED;
 }
 
 int CFG_GetTeamNumber()
