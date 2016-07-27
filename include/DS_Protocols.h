@@ -28,12 +28,11 @@
 extern "C" {
 #endif
 
-#include "DS_Types.h"
 #include "DS_Objects.h"
 
-extern DS_Protocol* DS_ProtocolFRC_2014();
-extern DS_Protocol* DS_ProtocolFRC_2015();
-extern DS_Protocol* DS_ProtocolFRC_2016();
+extern DS_Protocol* DS_GetProtocolFRC_2014();
+extern DS_Protocol* DS_GetProtocolFRC_2015();
+extern DS_Protocol* DS_GetProtocolFRC_2016();
 
 extern DS_Protocol* DS_CurrentProtocol();
 extern void DS_ConfigureProtocol (const DS_Protocol* p);

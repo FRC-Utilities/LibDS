@@ -21,8 +21,8 @@
  * DEALINGS IN THE SOFTWARE.
  */
 
-#ifndef _LIB_DS_PROTOCOLS_H
-#define _LIB_DS_PROTOCOLS_H
+#ifndef _LIB_DS_TYPES_H
+#define _LIB_DS_TYPES_H
 
 #ifdef __cplusplus
 extern "C" {
