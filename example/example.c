@@ -27,8 +27,10 @@
 #include <stdlib.h>
 #include <string.h>
 
+/* Not nice, but it works on GCC 4.9+ */
 #define AVOID_WARNINGS(x) (void)(x + 1)
 
+/* Clears the console screen */
 #if defined MSDOS || defined WIN32
     #define CLEAR_SCREEN AVOID_WARNINGS (system ("cls"))
 #else
@@ -102,10 +104,14 @@ void read_user_input()
     }
 
     /* User switched to teleoperated */
-    else if (strcmp (input, "teleoperated") == 0) {
+    else if (strcmp (input, "operator") == 0) {
         DS_SetRobotEnabled (false);
         DS_SetControlMode (DS_CONTROL_TELEOPERATED);
     }
+
+    /* Clear the console screen */
+    else if (strcmp (input, "clear") == 0)
+        CLEAR_SCREEN;
 
     /* User wants to quit the application */
     else if (strcmp (input, "quit") == 0) {
@@ -125,7 +131,8 @@ void read_user_input()
                           "   autonomous switch the robot to autonomous \n"
                           "   operator   switch the robot to teleop     \n"
                           "   quit       exit this application          \n"
-                          "   help       display this menu              \n";
+                          "   help       display this menu              \n"
+                          "   clear      clear the console screen       \n";
 
         printf ("%s", str);
     }
