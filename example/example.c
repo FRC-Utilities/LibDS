@@ -113,7 +113,7 @@ void read_user_input()
         exit (0);
     }
 
-    /* User inputed an illegal command */
+    /* User requested an illegal command */
     else {
         const char* str = "Available commands are:                      \n"
                           "   ip         change robot IP                \n"
