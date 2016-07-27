@@ -36,7 +36,7 @@ extern "C" {
  */
 typedef enum {
     DS_FIRST_EVENT             = 0x000, /**< Unused (do not remove) */
-    DS_QUIT                    = 0x100, /**< User-requested quit (/
+    DS_QUIT                    = 0x100, /**< User-requested quit */
 
     /* FMS events */
     DS_FMS_EVENT               = 0x200, /**< FMS event */

@@ -115,7 +115,8 @@ DS_ControlMode CFG_GetControlMode()
 
 void CFG_SetRobotCode (const bool code)
 {
-
+    if (robot_code != code)
+        robot_code = code;
 }
 
 void CFG_SetTeamNumber (const int number)

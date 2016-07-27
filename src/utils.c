@@ -27,5 +27,5 @@
 
 bool DS_StringIsEmpty (const char* string)
 {
-    return string [0] == "\0";
+    return string [0] == 0x00;
 }
