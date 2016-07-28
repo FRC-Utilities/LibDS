@@ -9,7 +9,8 @@ HEADERS += \
     $$PWD/include/DS_Protocols.h \
     $$PWD/include/DS_Types.h \
     $$PWD/include/DS_Utils.h \
-    $$PWD/include/LibDS.h
+    $$PWD/include/LibDS.h \
+    $$PWD/include/DS_Array.h
 
 SOURCES += \
     $$PWD/src/protocols/frc_2014.c \
@@ -23,4 +24,5 @@ SOURCES += \
     $$PWD/src/protocols.c \
     $$PWD/src/socket.c \
     $$PWD/src/utils.c \
-    $$PWD/src/utils/crc32.c
+    $$PWD/src/utils/crc32.c \
+    $$PWD/src/array.c

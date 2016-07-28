@@ -53,14 +53,14 @@ enum FMS {
     cFMSTeleoperated = 0x43,
 };
 
-static uint32_t CRC;
-static int SENT_FMS_PACKETS;
-static int SENT_ROBOT_PACKETS;
+static uint32_t crc32;
+static int sent_fms_packets;
+static int sent_robot_packets;
 
-static bool RESYNC;
-static bool REBOOT_ROBOT;
-static bool RESTART_CODE;
-static DS_Protocol* PROTOCOL;
+static bool resync;
+static bool reboot;
+static bool restart_code;
+static DS_Protocol* protocol;
 
 static uint8_t get_control_code()
 {
@@ -84,7 +84,7 @@ static uint8_t get_control_code()
     }
 
     /* Resync robot communications */
-    if (RESYNC)
+    if (resync)
         code |= cResyncComms;
 
     /* Let robot know if we are connected to FMS */
@@ -96,7 +96,7 @@ static uint8_t get_control_code()
         code = cEmergencyStopOn;
 
     /* Send the reboot code if required */
-    if (REBOOT_ROBOT)
+    if (reboot)
         code = cRebootRobot;
 
     return code;
@@ -138,14 +138,14 @@ static void add_joystick_data (char* data, int offset)
 {
     int pos = offset;
 
-    for (int i = 0; i < PROTOCOL->maxJoysticks; ++i) {
+    for (int i = 0; i < protocol->maxJoysticks; ++i) {
         /* Get joystick properties */
         int num_axes = DS_GetJoystickNumAxes (i);
         int num_buttons = DS_GetJoystickNumButtons (i);
         bool joystick_exists = DS_GetJoystickCount() > i;
 
         /* Add axis data */
-        for (int axis = 0; axis < PROTOCOL->maxAxisCount; ++i) {
+        for (int axis = 0; axis < protocol->maxAxisCount; ++i) {
             /* Add real axis value */
             if (joystick_exists && axis < num_axes)
                 data [pos] = (uint8_t) (DS_GetJoystickAxis (i, axis) * 127);
@@ -205,8 +205,8 @@ static uint8_t* create_robot_packet()
     uint8_t* data = (uint8_t*) malloc (sizeof (uint8_t) * 1024);
 
     /* Add packet index */
-    data [0] = (SENT_ROBOT_PACKETS & 0xff00) >> 8;
-    data [1] = (SENT_ROBOT_PACKETS & 0xff);
+    data [0] = (sent_robot_packets & 0xff00) >> 8;
+    data [1] = (sent_robot_packets & 0xff);
 
     /* Add control code and digital inputs */
     data [2] = get_control_code();
@@ -234,7 +234,7 @@ static uint8_t* create_robot_packet()
     data [79] = (uint8_t) 0x30;
 
     /* Add CRC32 checksum */
-    uint8_t checksum = DS_CRC32 (CRC, data, sizeof (data));
+    uint8_t checksum = DS_CRC32 (crc32, data, sizeof (data));
     data[1020] = (checksum & 0xff000000) >> 24;
     data[1021] = (checksum & 0xff0000) >> 16;
     data[1022] = (checksum & 0xff00) >> 8;
@@ -302,69 +302,69 @@ static void reset_radio()
 
 static void reset_robot()
 {
-    RESYNC = 1;
-    RESTART_CODE = 0;
-    REBOOT_ROBOT = 0;
+    resync = 1;
+    restart_code = 0;
+    reboot = 0;
 }
 
 static void reboot_robot()
 {
-    REBOOT_ROBOT = 1;
+    reboot = 1;
 }
 
 void restart_robot_code()
 {
-    RESTART_CODE = 1;
+    restart_code = 1;
 }
 
 DS_Protocol* DS_GetProtocolFRC_2014()
 {
-    if (!PROTOCOL) {
+    if (!protocol) {
         /* Initialize protocol variables */
-        CRC = 0;
-        RESYNC = 0;
-        RESTART_CODE = 0;
-        REBOOT_ROBOT = 0;
-        SENT_FMS_PACKETS = 0;
-        SENT_ROBOT_PACKETS = 0;
+        crc32 = 0;
+        resync = 0;
+        restart_code = 0;
+        reboot = 0;
+        sent_fms_packets = 0;
+        sent_robot_packets = 0;
 
         /* Initialize protocol */
-        PROTOCOL = (DS_Protocol*) malloc (sizeof (DS_Protocol));
+        protocol = (DS_Protocol*) malloc (sizeof (DS_Protocol));
 
         /* Set address functions */
-        PROTOCOL->fms_address = &fms_address;
-        PROTOCOL->radio_address = &radio_address;
-        PROTOCOL->robot_address = &robot_address;
+        protocol->fms_address = &fms_address;
+        protocol->radio_address = &radio_address;
+        protocol->robot_address = &robot_address;
 
         /* Set packet generator functions */
-        PROTOCOL->create_fms_packet = &create_fms_packet;
-        PROTOCOL->create_radio_packet = &create_radio_packet;
-        PROTOCOL->create_robot_packet = &create_robot_packet;
+        protocol->create_fms_packet = &create_fms_packet;
+        protocol->create_radio_packet = &create_radio_packet;
+        protocol->create_robot_packet = &create_robot_packet;
 
         /* Set packet interpretation functions */
-        PROTOCOL->read_fms_packet = &read_fms_packet;
-        PROTOCOL->read_radio_packet = &read_radio_packet;
-        PROTOCOL->read_robot_packet = &read_robot_packet;
+        protocol->read_fms_packet = &read_fms_packet;
+        protocol->read_radio_packet = &read_radio_packet;
+        protocol->read_robot_packet = &read_robot_packet;
 
         /* Set reset functions */
-        PROTOCOL->reset_fms = &reset_fms;
-        PROTOCOL->reset_radio = &reset_radio;
-        PROTOCOL->reset_robot = &reset_robot;
+        protocol->reset_fms = &reset_fms;
+        protocol->reset_radio = &reset_radio;
+        protocol->reset_robot = &reset_robot;
 
         /* Set misc. functions */
-        PROTOCOL->reboot_robot = &reboot_robot;
-        PROTOCOL->restart_robot_code = &restart_robot_code;
+        protocol->reboot_robot = &reboot_robot;
+        protocol->restart_robot_code = &restart_robot_code;
 
         /* Set packet intervals */
-        PROTOCOL->fmsInterval = 500;
-        PROTOCOL->radioInterval = 0;
-        PROTOCOL->robotInterval = 20;
+        protocol->fmsInterval = 500;
+        protocol->radioInterval = 0;
+        protocol->robotInterval = 20;
 
         /* Set joystick properties */
-        PROTOCOL->maxJoysticks = 4;
-        PROTOCOL->maxAxisCount = 6;
-        PROTOCOL->maxHatsCount = 0;
-        PROTOCOL->maxButtonCount = 10;
+        protocol->maxJoysticks = 4;
+        protocol->maxAxisCount = 6;
+        protocol->maxHatsCount = 0;
+        protocol->maxButtonCount = 10;
 
         /* Define FMS socket properties */
         DS_Socket fms_socket;
@@ -383,10 +383,10 @@ DS_Protocol* DS_GetProtocolFRC_2014()
         robot_socket.type = DS_SOCKET_UDP;
 
         /* Assign socket objects */
-        PROTOCOL->fmsSocket = fms_socket;
-        PROTOCOL->radioSocket = radio_socket;
-        PROTOCOL->robotSocket = robot_socket;
+        protocol->fmsSocket = fms_socket;
+        protocol->radioSocket = radio_socket;
+        protocol->robotSocket = robot_socket;
     }
 
-    return PROTOCOL;
+    return protocol;
 }

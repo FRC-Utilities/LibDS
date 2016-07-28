@@ -21,35 +21,21 @@
  * DEALINGS IN THE SOFTWARE.
  */
 
-#ifndef _LIB_DS_JOYSTICKS_H
-#define _LIB_DS_JOYSTICKS_H
+#ifndef _LIB_DS_ARRAY_H
+#define _LIB_DS_ARRAY_H
 
-#ifdef __cplusplus
-extern "C" {
-#endif
+#include <stdint.h>
+#include <stdlib.h>
 
-#include <stdbool.h>
+typedef struct _array {
+    size_t used;
+    size_t size;
+    void** data;
+} DS_Array;
 
-extern void Joysticks_Init();
-extern void Joysticks_Close();
-
-extern int DS_GetJoystickCount();
-extern int DS_GetJoystickNumHats (int joystick);
-extern int DS_GetJoystickNumAxes (int joystick);
-extern int DS_GetJoystickNumButtons (int joystick);
-
-extern int DS_GetJoystickHat (int joystick, int hat);
-extern double DS_GetJoystickAxis (int joystick, int axis);
-extern bool DS_GetJoystickButton (int joystick, int button);
-
-extern void DS_JoysticksReset();
-extern void DS_JoysticksAdd (int axes, int hats, int buttons);
-extern void DS_SetJoystickHat (int joystick, int hat, int angle);
-extern void DS_SetJoystickAxis (int joystick, int axis, double value);
-extern void DS_SetJoystickButton (int joystick, int button, bool pressed);
-
-#ifdef __cplusplus
-}
-#endif
+extern void DS_ArrayFree (DS_Array* array);
+extern void DS_ArrayInstert (DS_Array* array, void** element);
+extern void DS_ArrayInit (DS_Array* array, size_t initial_size);
 
 #endif
+

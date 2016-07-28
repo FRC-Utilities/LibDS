@@ -218,83 +218,132 @@ DS_Position DS_GetPosition()
     return CFG_GetPosition();
 }
 
+/**
+ * Returns \c true if the robot is emergency stopped
+ */
 bool DS_GetEmergencyStopped()
 {
     return CFG_GetEmergencyStopped();
 }
 
+/**
+ * Returns \c true if the LibDS has communications with the FMS
+ */
 bool DS_GetFMSCommunications()
 {
     return CFG_GetFMSCommunications();
 }
 
+/**
+ * Returns \c true if the LibDS has communications with the radio
+ */
 bool DS_GetRadioCommunications()
 {
     return CFG_GetRadioCommunications();
 }
 
+/**
+ * Returns \c true if the LibDS has communications with the robot
+ */
 bool DS_GetRobotCommunications()
 {
     return CFG_GetRobotCommunications();
 }
 
+/**
+ * Returns the current control mode of the robot
+ */
 DS_ControlMode DS_GetControlMode()
 {
     return CFG_GetControlMode();
 }
 
+/**
+ * Instructs the current protocol to reboot the robot
+ */
 void DS_RebootRobot()
 {
     DS_CurrentProtocol()->reboot_robot();
 }
 
+/**
+ * Instructs the current protocol to restart the robot code
+ */
 void DS_RestartRobotCode()
 {
     DS_CurrentProtocol()->restart_robot_code();
 }
 
+/**
+ * Changes the \a team number, which is used by the protocols to find the robot
+ * and (in some cases), to construct the packet
+ */
 void DS_SetTeamNumber (const int team)
 {
     CFG_SetTeamNumber (team);
 }
 
+/**
+ * Changes the \a enabled state of the robot
+ */
 void DS_SetRobotEnabled (const bool enabled)
 {
     CFG_SetRobotEnabled (enabled);
 }
 
+/**
+ * Changes the emergency stop state of the robot
+ */
 void DS_SetEmergencyStopped (const bool stop)
 {
     CFG_SetEmergencyStopped (stop);
 }
 
+/**
+ * Changes the team \a alliance of the robot
+ */
 void DS_SetAlliance (const DS_Alliance alliance)
 {
     CFG_SetAlliance (alliance);
 }
 
+/**
+ * Changes the robot's \a position in the field
+ */
 void DS_SetPosition (const DS_Position position)
 {
     CFG_SetPosition (position);
 }
 
+/**
+ * Changes the control \a mode of the robot
+ */
 void DS_SetControlMode (const DS_ControlMode mode)
 {
     CFG_SetControlMode (mode);
 }
 
+/**
+ * Changes the \a address used to communicate with the FMS
+ */
 void DS_SetCustomFMSAddress (const char* address)
 {
     if (address != NULL)
         strcpy (custom_fms_address, address);
 }
 
+/**
+ * Changes the \a address used to communicate with the radio
+ */
 void DS_SetCustomRadioAddress (const char* address)
 {
     if (address != NULL)
         strcpy (custom_radio_address, address);
 }
 
+/**
+ * Changes the \a address used to communicate with the robot
+ */
 void DS_SetCustomRobotAddress (const char* address)
 {
     if (address != NULL)

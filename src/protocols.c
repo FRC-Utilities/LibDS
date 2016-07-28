@@ -25,11 +25,17 @@
 
 static DS_Protocol* protocol;
 
+/**
+ * Returns a pointer to the current protocol
+ */
 DS_Protocol* DS_CurrentProtocol()
 {
     return protocol;
 }
 
+/**
+ * De-allocates the current protocol and loads the given \a protocol
+ */
 void DS_ConfigureProtocol (DS_Protocol* p)
 {
     if (protocol)
