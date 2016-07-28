@@ -32,36 +32,77 @@ static char* custom_fms_address;
 static char* custom_radio_address;
 static char* custom_robot_address;
 
+/**
+ * Allocates memory for the members of the client module
+ */
+void Client_Init()
+{
+    custom_fms_address = (char*) malloc (sizeof (char));
+    custom_radio_address = (char*) malloc (sizeof (char));
+    custom_robot_address = (char*) malloc (sizeof (char));
+}
+
+/**
+ * Frees up the memory used by the members of the client module
+ */
+void Client_Close()
+{
+    free (custom_fms_address);
+    free (custom_radio_address);
+    free (custom_robot_address);
+}
+
+/**
+ * Returns the user-set FMS address
+ */
 const char* DS_GetCustomFMSAddress()
 {
     return custom_fms_address;
 }
 
+/**
+ * Returns the user-set radio address
+ */
 const char* DS_GetCustomRadioAddress()
 {
     return custom_radio_address;
 }
 
+/**
+ * Returns the user-set robot address
+ */
 const char* DS_GetCustomRobotAddress()
 {
     return custom_robot_address;
 }
 
+/**
+ * Returns the protocol-set FMS address
+ */
 const char* DS_GetDefaultFMSAddress()
 {
-    return DS_CurrentProtocol()->fmsAddress;
+    return DS_CurrentProtocol()->fms_address();
 }
 
+/**
+ * Returns the protocol-set radio address
+ */
 const char* DS_GetDefaultRadioAddress()
 {
-    return DS_CurrentProtocol()->radioAddress;
+    return DS_CurrentProtocol()->radio_address();
 }
 
+/**
+ * Returns the protocol-set robot address
+ */
 const char* DS_GetDefaultRobotAddress()
 {
-    return DS_CurrentProtocol()->robotAddress;
+    return DS_CurrentProtocol()->robot_address();
 }
 
+/**
+ * Returns the address used to communicate with the FMS
+ */
 const char* DS_GetAppliedFMSAddress()
 {
     if (DS_StringIsEmpty (DS_GetCustomFMSAddress()))
@@ -70,6 +111,9 @@ const char* DS_GetAppliedFMSAddress()
     return DS_GetCustomFMSAddress();
 }
 
+/**
+ * Returns the address used to communicate with the radios
+ */
 const char* DS_GetAppliedRadioAddress()
 {
     if (DS_StringIsEmpty (DS_GetCustomRadioAddress()))
@@ -78,6 +122,9 @@ const char* DS_GetAppliedRadioAddress()
     return DS_GetCustomRadioAddress();
 }
 
+/**
+ * Returns the address used to communicate with the robot
+ */
 const char* DS_GetAppliedRobotAddress()
 {
     if (DS_StringIsEmpty (DS_GetCustomRobotAddress()))
@@ -86,16 +133,25 @@ const char* DS_GetAppliedRobotAddress()
     return DS_GetCustomRobotAddress();
 }
 
+/**
+ * Returns the current team number
+ */
 int DS_GetTeamNumber()
 {
     return CFG_GetTeamNumber();
 }
 
+/**
+ * Returns \c true if the robot code is running
+ */
 bool DS_GetRobotCode()
 {
     return CFG_GetRobotCode();
 }
 
+/**
+ * Returns \c true if the conditions to enable a robot are met
+ */
 bool DS_GetCanBeEnabled()
 {
     return DS_GetRobotCode()
@@ -103,36 +159,60 @@ bool DS_GetCanBeEnabled()
            && DS_GetRobotCommunications();
 }
 
+/**
+ * Returns \c true if the robot can be enabled, otherwise, this function will
+ * return \c false.
+ */
 bool DS_GetRobotEnabled()
 {
     return CFG_GetRobotEnabled();
 }
 
+/**
+ * Returns the current CPU usage of the robot
+ */
 int DS_GetRobotCPUUsage()
 {
     return CFG_GetRobotCPUUsage();
 }
 
+/**
+ * Returns the current RAM usage of the robot
+ */
 int DS_GetRobotRAMUsage()
 {
     return CFG_GetRobotRAMUsage();
 }
 
+/**
+ * Returns the current disk usage of the robot
+ */
 int DS_GetRobotDiskUsage()
 {
     return CFG_GetRobotDiskUsage();
 }
 
+/**
+ * Returns the current voltage of the robot
+ */
 double DS_GetRobotVoltage()
 {
     return CFG_GetRobotVoltage();
 }
 
+/**
+ * Returns the current alliance of the robot.
+ * This value can be changed by the user or the FMS.
+ */
 DS_Alliance DS_GetAlliance()
 {
     return CFG_GetAlliance();
 }
 
+/**
+ * Returns the current position of the robot.
+ * This value can be changed by the user or the FMS.
+ */
 DS_Position DS_GetPosition()
 {
     return CFG_GetPosition();
@@ -165,12 +245,12 @@ DS_ControlMode DS_GetControlMode()
 
 void DS_RebootRobot()
 {
-    DS_CurrentProtocol()->rebootRobot();
+    DS_CurrentProtocol()->reboot_robot();
 }
 
 void DS_RestartRobotCode()
 {
-    DS_CurrentProtocol()->restartRobotCode();
+    DS_CurrentProtocol()->restart_robot_code();
 }
 
 void DS_SetTeamNumber (const int team)
@@ -205,15 +285,18 @@ void DS_SetControlMode (const DS_ControlMode mode)
 
 void DS_SetCustomFMSAddress (const char* address)
 {
-    strcpy (custom_fms_address, address);
+    if (address != NULL)
+        strcpy (custom_fms_address, address);
 }
 
 void DS_SetCustomRadioAddress (const char* address)
 {
-    strcpy (custom_radio_address, address);
+    if (address != NULL)
+        strcpy (custom_radio_address, address);
 }
 
 void DS_SetCustomRobotAddress (const char* address)
 {
-    strcpy (custom_robot_address, address);
+    if (address != NULL)
+        strcpy (custom_robot_address, address);
 }

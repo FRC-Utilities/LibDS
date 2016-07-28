@@ -38,6 +38,9 @@ static DS_Alliance robot_alliance;
 static DS_Position robot_position;
 static DS_ControlMode control_mode;
 
+/**
+ * Initializes the members of the CFG module to default values
+ */
 void CFG_Init()
 {
     team = 0;

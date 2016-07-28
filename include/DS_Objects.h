@@ -25,6 +25,7 @@
 #define _LIB_DS_OBJECTS_H
 
 #include <stdint.h>
+#include <stdlib.h>
 #include <stdbool.h>
 
 #ifdef __cplusplus
@@ -40,24 +41,33 @@ typedef struct _socket {
 } DS_Socket;
 
 typedef struct _protocol {
-    char* (*fmsAddress)();
-    char* (*radioAddress)();
-    char* (*robotAddress)();
+    char* (*fms_address)();
+    char* (*radio_address)();
+    char* (*robot_address)();
 
-    char* (*fmsPacket)();
-    char* (*radioPacket)();
-    char* (*robotPacket)();
+    uint8_t* (*create_fms_packet)();
+    uint8_t* (*create_radio_packet)();
+    uint8_t* (*create_robot_packet)();
 
-    bool (*readFmsPacket) (char* const data);
-    bool (*readRadioPacket) (char* const data);
-    bool (*readRobotPacket) (char* const data);
+    bool (*read_fms_packet) (const uint8_t*);
+    bool (*read_radio_packet) (const uint8_t*);
+    bool (*read_robot_packet) (const uint8_t*);
 
-    void (*resetFMS)();
-    void (*resetRadio)();
-    void (*resetRobot)();
+    void (*reset_fms)();
+    void (*reset_radio)();
+    void (*reset_robot)();
 
-    void (*rebootRobot)();
-    void (*restartRobotCode)();
+    void (*reboot_robot)();
+    void (*restart_robot_code)();
+
+    int fmsInterval;
+    int radioInterval;
+    int robotInterval;
+
+    int maxJoysticks;
+    int maxAxisCount;
+    int maxHatsCount;
+    int maxButtonCount;
 
     DS_Socket fmsSocket;
     DS_Socket radioSocket;

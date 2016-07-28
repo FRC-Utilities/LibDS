@@ -33,6 +33,10 @@ extern "C" {
 
 #include "DS_Types.h"
 
+/* Init/close functions */
+extern void Client_Init();
+extern void Client_Close();
+
 /* User-set addresses */
 extern const char* DS_GetCustomFMSAddress();
 extern const char* DS_GetCustomRadioAddress();

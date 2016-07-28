@@ -22,4 +22,5 @@ SOURCES += \
     $$PWD/src/joysticks.c \
     $$PWD/src/protocols.c \
     $$PWD/src/socket.c \
-    $$PWD/src/utils.c
+    $$PWD/src/utils.c \
+    $$PWD/src/utils/crc32.c

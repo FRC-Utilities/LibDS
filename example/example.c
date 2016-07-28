@@ -40,12 +40,16 @@
 void read_user_input();
 void read_libds_events();
 
+/**
+ * Main entry point of the application
+ */
 int main ()
 {
     CLEAR_SCREEN;
 
     DS_Init();
-    printf ("Welcome! Type \"help\" to get started!\n");
+    DS_ConfigureProtocol (DS_GetProtocolFRC_2014());
+    printf ("Welcome! Type \"help\" to get started!\n\n");
 
     while (true) {
         read_user_input();
@@ -55,27 +59,39 @@ int main ()
     return 0;
 }
 
+/**
+ * Reads the user input and calls the appropiate commands
+ */
 void read_user_input()
 {
-    printf ("\n> ");
+    printf ("> ");
 
     /* Get user input */
-    char input [BUFSIZ];
+    char* input = (char*) malloc (sizeof (char) * BUFSIZ);
     if (scanf ("%s", input) <= 0)
         return;
 
     /* User wants to change robot IP */
     if (strcmp (input, "ip") == 0) {
-        char ip [BUFSIZ];
-        if (scanf ("%s", ip) > 0)
+        char* ip = (char*) malloc (sizeof (char) * BUFSIZ);
+
+        printf ("Set robot address: ");
+        if (scanf ("%s", ip)) {
             DS_SetCustomRobotAddress (ip);
+            printf ("Robot address set to %s\n", DS_GetAppliedRobotAddress());
+        }
+
+        free (ip);
     }
 
     /* User wants to change team number */
     else if (strcmp (input, "team") == 0) {
         int team = 0;
-        if (scanf ("%d", &team) > 0)
+        printf ("New team number: ");
+        if (scanf ("%d", &team)) {
             DS_SetTeamNumber (team);
+            printf ("Team number set to %d\n", DS_GetTeamNumber());
+        }
     }
 
     /* User wants to enable the robot */
@@ -85,11 +101,6 @@ void read_user_input()
     /* User wants to disable the robot */
     else if (strcmp (input, "disable") == 0)
         DS_SetRobotEnabled (false);
-
-    /* User wants to see NetConsole output */
-    else if (strcmp (input, "netconsole") == 0) {
-
-    }
 
     /* User switched to test mode */
     else if (strcmp (input, "test") == 0) {
@@ -126,7 +137,6 @@ void read_user_input()
                           "   team       set team number                \n"
                           "   enable     enable the robot               \n"
                           "   disable    disable the robot              \n"
-                          "   netconsole display netconsole messages    \n"
                           "   test       switch the robot to test mode  \n"
                           "   autonomous switch the robot to autonomous \n"
                           "   operator   switch the robot to teleop     \n"
@@ -136,14 +146,69 @@ void read_user_input()
 
         printf ("%s", str);
     }
+
+    /* Delete input string */
+    free (input);
 }
 
+/**
+ * Informs the user about the different LibDS events
+ */
 void read_libds_events()
 {
     DS_Event event;
 
     /* Get one item from the event list until the list is empty */
     while (DS_PollEvent (&event) != 0) {
-
+        switch (event.type) {
+        case DS_FMS_CONNECTED:
+            printf ("[INFO] Connected to FMS\n");
+            break;
+        case DS_FMS_DISCONNECTED:
+            printf ("[INFO] Disconnected from FMS\n");
+            break;
+        case DS_RADIO_CONNECTED:
+            printf ("[INFO] Connected to radio\n");
+            break;
+        case DS_RADIO_DISCONNECTED:
+            printf ("[INFO] Disconnected from radio\n");
+            break;
+        case DS_NETCONSOLE_NEW_MESSAGE:
+            printf ("[NETCONSOLE] %s\n", event.netconsole.message);
+            break;
+        case DS_ROBOT_ENABLED:
+            printf ("[INFO] Robot enabled\n");
+            break;
+        case DS_ROBOT_DISABLED:
+            printf ("[INFO] Robot disabled\n");
+            break;
+        case DS_ROBOT_REBOOTED:
+            printf ("[INFO] Robot rebooted\n");
+            break;
+        case DS_ROBOT_CONNECTED:
+            printf ("[INFO] Connected to robot\n");
+            break;
+        case DS_ROBOT_EXIT_ESTOP:
+            printf ("[INFO] Exited from emergency stop\n");
+            break;
+        case DS_ROBOT_CODE_LOADED:
+            printf ("[INFO] Robot code loaded\n");
+            break;
+        case DS_ROBOT_DISCONNECTED:
+            printf ("[INFO] Disconnected from robot\n");
+            break;
+        case DS_ROBOT_CODE_UNLOADED:
+            printf ("[INFO] Robot code unloaded\n");
+            break;
+        case DS_ROBOT_CODE_RESTARTED:
+            printf ("[INFO] Robot code restarted\n");
+            break;
+        case DS_ROBOT_VOLTAGE_CHANGED:
+            printf ("[INFO] Robot voltage set to %f\n", event.robot.voltage);
+            break;
+        case DS_ROBOT_EMERGENCY_STOPPED:
+            printf ("[INFO] Robot entered emergency stop\n");
+            break;
+        }
     }
 }

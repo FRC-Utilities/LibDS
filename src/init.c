@@ -27,9 +27,10 @@
 void DS_Init()
 {
     CFG_Init();
+    Client_Init();
 }
 
 void DS_Close()
 {
-
+    Client_Close();
 }

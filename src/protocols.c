@@ -30,7 +30,7 @@ DS_Protocol* DS_CurrentProtocol()
     return protocol;
 }
 
-void DS_ConfigureProtocol (const DS_Protocol* p)
+void DS_ConfigureProtocol (DS_Protocol* p)
 {
     if (protocol)
         free (protocol);
