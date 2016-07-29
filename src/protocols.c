@@ -37,12 +37,19 @@ DS_Protocol* DS_CurrentProtocol()
 }
 
 /**
+ * De-allocates the current protocol
+ */
+void Protocol_Close()
+{
+    if (protocol)
+        free (protocol);
+}
+
+/**
  * De-allocates the current protocol and loads the given \a protocol
  */
 void DS_ConfigureProtocol (DS_Protocol* p)
 {
-    if (protocol)
-        free (protocol);
-
+    Protocol_Close();
     protocol = p;
 }

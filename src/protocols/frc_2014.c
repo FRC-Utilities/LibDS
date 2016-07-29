@@ -69,7 +69,40 @@ static int restart_code;
 /*
  * Protocol pointer
  */
+static char* null_char;
 static DS_Protocol* protocol;
+
+/**
+ * Gets the alliance type from the received \a byte
+ * This function is used to update the robot configuration when receiving data
+ * from the FMS
+ */
+static DS_Alliance get_alliance (const uint8_t byte)
+{
+    if (byte == cAllianceRed)
+        return DS_ALLIANCE_RED;
+
+    return DS_ALLIANCE_BLUE;
+}
+
+/**
+ * Gets the position type from the received \a byte
+ * This function is used to update the robot configuration when receiving data
+ * from the FMS
+ */
+static DS_Position get_position (const uint8_t byte)
+{
+    if (byte == cPosition1)
+        return DS_POSITION_1;
+
+    if (byte == cPosition2)
+        return DS_POSITION_2;
+
+    if (byte == cPosition3)
+        return DS_POSITION_3;
+
+    return DS_POSITION_1;
+}
 
 /**
  * Returns the control code sent to the robot. The control code holds the
@@ -223,7 +256,7 @@ static void add_joystick_data (uint8_t* data, int offset)
  */
 static char* fms_address()
 {
-    return "";
+    return null_char;
 }
 
 /**
@@ -242,9 +275,14 @@ static char* robot_address()
     return DS_GetStaticIP (10, CFG_GetTeamNumber(), 2);
 }
 
+/**
+ * One day in the future... many years from now,
+ * A spaceship from another world will visit here somehow,
+ * and they shall implement this function.
+ */
 static uint8_t* create_fms_packet()
 {
-    return (uint8_t*) malloc (sizeof (uint8_t));
+    return (uint8_t*) null_char;
 }
 
 /**
@@ -254,7 +292,7 @@ static uint8_t* create_fms_packet()
  */
 static uint8_t* create_radio_packet()
 {
-    return (uint8_t*) malloc (sizeof (uint8_t));
+    return (uint8_t*) null_char;
 }
 
 /**
@@ -305,15 +343,18 @@ static uint8_t* create_robot_packet()
 
     /* Add CRC32 checksum */
     uint8_t checksum = DS_CRC32 (crc32, data, sizeof (data));
-    data[1020] = (checksum & 0xff000000) >> 24;
-    data[1021] = (checksum & 0xff0000) >> 16;
-    data[1022] = (checksum & 0xff00) >> 8;
-    data[1023] = (checksum & 0xff);
+    data [1020] = (checksum & 0xff000000) >> 24;
+    data [1021] = (checksum & 0xff0000) >> 16;
+    data [1022] = (checksum & 0xff00) >> 8;
+    data [1023] = (checksum & 0xff);
 
     /* Return address of data */
     return data;
 }
 
+/**
+ * Gets the team station and the robot control mode from the FMS
+ */
 static int read_fms_packet (const uint8_t* data)
 {
     /* Data pointer is invalid */
@@ -321,12 +362,55 @@ static int read_fms_packet (const uint8_t* data)
         return 0;
 
     /* The packet is long enough to be read */
-    if (sizeof (data) > 8)
+    if (sizeof (data) > 74) {
+        uint8_t robotmod = data [2];
+        uint8_t alliance = data [3];
+        uint8_t position = data [4];
+
+        /* Get the operation mode & enable status */
+        int enabled;
+        DS_ControlMode mode;
+        switch (robotmod) {
+        case (cFMSAutonomous):
+            enabled =  0;
+            mode = DS_CONTROL_AUTONOMOUS;
+            break;
+        case (cFMSAutonomous | cEnabled):
+            enabled =  1;
+            mode = DS_CONTROL_AUTONOMOUS;
+            break;
+        case (cFMSTeleoperated):
+            enabled = 0;
+            mode = DS_CONTROL_TELEOPERATED;
+            break;
+        case (cFMSTeleoperated | cEnabled):
+            enabled = 1;
+            mode = DS_CONTROL_TELEOPERATED;
+            break;
+        default:
+            enabled = 0;
+            mode = DS_CONTROL_TELEOPERATED;
+            break;
+        }
+
+        /* Set control mode & enabled status */
+        CFG_SetControlMode (mode);
+        CFG_SetRobotEnabled (enabled);
+
+        /* Set team station */
+        CFG_SetAlliance (get_alliance (alliance));
+        CFG_SetPosition (get_position (position));
+
         return 1;
+    }
 
     return 0;
 }
 
+/**
+ * Since the DS does not interact directly with the radio/bridge, any incoming
+ * packets shall be ignored.
+ */
 static int read_radio_packet (const uint8_t* data)
 {
     (void) data;
@@ -360,33 +444,54 @@ int read_robot_packet (const uint8_t* data)
     return 0;
 }
 
+/**
+ * Called when the FMS watchdog expires, does nothing...
+ */
 static void reset_fms()
 {
     /* Nothing to do */
 }
 
+/**
+ * Called when the radio watchdog expires, does nothing...
+ */
 static void reset_radio()
 {
     /* Nothing to do */
 }
 
+/**
+ * Called when the robot watchdog expires. This function resets the control
+ * flags sent to the robot.
+ */
 static void reset_robot()
 {
     resync = 1;
-    restart_code = 0;
     reboot = 0;
+    restart_code = 0;
 }
 
+/**
+ * Updates the flags used to create the control mode byte to instruct the
+ * cRIO to reboot itself
+ */
 static void reboot_robot()
 {
     reboot = 1;
 }
 
+/**
+ * Updates the flags used to create the control mode byte to instruct the
+ * cRIO to restart the robot code process
+ */
 void restart_robot_code()
 {
     restart_code = 1;
 }
 
+/**
+ * Initializes and configures the FRC 2014 communication protocol.
+ */
 DS_Protocol* DS_GetProtocolFRC_2014()
 {
     if (!protocol) {
@@ -397,6 +502,7 @@ DS_Protocol* DS_GetProtocolFRC_2014()
         reboot = 0;
         sent_fms_packets = 0;
         sent_robot_packets = 0;
+        null_char = (char*) malloc (sizeof (char));
 
         /* Initialize protocol */
         protocol = (DS_Protocol*) malloc (sizeof (DS_Protocol));

@@ -40,5 +40,6 @@ void DS_Init()
 void DS_Close()
 {
     Client_Close();
+    Protocol_Close();
     Joysticks_Close();
 }

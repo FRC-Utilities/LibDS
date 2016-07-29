@@ -73,21 +73,19 @@ void read_user_input()
     printf ("> ");
 
     /* Get user input */
-    char* input = (char*) malloc (sizeof (char) * BUFSIZ);
+    char input [BUFSIZ];
     if (scanf ("%s", input) <= 0)
         return;
 
     /* User wants to change robot IP */
     if (strcmp (input, "ip") == 0) {
-        char* ip = (char*) malloc (sizeof (char) * BUFSIZ);
-
         printf ("Set robot address: ");
+
+        char ip [BUFSIZ];
         if (scanf ("%s", ip)) {
             DS_SetCustomRobotAddress (ip);
             printf ("Robot address set to %s\n", DS_GetAppliedRobotAddress());
         }
-
-        free (ip);
     }
 
     /* User wants to change team number */
@@ -152,9 +150,6 @@ void read_user_input()
 
         printf ("%s", str);
     }
-
-    /* Delete input string */
-    free (input);
 }
 
 /**

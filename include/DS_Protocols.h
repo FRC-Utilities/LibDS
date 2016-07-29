@@ -35,6 +35,8 @@ extern DS_Protocol* DS_GetProtocolFRC_2015();
 extern DS_Protocol* DS_GetProtocolFRC_2016();
 
 extern DS_Protocol* DS_CurrentProtocol();
+
+extern void Protocol_Close();
 extern void DS_ConfigureProtocol (DS_Protocol* p);
 
 #ifdef __cplusplus
