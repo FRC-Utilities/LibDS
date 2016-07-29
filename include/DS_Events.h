@@ -25,7 +25,6 @@
 #define _LIB_DS_EVENTS_H
 
 #include <stdint.h>
-#include <stdbool.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -88,7 +87,7 @@ typedef struct {
 typedef struct {
     uint32_t type;      /**< ::DS_FMS_EVENT */
     uint32_t timestamp; /**< Timestamp of event */
-    bool connected;     /**< Set to \c true if FMS is connected */
+    int connected;      /**< Set to \c 1 if FMS is connected */
 } DS_FMSEvent;
 
 /**
@@ -97,7 +96,7 @@ typedef struct {
 typedef struct {
     uint32_t type;      /**< ::DS_RADIO_EVENT */
     uint32_t timestamp; /**< Timestamp of event */
-    bool connected;     /**< Set to \c true if radio is connected */
+    int connected;      /**< Set to \c 1 if radio is connected */
 } DS_RadioEvent;
 
 /**
@@ -106,12 +105,12 @@ typedef struct {
 typedef struct {
     uint32_t type;      /**< ::DS_ROBOT_EVENT */
     uint32_t timestamp; /**< Timestamp of event */
-    bool code;          /**< Set to \c true if robot code is loaded */
-    bool enabled;       /**< Set to \c true if the robot is enabled */
+    int code;           /**< Set to \c 1 if robot code is loaded */
+    int enabled;        /**< Set to \c 1 if the robot is enabled */
     int cpu_usage;      /**< Represents the CPU usage (from 0 to 100) */
     int ram_usage;      /**< Represents the RAM usage (from 0 to 100) */
-    bool estopped;      /**< Set to \c true if robot is emergency stopped */
-    bool connected;     /**< Set to \c true if robot is connected */
+    int estopped;       /**< Set to \c 1 if robot is emergency stopped */
+    int connected;      /**< Set to \c 1 if robot is connected */
     int disk_usage;     /**< Represents the disk usage (from 0 to 100) */
     double voltage;     /**< Holds the current robot voltage */
 } DS_RobotEvent;

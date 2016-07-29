@@ -23,17 +23,20 @@
 
 #include "DS_Config.h"
 
+/*
+ * These variables hold the state(s) of the LibDS and its modules
+ */
 static int team;
 static int cpu_usage;
 static int ram_usage;
 static int disk_usage;
-static bool robot_code;
-static bool robot_enabled;
+static int robot_code;
+static int robot_enabled;
 static double robot_voltage;
-static bool emergency_stopped;
-static bool fms_communications;
-static bool radio_communications;
-static bool robot_communications;
+static int emergency_stopped;
+static int fms_communications;
+static int radio_communications;
+static int robot_communications;
 static DS_Alliance robot_alliance;
 static DS_Position robot_position;
 static DS_ControlMode control_mode;
@@ -64,12 +67,12 @@ int CFG_GetTeamNumber()
     return team;
 }
 
-bool CFG_GetRobotCode()
+int CFG_GetRobotCode()
 {
     return robot_code;
 }
 
-bool CFG_GetRobotEnabled()
+int CFG_GetRobotEnabled()
 {
     return robot_enabled;
 }
@@ -104,22 +107,22 @@ DS_Position CFG_GetPosition()
     return robot_position;
 }
 
-bool CFG_GetEmergencyStopped()
+int CFG_GetEmergencyStopped()
 {
     return emergency_stopped;
 }
 
-bool CFG_GetFMSCommunications()
+int CFG_GetFMSCommunications()
 {
     return fms_communications;
 }
 
-bool CFG_GetRadioCommunications()
+int CFG_GetRadioCommunications()
 {
     return radio_communications;
 }
 
-bool CFG_GetRobotCommunications()
+int CFG_GetRobotCommunications()
 {
     return robot_communications;
 }
@@ -129,7 +132,7 @@ DS_ControlMode CFG_GetControlMode()
     return control_mode;
 }
 
-void CFG_SetRobotCode (const bool code)
+void CFG_SetRobotCode (const int code)
 {
     if (robot_code != code)
         robot_code = code;
@@ -141,7 +144,7 @@ void CFG_SetTeamNumber (const int number)
         team = number;
 }
 
-void CFG_SetRobotEnabled (const bool enabled)
+void CFG_SetRobotEnabled (const int enabled)
 {
     if (robot_enabled != enabled)
         robot_enabled = enabled;
@@ -171,7 +174,7 @@ void CFG_SetRobotVoltage (const double voltage)
         robot_voltage = voltage;
 }
 
-void CFG_SetEmergencyStopped (const bool stopped)
+void CFG_SetEmergencyStopped (const int stopped)
 {
     if (emergency_stopped != stopped)
         emergency_stopped = stopped;
@@ -195,19 +198,19 @@ void CFG_SetControlMode (const DS_ControlMode mode)
         control_mode = mode;
 }
 
-void CFG_SetFMSCommunications (const bool communications)
+void CFG_SetFMSCommunications (const int communications)
 {
     if (fms_communications != communications)
         fms_communications = communications;
 }
 
-void CFG_SetRadioCommunications (const bool communications)
+void CFG_SetRadioCommunications (const int communications)
 {
     if (radio_communications != communications)
         radio_communications = communications;
 }
 
-void CFG_SetRobotCommunications (const bool communications)
+void CFG_SetRobotCommunications (const int communications)
 {
     if (robot_communications != communications)
         robot_communications = communications;

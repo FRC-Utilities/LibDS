@@ -30,11 +30,10 @@ extern "C" {
 
 #include <stdlib.h>
 #include <stdint.h>
-#include <stdbool.h>
 
 extern uint32_t DS_CRC32 (uint32_t crc, const void* buf, size_t size);
 
-extern bool DS_StringIsEmpty (const char* string);
+extern int DS_StringIsEmpty (const char* string);
 extern char* DS_GetStaticIP (const int net, const int team, const int host);
 
 #ifdef __cplusplus

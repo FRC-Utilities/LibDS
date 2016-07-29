@@ -26,7 +26,6 @@
 
 #include <stdint.h>
 #include <stdlib.h>
-#include <stdbool.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -49,9 +48,9 @@ typedef struct _protocol {
     uint8_t* (*create_radio_packet)();
     uint8_t* (*create_robot_packet)();
 
-    bool (*read_fms_packet) (const uint8_t*);
-    bool (*read_radio_packet) (const uint8_t*);
-    bool (*read_robot_packet) (const uint8_t*);
+    int (*read_fms_packet) (const uint8_t*);
+    int (*read_radio_packet) (const uint8_t*);
+    int (*read_robot_packet) (const uint8_t*);
 
     void (*reset_fms)();
     void (*reset_radio)();

@@ -9,7 +9,3 @@
 - [ ] Implement cross-platform socket handling (using `DS_Socket` to define socket data)
 - [x] Implement joystick handling functions
 - [ ] Implement the NetConsole (also using `DS_Socket` for the job)
-
-### Notes (mostly to myself, that's sad...)
-
-- Using `stdbool.h` may not be the wisest idea...

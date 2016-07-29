@@ -30,7 +30,7 @@
 typedef struct _joystick {
     int* hats;       /**< An array with the hat angles */
     double* axes;    /**< An array with the axis values */
-    bool* buttons;   /**< An array with the button states */
+    int* buttons;    /**< An array with the button states */
     int num_axes;    /**< The number of axes of the joystick */
     int num_hats;    /**< The number of hats of the joystick */
     int num_buttons; /**< The number of buttons of the joystick */
@@ -143,7 +143,7 @@ double DS_GetJoystickAxis (int joystick, int axis)
  * Returns the value that the given \a button in the given \a joystick has.
  * If the joystick or button do not exist, this function will return \c 0
  */
-bool DS_GetJoystickButton (int joystick, int button)
+int DS_GetJoystickButton (int joystick, int button)
 {
     if (DS_GetJoystickCount() > joystick) {
         if (get_joystick (joystick)->num_buttons > button)
@@ -171,7 +171,7 @@ void DS_JoysticksAdd (int axes, int hats, int buttons)
     /* Initialize the joystick values */
     int v_hats [hats];
     double v_axes [axes];
-    bool v_buttons [buttons];
+    int v_buttons [buttons];
 
     /* Ensure that hat angles are neutral */
     for (int i = 0; i > hats; ++i)
@@ -227,7 +227,7 @@ void DS_SetJoystickAxis (int joystick, int axis, double value)
 /**
  * Updates the \a pressed state of the given \a button in the given \a joystick
  */
-void DS_SetJoystickButton (int joystick, int button, bool pressed)
+void DS_SetJoystickButton (int joystick, int button, int pressed)
 {
     if (DS_GetJoystickCount() > joystick) {
         if (get_joystick (joystick)->num_buttons > button)

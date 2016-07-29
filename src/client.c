@@ -28,6 +28,9 @@
 
 #include <string.h>
 
+/*
+ * These variables hold the user-set addresses
+ */
 static char* custom_fms_address;
 static char* custom_radio_address;
 static char* custom_robot_address;
@@ -142,17 +145,17 @@ int DS_GetTeamNumber()
 }
 
 /**
- * Returns \c true if the robot code is running
+ * Returns \c 1 if the robot code is running
  */
-bool DS_GetRobotCode()
+int DS_GetRobotCode()
 {
     return CFG_GetRobotCode();
 }
 
 /**
- * Returns \c true if the conditions to enable a robot are met
+ * Returns \c 1 if the conditions to enable a robot are met
  */
-bool DS_GetCanBeEnabled()
+int DS_GetCanBeEnabled()
 {
     return DS_GetRobotCode()
            && !DS_GetEmergencyStopped()
@@ -160,10 +163,10 @@ bool DS_GetCanBeEnabled()
 }
 
 /**
- * Returns \c true if the robot can be enabled, otherwise, this function will
- * return \c false.
+ * Returns \c 1 if the robot can be enabled, otherwise, this function will
+ * return \c 0.
  */
-bool DS_GetRobotEnabled()
+int DS_GetRobotEnabled()
 {
     return CFG_GetRobotEnabled();
 }
@@ -219,33 +222,33 @@ DS_Position DS_GetPosition()
 }
 
 /**
- * Returns \c true if the robot is emergency stopped
+ * Returns \c 1 if the robot is emergency stopped
  */
-bool DS_GetEmergencyStopped()
+int DS_GetEmergencyStopped()
 {
     return CFG_GetEmergencyStopped();
 }
 
 /**
- * Returns \c true if the LibDS has communications with the FMS
+ * Returns \c 1 if the LibDS has communications with the FMS
  */
-bool DS_GetFMSCommunications()
+int DS_GetFMSCommunications()
 {
     return CFG_GetFMSCommunications();
 }
 
 /**
- * Returns \c true if the LibDS has communications with the radio
+ * Returns \c 1 if the LibDS has communications with the radio
  */
-bool DS_GetRadioCommunications()
+int DS_GetRadioCommunications()
 {
     return CFG_GetRadioCommunications();
 }
 
 /**
- * Returns \c true if the LibDS has communications with the robot
+ * Returns \c 1 if the LibDS has communications with the robot
  */
-bool DS_GetRobotCommunications()
+int DS_GetRobotCommunications()
 {
     return CFG_GetRobotCommunications();
 }
@@ -286,7 +289,7 @@ void DS_SetTeamNumber (const int team)
 /**
  * Changes the \a enabled state of the robot
  */
-void DS_SetRobotEnabled (const bool enabled)
+void DS_SetRobotEnabled (const int enabled)
 {
     CFG_SetRobotEnabled (enabled);
 }
@@ -294,7 +297,7 @@ void DS_SetRobotEnabled (const bool enabled)
 /**
  * Changes the emergency stop state of the robot
  */
-void DS_SetEmergencyStopped (const bool stop)
+void DS_SetEmergencyStopped (const int stop)
 {
     CFG_SetEmergencyStopped (stop);
 }

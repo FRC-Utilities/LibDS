@@ -28,40 +28,58 @@
 #include "DS_Joysticks.h"
 #include "DS_Protocols.h"
 
-enum Control {
-    cEnabled          = 0x20,
-    cTestMode         = 0x02,
-    cAutonomous       = 0x10,
-    cTeleoperated     = 0x00,
-    cFMS_Attached     = 0x08,
-    cResyncComms      = 0x04,
-    cRebootRobot      = 0x80,
-    cEmergencyStopOn  = 0x00,
-    cEmergencyStopOff = 0x40,
-};
+/*
+ * Protocol bytes
+ */
+const uint8_t cEnabled          = 0x20;
+const uint8_t cTestMode         = 0x02;
+const uint8_t cAutonomous       = 0x10;
+const uint8_t cTeleoperated     = 0x00;
+const uint8_t cFMS_Attached     = 0x08;
+const uint8_t cResyncComms      = 0x04;
+const uint8_t cRebootRobot      = 0x80;
+const uint8_t cEmergencyStopOn  = 0x00;
+const uint8_t cEmergencyStopOff = 0x40;
+const uint8_t cPosition1        = 0x31;
+const uint8_t cPosition2        = 0x32;
+const uint8_t cPosition3        = 0x33;
+const uint8_t cAllianceRed      = 0x52;
+const uint8_t cAllianceBlue     = 0x42;
+const uint8_t cFMSAutonomous    = 0x53;
+const uint8_t cFMSTeleoperated  = 0x43;
 
-enum Stations {
-    cPosition1    = 0x31,
-    cPosition2    = 0x32,
-    cPosition3    = 0x33,
-    cAllianceRed  = 0x52,
-    cAllianceBlue = 0x42,
-};
-
-enum FMS {
-    cFMSAutonomous   = 0x53,
-    cFMSTeleoperated = 0x43,
-};
-
+/*
+ * CRC32 code
+ */
 static uint32_t crc32;
+
+/*
+ * Sent robot and FMS packet counters
+ */
 static int sent_fms_packets;
 static int sent_robot_packets;
 
-static bool resync;
-static bool reboot;
-static bool restart_code;
+/*
+ * Control code flags
+ */
+static int resync;
+static int reboot;
+static int restart_code;
+
+/*
+ * Protocol pointer
+ */
 static DS_Protocol* protocol;
 
+/**
+ * Returns the control code sent to the robot. The control code holds the
+ * following information:
+ *     - The emergency stop state
+ *     - The enabled state of the robot
+ *     - The control mode of the robot
+ *     - The FMS communication state (the robot wants it)
+ *     - Extra commands to the robot (e.g. reboot & resync)
+ */
 static uint8_t get_control_code()
 {
     uint8_t code = cEmergencyStopOff;
@@ -102,6 +120,11 @@ static uint8_t get_control_code()
     return code;
 }
 
+/**
+ * Returns the alliance code sent to the robot.
+ * The robot application can use this information to adjust its programming for
+ * the current alliance.
+ */
 static uint8_t get_alliance_code()
 {
     if (CFG_GetAlliance() == DS_ALLIANCE_RED)
@@ -110,6 +133,9 @@ static uint8_t get_alliance_code()
     return cAllianceBlue;
 }
 
+/**
+ * Returns the alliance position code sent to the robot.
+ */
 static uint8_t get_position_code()
 {
     uint8_t code = cPosition1;
@@ -129,12 +155,29 @@ static uint8_t get_position_code()
     return code;
 }
 
+/**
+ * Returns the (number?) of digital inputs connected to the computer.
+ */
 static uint8_t get_digital_inputs()
 {
     return 0x00;
 }
 
-static void add_joystick_data (char* data, int offset)
+/**
+ * Adds joystick information to a DS-to-robot packet, beginning at the given
+ * \a offset in the data packet.
+ *
+ * The 2014 communication protocol records the data for all four joysticks,
+ * if a joystick or joystick member is not present, we will send a neutral
+ * value (\c 0.00 for axes, \c 0 for buttons).
+ *
+ * Axis value range is -127 to 128, the robot program will then adjust those
+ * values to a double range from -1 to 1.
+ *
+ * Button states are stored in a similar way as enumerated flags in a C/C++
+ * program.
+ */
+static void add_joystick_data (uint8_t* data, int offset)
 {
     int pos = offset;
 
@@ -142,7 +185,7 @@ static void add_joystick_data (char* data, int offset)
         /* Get joystick properties */
         int num_axes = DS_GetJoystickNumAxes (i);
         int num_buttons = DS_GetJoystickNumButtons (i);
-        bool joystick_exists = DS_GetJoystickCount() > i;
+        int joystick_exists = DS_GetJoystickCount() > i;
 
         /* Add axis data */
         for (int axis = 0; axis < protocol->maxAxisCount; ++i) {
@@ -174,16 +217,26 @@ static void add_joystick_data (char* data, int offset)
     }
 }
 
+/**
+ * The FMS address is not defined, it will be assigned automatically when the
+ * DS receives a FMS packet
+ */
 static char* fms_address()
 {
     return "";
 }
 
+/**
+ * The 2014 control systems assigns the radio IP in 10.te.am.1
+ */
 static char* radio_address()
 {
     return DS_GetStaticIP (10, CFG_GetTeamNumber(), 1);
 }
 
+/**
+ * The 2014 control systems assigns the radio IP in 10.te.am.2
+ */
 static char* robot_address()
 {
     return DS_GetStaticIP (10, CFG_GetTeamNumber(), 2);
@@ -194,11 +247,28 @@ static uint8_t* create_fms_packet()
     return (uint8_t*) malloc (sizeof (uint8_t));
 }
 
+/**
+ * The 2014 communication protocol does not involve sending specialized packets
+ * to the DS Radio / Bridge. For that reason, the 2014 communication protocol
+ * generates empty radio packets.
+ */
 static uint8_t* create_radio_packet()
 {
     return (uint8_t*) malloc (sizeof (uint8_t));
 }
 
+/**
+ * Generates a DS-to-robot packet. The packet is 1024 bytes long and contains
+ * the following data:
+ *     - The packet index / ID
+ *     - The team number
+ *     - The control code (which includes e-stop and other commands)
+ *     - The alliance and position
+ *     - Joystick values
+ *     - (Number?) of digital inputs
+ *     - The version of the FRC Driver Station
+ *     - The CRC32 checksum of the packet
+ */
 static uint8_t* create_robot_packet()
 {
     /* Create a 1024-byte long packet */
@@ -244,30 +314,30 @@ static uint8_t* create_robot_packet()
     return data;
 }
 
-static bool read_fms_packet (const uint8_t* data)
+static int read_fms_packet (const uint8_t* data)
 {
     /* Data pointer is invalid */
     if (data == NULL)
-        return false;
+        return 0;
 
     /* The packet is long enough to be read */
     if (sizeof (data) > 8)
-        return true;
+        return 1;
 
-    return false;
+    return 0;
 }
 
-static bool read_radio_packet (const uint8_t* data)
+static int read_radio_packet (const uint8_t* data)
 {
     (void) data;
-    return false;
+    return 0;
 }
 
-bool read_robot_packet (const uint8_t* data)
+int read_robot_packet (const uint8_t* data)
 {
     /* Data pointer is invalid */
     if (data == NULL)
-        return false;
+        return 0;
 
     /* The packet is long enough to be read */
     if (sizeof (data) >= 1024) {
@@ -284,10 +354,10 @@ bool read_robot_packet (const uint8_t* data)
         CFG_SetRobotCode ((integer != 0x37) && (decimal != 0x37));
 
         /* Packet read successfully */
-        return true;
+        return 1;
     }
 
-    return false;
+    return 0;
 }
 
 static void reset_fms()

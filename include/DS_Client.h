@@ -28,12 +28,9 @@
 extern "C" {
 #endif
 
-#include <stdint.h>
-#include <stdbool.h>
-
 #include "DS_Types.h"
 
-/* Init/close functions */
+/* Init/closintnctions */
 extern void Client_Init();
 extern void Client_Close();
 
@@ -54,27 +51,27 @@ extern const char* DS_GetAppliedRobotAddress();
 
 /* Getters */
 extern int DS_GetTeamNumber();
-extern bool DS_GetRobotCode();
-extern bool DS_GetCanBeEnabled();
-extern bool DS_GetRobotEnabled();
+extern int DS_GetRobotCode();
+extern int DS_GetCanBeEnabled();
+extern int DS_GetRobotEnabled();
 extern int DS_GetRobotCPUUsage();
 extern int DS_GetRobotRAMUsage();
 extern int DS_GetRobotDiskUsage();
 extern double DS_GetRobotVoltage();
 extern DS_Alliance DS_GetAlliance();
 extern DS_Position DS_GetPosition();
-extern bool DS_GetEmergencyStopped();
-extern bool DS_GetFMSCommunications();
-extern bool DS_GetRadioCommunications();
-extern bool DS_GetRobotCommunications();
+extern int DS_GetEmergencyStopped();
+extern int DS_GetFMSCommunications();
+extern int DS_GetRadioCommunications();
+extern int DS_GetRobotCommunications();
 extern DS_ControlMode DS_GetControlMode();
 
-/* Setters */
+/* Setint*/
 extern void DS_RebootRobot();
 extern void DS_RestartRobotCode();
 extern void DS_SetTeamNumber (const int team);
-extern void DS_SetRobotEnabled (const bool enabled);
-extern void DS_SetEmergencyStopped (const bool stop);
+extern void DS_SetRobotEnabled (const int enabled);
+extern void DS_SetEmergencyStopped (const int stop);
 extern void DS_SetAlliance (const DS_Alliance alliance);
 extern void DS_SetPosition (const DS_Position position);
 extern void DS_SetControlMode (const DS_ControlMode mode);

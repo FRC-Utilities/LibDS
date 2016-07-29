@@ -28,14 +28,14 @@
 #include <stdlib.h>
 
 /**
- * Returns \c true if the given \a string is empty
+ * Returns \c 1 if the given \a string is empty
  */
-bool DS_StringIsEmpty (const char* string)
+int DS_StringIsEmpty (const char* string)
 {
     if (string)
         return (string [0] == 0);
 
-    return true;
+    return 0;
 }
 
 /**

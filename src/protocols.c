@@ -23,6 +23,9 @@
 
 #include "DS_Protocols.h"
 
+/**
+ * Holds a pointer to the current protocol in use
+ */
 static DS_Protocol* protocol;
 
 /**

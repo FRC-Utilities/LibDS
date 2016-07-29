@@ -22,25 +22,31 @@
  */
 
 #include <LibDS.h>
-
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 
-/* Not nice, but it works on GCC 4.9+ */
+/*
+ * Not nice, but it works on GCC 4.9+
+ */
 #define AVOID_WARNINGS(x) (void)(x + 1)
 
-/* Clears the console screen */
+/*
+ * Clears the console screen
+ */
 #if defined MSDOS || defined WIN32
     #define CLEAR_SCREEN AVOID_WARNINGS (system ("cls"))
 #else
     #define CLEAR_SCREEN AVOID_WARNINGS (system ("clear"))
 #endif
 
+/*
+ * Forward-declaration of function
+ */
 void read_user_input();
 void read_libds_events();
 
-/**
+/*
  * Main entry point of the application
  */
 int main ()
@@ -51,7 +57,7 @@ int main ()
     DS_ConfigureProtocol (DS_GetProtocolFRC_2014());
     printf ("Welcome! Type \"help\" to get started!\n\n");
 
-    while (true) {
+    while (1) {
         read_user_input();
         read_libds_events();
     }
@@ -59,7 +65,7 @@ int main ()
     return 0;
 }
 
-/**
+/*
  * Reads the user input and calls the appropiate commands
  */
 void read_user_input()
@@ -96,27 +102,27 @@ void read_user_input()
 
     /* User wants to enable the robot */
     else if (strcmp (input, "enable") == 0)
-        DS_SetRobotEnabled (true);
+        DS_SetRobotEnabled (1);
 
     /* User wants to disable the robot */
     else if (strcmp (input, "disable") == 0)
-        DS_SetRobotEnabled (false);
+        DS_SetRobotEnabled (0);
 
     /* User switched to test mode */
     else if (strcmp (input, "test") == 0) {
-        DS_SetRobotEnabled (false);
+        DS_SetRobotEnabled (0);
         DS_SetControlMode (DS_CONTROL_TEST);
     }
 
     /* User switched to autonomous */
     else if (strcmp (input, "autonomous") == 0) {
-        DS_SetRobotEnabled (false);
+        DS_SetRobotEnabled (0);
         DS_SetControlMode (DS_CONTROL_AUTONOMOUS);
     }
 
     /* User switched to teleoperated */
     else if (strcmp (input, "operator") == 0) {
-        DS_SetRobotEnabled (false);
+        DS_SetRobotEnabled (0);
         DS_SetControlMode (DS_CONTROL_TELEOPERATED);
     }
 

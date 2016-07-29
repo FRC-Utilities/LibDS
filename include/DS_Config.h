@@ -25,7 +25,6 @@
 #define _LIB_DS_INTERNAL_H
 
 #include <stdint.h>
-#include <stdbool.h>
 
 #include "DS_Types.h"
 #include "DS_Objects.h"
@@ -47,38 +46,38 @@ extern void CFG_Init();
 
 /* Getters */
 extern int CFG_GetTeamNumber();
-extern bool CFG_GetRobotCode();
-extern bool CFG_GetRobotEnabled();
+extern int CFG_GetRobotCode();
+extern int CFG_GetRobotEnabled();
 extern int CFG_GetRobotCPUUsage();
 extern int CFG_GetRobotRAMUsage();
 extern int CFG_GetRobotDiskUsage();
 extern double CFG_GetRobotVoltage();
 extern DS_Alliance CFG_GetAlliance();
 extern DS_Position CFG_GetPosition();
-extern bool CFG_GetEmergencyStopped();
-extern bool CFG_GetFMSCommunications();
-extern bool CFG_GetRadioCommunications();
-extern bool CFG_GetRobotCommunications();
+extern int CFG_GetEmergencyStopped();
+extern int CFG_GetFMSCommunications();
+extern int CFG_GetRadioCommunications();
+extern int CFG_GetRobotCommunications();
 extern DS_ControlMode CFG_GetControlMode();
 
 /* Setters */
-extern void CFG_SetRobotCode (const bool code);
+extern void CFG_SetRobotCode (const int code);
 extern void CFG_SetTeamNumber (const int number);
-extern void CFG_SetRobotEnabled (const bool enabled);
+extern void CFG_SetRobotEnabled (const int enabled);
 extern void CFG_SetRobotCPUUsage (const int percent);
 extern void CFG_SetRobotRAMUsage (const int percent);
 extern void CFG_SetRobotDiskUsage (const int percent);
 extern void CFG_SetRobotVoltage (const double voltage);
-extern void CFG_SetEmergencyStopped (const bool stopped);
+extern void CFG_SetEmergencyStopped (const int stopped);
 extern void CFG_SetAlliance (const DS_Alliance alliance);
 extern void CFG_SetPosition (const DS_Position position);
 extern void CFG_SetControlMode (const DS_ControlMode mode);
-extern void CFG_SetFMSCommunications (const bool communications);
-extern void CFG_SetRadioCommunications (const bool communications);
-extern void CFG_SetRobotCommunications (const bool communications);
+extern void CFG_SetFMSCommunications (const int communications);
+extern void CFG_SetRadioCommunications (const int communications);
+extern void CFG_SetRobotCommunications (const int communications);
 
 /* Networking functions */
-extern int CFG_GetSocket (DS_Socket* socket);
+extern int CFG_Getintet (DS_Socket* socket);
 extern int CFG_CloseSocket (DS_Socket* socket);
 extern int CFG_SendData (DS_Socket* socket, char* data);
 extern int CFG_ReadData (DS_Socket* socket, char* data);
