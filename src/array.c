@@ -46,7 +46,7 @@ void DS_ArrayFree (DS_Array* array)
  * Inserts the given \a element in the \a array and resizes the allocated
  * memory if required.
  */
-void DS_ArrayInstert (DS_Array* array, void** element)
+void DS_ArrayInsert (DS_Array* array, void** element)
 {
     /* Array pointer is NULL */
     if (!array)

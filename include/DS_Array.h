@@ -24,6 +24,10 @@
 #ifndef _LIB_DS_ARRAY_H
 #define _LIB_DS_ARRAY_H
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 #include <stdint.h>
 #include <stdlib.h>
 
@@ -34,8 +38,12 @@ typedef struct _array {
 } DS_Array;
 
 extern void DS_ArrayFree (DS_Array* array);
-extern void DS_ArrayInstert (DS_Array* array, void** element);
+extern void DS_ArrayInsert (DS_Array* array, void** element);
 extern void DS_ArrayInit (DS_Array* array, size_t initial_size);
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif
 

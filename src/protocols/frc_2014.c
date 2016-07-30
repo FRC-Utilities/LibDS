@@ -31,22 +31,22 @@
 /*
  * Protocol bytes
  */
-const uint8_t cEnabled          = 0x20;
-const uint8_t cTestMode         = 0x02;
-const uint8_t cAutonomous       = 0x10;
-const uint8_t cTeleoperated     = 0x00;
-const uint8_t cFMS_Attached     = 0x08;
-const uint8_t cResyncComms      = 0x04;
-const uint8_t cRebootRobot      = 0x80;
-const uint8_t cEmergencyStopOn  = 0x00;
-const uint8_t cEmergencyStopOff = 0x40;
-const uint8_t cPosition1        = 0x31;
-const uint8_t cPosition2        = 0x32;
-const uint8_t cPosition3        = 0x33;
-const uint8_t cAllianceRed      = 0x52;
-const uint8_t cAllianceBlue     = 0x42;
-const uint8_t cFMSAutonomous    = 0x53;
-const uint8_t cFMSTeleoperated  = 0x43;
+static const uint8_t cEnabled          = 0x20;
+static const uint8_t cTestMode         = 0x02;
+static const uint8_t cAutonomous       = 0x10;
+static const uint8_t cTeleoperated     = 0x00;
+static const uint8_t cFMS_Attached     = 0x08;
+static const uint8_t cResyncComms      = 0x04;
+static const uint8_t cRebootRobot      = 0x80;
+static const uint8_t cEmergencyStopOn  = 0x00;
+static const uint8_t cEmergencyStopOff = 0x40;
+static const uint8_t cPosition1        = 0x31;
+static const uint8_t cPosition2        = 0x32;
+static const uint8_t cPosition3        = 0x33;
+static const uint8_t cAllianceRed      = 0x52;
+static const uint8_t cAllianceBlue     = 0x42;
+static const uint8_t cFMSAutonomous    = 0x53;
+static const uint8_t cFMSTeleoperated  = 0x43;
 
 /*
  * CRC32 code
@@ -54,9 +54,8 @@ const uint8_t cFMSTeleoperated  = 0x43;
 static uint32_t crc32;
 
 /*
- * Sent robot and FMS packet counters
+ * Sent robot acket counters, they are used as packet IDs
  */
-static int sent_fms_packets;
 static int sent_robot_packets;
 
 /*
@@ -210,7 +209,7 @@ static uint8_t get_digital_inputs()
  * Button states are stored in a similar way as enumerated flags in a C/C++
  * program.
  */
-static void add_joystick_data (uint8_t* data, int offset)
+static void add_joystick_data (uint8_t* data, const int offset)
 {
     int pos = offset;
 
@@ -326,7 +325,7 @@ static uint8_t* create_robot_packet()
 
     /* Add alliance and position */
     data [6] = get_alliance_code();
-    data [6] = get_position_code();
+    data [7] = get_position_code();
 
     /* Add joystick data */
     add_joystick_data (data, 8);
@@ -347,6 +346,9 @@ static uint8_t* create_robot_packet()
     data [1021] = (checksum & 0xff0000) >> 16;
     data [1022] = (checksum & 0xff00) >> 8;
     data [1023] = (checksum & 0xff);
+
+    /* Increase sent robot packets */
+    ++sent_robot_packets;
 
     /* Return address of data */
     return data;
@@ -417,6 +419,10 @@ static int read_radio_packet (const uint8_t* data)
     return 0;
 }
 
+/**
+ * Interprets the given robot packet \a data and updates the emergency stop
+ * state and the robot voltage values.
+ */
 int read_robot_packet (const uint8_t* data)
 {
     /* Data pointer is invalid */
@@ -498,9 +504,8 @@ DS_Protocol* DS_GetProtocolFRC_2014()
         /* Initialize protocol variables */
         crc32 = 0;
         resync = 0;
-        restart_code = 0;
         reboot = 0;
-        sent_fms_packets = 0;
+        restart_code = 0;
         sent_robot_packets = 0;
         null_char = (char*) malloc (sizeof (char));
 
@@ -558,10 +563,17 @@ DS_Protocol* DS_GetProtocolFRC_2014()
         robot_socket.output_port = 1110;
         robot_socket.type = DS_SOCKET_UDP;
 
+        /* Define netconsole socket properties */
+        DS_Socket netconsole_socket;
+        netconsole_socket.input_port = 6666;
+        netconsole_socket.output_port = 6668;
+        netconsole_socket.type = DS_SOCKET_UDP;
+
         /* Assign socket objects */
         protocol->fmsSocket = fms_socket;
         protocol->radioSocket = radio_socket;
         protocol->robotSocket = robot_socket;
+        protocol->netconsoleSocket = netconsole_socket;
     }
 
     return protocol;

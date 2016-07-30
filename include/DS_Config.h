@@ -32,10 +32,9 @@
 /*
  * WARNING:
  *
- * Do not use this header in your application unless you are implementing your
+ * DO NOT use this header in your application unless you are implementing your
  * own protocols. Only include this header where it is required, do not include
  * it for the lolz.
- *
  */
 
 #ifdef __cplusplus

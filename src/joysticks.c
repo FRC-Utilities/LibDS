@@ -199,7 +199,7 @@ void DS_JoysticksAdd (int axes, int hats, int buttons)
     joystick->buttons = v_buttons;
 
     /* Register the new joystick in the joystick list */
-    DS_ArrayInstert (array, (void*) joystick);
+    DS_ArrayInsert (array, (void*) joystick);
 }
 
 /**

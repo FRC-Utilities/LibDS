@@ -20,3 +20,38 @@
  * FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
  * DEALINGS IN THE SOFTWARE.
  */
+
+#include "DS_Config.h"
+#include "DS_Protocols.h"
+
+#include <stdio.h>
+
+/*
+ * Pointer to the protocol
+ */
+static DS_Protocol* protocol;
+
+/**
+ * The 2016 FRC control system is very similar to the FRC 2015 control system,
+ * the only (DS/Comms) difference is that the robot address is found at
+ * roboRIO-TEAM-FRC.local (instead of roboRIO-TEAM.local).
+ */
+static char* robot_address()
+{
+    char* str = (char*) malloc (sizeof (char*) * 22);
+    sprintf (str, "roboRIO-%d-FRC.local", CFG_GetTeamNumber());
+    return str;
+}
+
+/**
+ * Initializes and configures the FRC 2016 Communication Protocol
+ */
+extern DS_Protocol* DS_GetProtocolFRC_2016()
+{
+    if (!protocol) {
+        protocol = DS_GetProtocolFRC_2015();
+        protocol->robot_address = &robot_address;
+    }
+
+    return protocol;
+}

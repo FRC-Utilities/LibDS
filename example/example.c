@@ -54,7 +54,7 @@ int main ()
     CLEAR_SCREEN;
 
     DS_Init();
-    DS_ConfigureProtocol (DS_GetProtocolFRC_2014());
+    DS_ConfigureProtocol (DS_GetProtocolFRC_2016());
     printf ("Welcome! Type \"help\" to get started!\n\n");
 
     while (1) {
