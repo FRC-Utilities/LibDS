@@ -6,7 +6,7 @@
 - [ ] Implement the event loop
 - [x] Implement 2014 protocol
 - [x] Implement 2016 protocol
-- [ ] Implement joystick encoding in 2015 protocol
+- [x] Implement joystick encoding in 2015 protocol
 - [ ] Add milliseconds in the 2015 date/time data packet
 - [ ] Add protocol handler functions that free the generated (and obtained) data after being used
 - [ ] Implement cross-platform socket handling (using `DS_Socket` to define socket data)
