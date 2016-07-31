@@ -21,9 +21,7 @@
  * DEALINGS IN THE SOFTWARE.
  */
 
-#include "DS_Config.h"
 #include "DS_Protocols.h"
-
 #include <stdio.h>
 
 /*
