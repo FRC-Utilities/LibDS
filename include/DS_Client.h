@@ -66,7 +66,7 @@ extern int DS_GetRadioCommunications();
 extern int DS_GetRobotCommunications();
 extern DS_ControlMode DS_GetControlMode();
 
-/* Setint*/
+/* Setters */
 extern void DS_RebootRobot();
 extern void DS_RestartRobotCode();
 extern void DS_SetTeamNumber (const int team);
@@ -78,6 +78,7 @@ extern void DS_SetControlMode (const DS_ControlMode mode);
 extern void DS_SetCustomFMSAddress (const char* address);
 extern void DS_SetCustomRadioAddress (const char* address);
 extern void DS_SetCustomRobotAddress (const char* address);
+extern void DS_SendNetConsoleMessage (const char* message);
 
 #ifdef __cplusplus
 }

@@ -21,59 +21,22 @@
  * DEALINGS IN THE SOFTWARE.
  */
 
-#ifndef _LIB_DS_OBJECTS_H
-#define _LIB_DS_OBJECTS_H
-
-#include <stdint.h>
-#include <stdlib.h>
+#ifndef _LIB_DS_TIMER_H
+#define _LIB_DS_TIMER_H
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-typedef struct _socket {
-    int socket;
-    int disabled;
-    unsigned long address;
-    unsigned short int type;
-    unsigned short int input_port;
-    unsigned short int output_port;
-} DS_Socket;
+typedef struct _timer {
+    int time;
+    int expired;
+    int remaining;
+} DS_Timer;
 
-typedef struct _protocol {
-    char* (*fms_address)();
-    char* (*radio_address)();
-    char* (*robot_address)();
-
-    uint8_t* (*create_fms_packet)();
-    uint8_t* (*create_radio_packet)();
-    uint8_t* (*create_robot_packet)();
-
-    int (*read_fms_packet) (const uint8_t*);
-    int (*read_radio_packet) (const uint8_t*);
-    int (*read_robot_packet) (const uint8_t*);
-
-    void (*reset_fms)();
-    void (*reset_radio)();
-    void (*reset_robot)();
-
-    void (*reboot_robot)();
-    void (*restart_robot_code)();
-
-    int fmsInterval;
-    int radioInterval;
-    int robotInterval;
-
-    int maxJoysticks;
-    int maxAxisCount;
-    int maxHatsCount;
-    int maxButtonCount;
-
-    DS_Socket fmsSocket;
-    DS_Socket radioSocket;
-    DS_Socket robotSocket;
-    DS_Socket netconsoleSocket;
-} DS_Protocol;
+extern void DS_TimerReset (DS_Timer* timer);
+extern void DS_TimerUpdate (DS_Timer* timer);
+extern void DS_TimerInit (DS_Timer* timer, const int time);
 
 #ifdef __cplusplus
 }

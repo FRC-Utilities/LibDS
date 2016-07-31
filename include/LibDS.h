@@ -32,9 +32,10 @@ extern "C" {
 #include "DS_Utils.h"
 #include "DS_Events.h"
 #include "DS_Client.h"
-#include "DS_Objects.h"
+#include "DS_Socket.h"
+#include "DS_Protocol.h"
 #include "DS_Joysticks.h"
-#include "DS_Protocols.h"
+#include "DS_DefaultProtocols.h"
 
 extern void DS_Init();
 extern void DS_Close();

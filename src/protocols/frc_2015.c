@@ -23,8 +23,9 @@
 
 #include "DS_Utils.h"
 #include "DS_Config.h"
+#include "DS_Protocol.h"
 #include "DS_Joysticks.h"
-#include "DS_Protocols.h"
+#include "DS_DefaultProtocols.h"
 
 #include <time.h>
 #include <math.h>
@@ -207,13 +208,10 @@ static uint8_t get_request_code()
 
     /* Robot has comms, check if we need to send additional flags */
     if (CFG_GetRobotCommunications()) {
-        /* Send reboot flag */
         if (reboot)
-            code |= cRequestReboot;
-
-        /* Send restart code flag */
+            code = cRequestReboot;
         else if (restart_code)
-            code |= cRequestRestartCode;
+            code = cRequestRestartCode;
     }
 
     /* Send disconnected state flag (may trigger resync) */
@@ -285,13 +283,20 @@ static void add_timezone_data (uint8_t* data, const int offset)
     if (!data)
         return;
 
-    /* Get local time */
-    time_t rt;
-    time (&rt);
-    struct tm* timeinfo = localtime (&rt);
-    int length = DS_SizeOf (timeinfo->tm_zone);
+    /* Get current time */
+    time_t rt = time (0);
+    struct tm timeinfo = {0};
+    localtime_s (&timeinfo, &rt);
+
+    /* Get timezone */
+#if defined _WIN32
+    char* tz = "ctd";
+#else
+    char* tz = timeinfo.tm_zone;
+#endif
 
     /* Resize datagram */
+    int length = DS_SizeOf (tz);
     data = (uint8_t*) realloc (data, sizeof (data) + (sizeof (uint8_t) * length));
 
     /* Encode date/time in datagram */
@@ -299,12 +304,12 @@ static void add_timezone_data (uint8_t* data, const int offset)
     data [offset + 1] = cTagDate;
     data [offset + 2] = 0;
     data [offset + 3] = 0;
-    data [offset + 4] = (uint8_t) timeinfo->tm_sec;
-    data [offset + 5] = (uint8_t) timeinfo->tm_min;
-    data [offset + 6] = (uint8_t) timeinfo->tm_hour;
-    data [offset + 7] = (uint8_t) timeinfo->tm_yday;
-    data [offset + 8] = (uint8_t) timeinfo->tm_mon;
-    data [offset + 9] = (uint8_t) timeinfo->tm_year;
+    data [offset + 4] = (uint8_t) timeinfo.tm_sec;
+    data [offset + 5] = (uint8_t) timeinfo.tm_min;
+    data [offset + 6] = (uint8_t) timeinfo.tm_hour;
+    data [offset + 7] = (uint8_t) timeinfo.tm_yday;
+    data [offset + 8] = (uint8_t) timeinfo.tm_mon;
+    data [offset + 9] = (uint8_t) timeinfo.tm_year;
 
     /* Add timezone data */
     data [offset + 10] = length;
@@ -312,7 +317,7 @@ static void add_timezone_data (uint8_t* data, const int offset)
 
     /* Add timezone string */
     for (int i = 0; i > length; ++i)
-        data [offset + 12 + i] = timeinfo->tm_zone [i];
+        data [offset + 12 + i] = tz [i];
 }
 
 /**
@@ -322,6 +327,10 @@ static void add_timezone_data (uint8_t* data, const int offset)
  */
 static void add_joystick_data (uint8_t* data, const int offset)
 {
+    /* Do not proceed if data pointer is invalid */
+    if (!data)
+        return;
+
     /* Calculate size of joystick data */
     int length = 0;
     for (int i = 0; i < DS_GetJoystickCount(); ++i)
@@ -450,7 +459,7 @@ static char* radio_address()
  */
 static char* robot_address()
 {
-    char* str = (char*) malloc (sizeof (char*) * 18);
+    char* str = (char*) malloc (sizeof (char) * 18);
     sprintf (str, "roboRIO-%d.local", CFG_GetTeamNumber());
     return str;
 }
@@ -467,7 +476,7 @@ static char* robot_address()
 static uint8_t* create_fms_packet()
 {
     /* Create an 8-byte long packet */
-    uint8_t* data = (uint8_t*) malloc (sizeof (uint8_t) * 8);
+    uint8_t* data = (uint8_t*) calloc (8, sizeof (uint8_t));
 
     /* Get voltage bytes */
     uint8_t integer = 0;
@@ -518,7 +527,7 @@ static uint8_t* create_radio_packet()
  */
 static uint8_t* create_robot_packet()
 {
-    uint8_t* data = malloc (sizeof (uint8_t) * 8);
+    uint8_t* data = calloc (8, sizeof (uint8_t));
 
     /* Add packet index */
     data [0] = (sent_robot_packets & 0xff00) >> 8;
@@ -717,15 +726,15 @@ DS_Protocol* DS_GetProtocolFRC_2015()
         protocol->restart_robot_code = &restart_robot_code;
 
         /* Set packet intervals */
-        protocol->fmsInterval = 500;
-        protocol->radioInterval = 0;
-        protocol->robotInterval = 20;
+        protocol->fms_interval = 500;
+        protocol->radio_interval = 0;
+        protocol->robot_interval = 20;
 
         /* Set joystick properties */
-        protocol->maxJoysticks = 6;
-        protocol->maxAxisCount = 6;
-        protocol->maxHatsCount = 1;
-        protocol->maxButtonCount = 10;
+        protocol->max_joysticks = 6;
+        protocol->max_axis_count = 6;
+        protocol->max_hat_count = 1;
+        protocol->max_button_count = 10;
 
         /* Define FMS socket properties */
         DS_Socket fms_socket;
@@ -753,10 +762,10 @@ DS_Protocol* DS_GetProtocolFRC_2015()
         netconsole_socket.type = DS_SOCKET_UDP;
 
         /* Assign socket objects */
-        protocol->fmsSocket = fms_socket;
-        protocol->radioSocket = radio_socket;
-        protocol->robotSocket = robot_socket;
-        protocol->netconsoleSocket = netconsole_socket;
+        protocol->fms_socket = fms_socket;
+        protocol->radio_socket = radio_socket;
+        protocol->robot_socket = robot_socket;
+        protocol->netconsole_socket = netconsole_socket;
     }
 
     return protocol;

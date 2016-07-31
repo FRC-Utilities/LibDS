@@ -21,7 +21,7 @@
  * DEALINGS IN THE SOFTWARE.
  */
 
-#include "DS_Protocols.h"
+#include "DS_Protocol.h"
 
 /**
  * Holds a pointer to the current protocol in use
@@ -41,8 +41,7 @@ DS_Protocol* DS_CurrentProtocol()
  */
 void Protocol_Close()
 {
-    if (protocol)
-        free (protocol);
+    free (protocol);
 }
 
 /**
@@ -50,6 +49,6 @@ void Protocol_Close()
  */
 void DS_ConfigureProtocol (DS_Protocol* p)
 {
-    Protocol_Close();
+    free (protocol);
     protocol = p;
 }

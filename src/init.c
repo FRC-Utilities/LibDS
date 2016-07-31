@@ -32,6 +32,8 @@ void DS_Init()
     CFG_Init();
     Client_Init();
     Joysticks_Init();
+
+    Events_Init();
 }
 
 /**
@@ -42,4 +44,6 @@ void DS_Close()
     Client_Close();
     Protocol_Close();
     Joysticks_Close();
+
+    Events_Close();
 }

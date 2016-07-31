@@ -27,7 +27,7 @@
 #include <stdint.h>
 
 #include "DS_Types.h"
-#include "DS_Objects.h"
+#include "DS_Socket.h"
 
 /*
  * WARNING:
@@ -54,6 +54,7 @@ extern int CFG_GetRobotDiskUsage();
 extern double CFG_GetRobotVoltage();
 extern DS_Alliance CFG_GetAlliance();
 extern DS_Position CFG_GetPosition();
+extern char* CFG_GetNetConsoleData();
 extern int CFG_GetEmergencyStopped();
 extern int CFG_GetFMSCommunications();
 extern int CFG_GetRadioCommunications();
@@ -64,6 +65,7 @@ extern DS_ControlMode CFG_GetControlMode();
 extern void CFG_SetRobotCode (const int code);
 extern void CFG_SetTeamNumber (const int number);
 extern void CFG_SetRobotEnabled (const int enabled);
+extern void CFG_SetNetConsoleData (const char* data);
 extern void CFG_SetRobotCPUUsage (const int percent);
 extern void CFG_SetRobotRAMUsage (const int percent);
 extern void CFG_SetRobotDiskUsage (const int percent);
@@ -77,11 +79,10 @@ extern void CFG_SetFMSCommunications (const int communications);
 extern void CFG_SetRadioCommunications (const int communications);
 extern void CFG_SetRobotCommunications (const int communications);
 
-/* Networking functions */
-extern int CFG_Getintet (DS_Socket* socket);
-extern int CFG_CloseSocket (DS_Socket* socket);
-extern int CFG_SendData (DS_Socket* socket, char* data);
-extern int CFG_ReadData (DS_Socket* socket, char* data);
+/* Watchdog functions */
+extern void CFG_FMSWatchdogExpired();
+extern void CFG_RadioWatchdogExpired();
+extern void CFG_RobotWatchdogExpired();
 
 #ifdef __cplusplus
 }

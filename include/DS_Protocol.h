@@ -21,30 +21,54 @@
  * DEALINGS IN THE SOFTWARE.
  */
 
-#ifndef _LIB_DS_JOYSTICKS_H
-#define _LIB_DS_JOYSTICKS_H
+#ifndef _LIB_DS_PROTOCOL_H
+#define _LIB_DS_PROTOCOL_H
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-extern void Joysticks_Init();
-extern void Joysticks_Close();
+#include "DS_Socket.h"
 
-extern int DS_GetJoystickCount();
-extern int DS_GetJoystickNumHats (int joystick);
-extern int DS_GetJoystickNumAxes (int joystick);
-extern int DS_GetJoystickNumButtons (int joystick);
+typedef struct _protocol {
+    char* (*fms_address)();
+    char* (*radio_address)();
+    char* (*robot_address)();
 
-extern int DS_GetJoystickHat (int joystick, int hat);
-extern double DS_GetJoystickAxis (int joystick, int axis);
-extern int DS_GetJoystickButton (int joystick, int button);
+    uint8_t* (*create_fms_packet)();
+    uint8_t* (*create_radio_packet)();
+    uint8_t* (*create_robot_packet)();
 
-extern void DS_JoysticksReset();
-extern void DS_JoysticksAdd (int axes, int hats, int buttons);
-extern void DS_SetJoystickHat (int joystick, int hat, int angle);
-extern void DS_SetJoystickAxis (int joystick, int axis, double value);
-extern void DS_SetJoystickButton (int joystick, int button, int pressed);
+    int (*read_fms_packet) (const uint8_t*);
+    int (*read_radio_packet) (const uint8_t*);
+    int (*read_robot_packet) (const uint8_t*);
+
+    void (*reset_fms)();
+    void (*reset_radio)();
+    void (*reset_robot)();
+
+    void (*reboot_robot)();
+    void (*restart_robot_code)();
+
+    int fms_interval;
+    int radio_interval;
+    int robot_interval;
+
+    int max_joysticks;
+    int max_axis_count;
+    int max_hat_count;
+    int max_button_count;
+
+    DS_Socket fms_socket;
+    DS_Socket radio_socket;
+    DS_Socket robot_socket;
+    DS_Socket netconsole_socket;
+} DS_Protocol;
+
+extern DS_Protocol* DS_CurrentProtocol();
+
+extern void Protocol_Close();
+extern void DS_ConfigureProtocol (DS_Protocol* p);
 
 #ifdef __cplusplus
 }

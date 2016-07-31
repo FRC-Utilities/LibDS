@@ -21,26 +21,29 @@
  * DEALINGS IN THE SOFTWARE.
  */
 
-#ifndef _LIB_DS_PROTOCOLS_H
-#define _LIB_DS_PROTOCOLS_H
+#include "DS_Timer.h"
 
-#ifdef __cplusplus
-extern "C" {
-#endif
-
-#include "DS_Objects.h"
-
-extern DS_Protocol* DS_GetProtocolFRC_2014();
-extern DS_Protocol* DS_GetProtocolFRC_2015();
-extern DS_Protocol* DS_GetProtocolFRC_2016();
-
-extern DS_Protocol* DS_CurrentProtocol();
-
-extern void Protocol_Close();
-extern void DS_ConfigureProtocol (DS_Protocol* p);
-
-#ifdef __cplusplus
+void DS_TimerReset (DS_Timer* timer)
+{
+    if (timer) {
+        timer->expired = 0;
+        timer->time = timer->remaining;
+    }
 }
-#endif
 
-#endif
+void DS_TimerUpdate (DS_Timer* timer)
+{
+    if (timer) {
+
+    }
+}
+
+void DS_TimerInit (DS_Timer* timer, const int time)
+{
+    if (timer) {
+        timer->expired = 0;
+        timer->time = time;
+        timer->remaining = time;
+    }
+}
+

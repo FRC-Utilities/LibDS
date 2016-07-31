@@ -24,7 +24,7 @@
 #include "DS_Utils.h"
 #include "DS_Client.h"
 #include "DS_Config.h"
-#include "DS_Protocols.h"
+#include "DS_Protocol.h"
 
 #include <string.h>
 
@@ -351,4 +351,12 @@ void DS_SetCustomRobotAddress (const char* address)
 {
     if (address != NULL)
         strcpy (custom_robot_address, address);
+}
+
+/**
+ * Sends the given \a message to the NetConsole of the robot
+ */
+void DS_SendNetConsoleMessage (const char* message)
+{
+    CFG_SetNetConsoleData (message);
 }

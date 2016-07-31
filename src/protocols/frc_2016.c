@@ -22,7 +22,8 @@
  */
 
 #include "DS_Config.h"
-#include "DS_Protocols.h"
+#include "DS_Protocol.h"
+#include "DS_DefaultProtocols.h"
 
 #include <stdio.h>
 

@@ -21,30 +21,18 @@
  * DEALINGS IN THE SOFTWARE.
  */
 
-#ifndef _LIB_DS_JOYSTICKS_H
-#define _LIB_DS_JOYSTICKS_H
+#ifndef _LIB_DS_DEFAULT_PROTOCOLS_H
+#define _LIB_DS_DEFAULT_PROTOCOLS_H
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-extern void Joysticks_Init();
-extern void Joysticks_Close();
+#include "DS_Protocol.h"
 
-extern int DS_GetJoystickCount();
-extern int DS_GetJoystickNumHats (int joystick);
-extern int DS_GetJoystickNumAxes (int joystick);
-extern int DS_GetJoystickNumButtons (int joystick);
-
-extern int DS_GetJoystickHat (int joystick, int hat);
-extern double DS_GetJoystickAxis (int joystick, int axis);
-extern int DS_GetJoystickButton (int joystick, int button);
-
-extern void DS_JoysticksReset();
-extern void DS_JoysticksAdd (int axes, int hats, int buttons);
-extern void DS_SetJoystickHat (int joystick, int hat, int angle);
-extern void DS_SetJoystickAxis (int joystick, int axis, double value);
-extern void DS_SetJoystickButton (int joystick, int button, int pressed);
+extern DS_Protocol* DS_GetProtocolFRC_2014();
+extern DS_Protocol* DS_GetProtocolFRC_2015();
+extern DS_Protocol* DS_GetProtocolFRC_2016();
 
 #ifdef __cplusplus
 }

@@ -25,8 +25,9 @@
 
 #include "DS_Utils.h"
 #include "DS_Config.h"
+#include "DS_Protocol.h"
 #include "DS_Joysticks.h"
-#include "DS_Protocols.h"
+#include "DS_DefaultProtocols.h"
 
 /*
  * Protocol bytes
@@ -211,12 +212,15 @@ static uint8_t get_digital_inputs()
  */
 static void add_joystick_data (uint8_t* data, const int offset)
 {
-    int pos = offset;
+    /* Do not proceed if data pointer is invalid */
+    if (!data)
+        return;
 
     /* Add data for every joystick */
-    for (int i = 0; i < protocol->maxJoysticks; ++i) {
+    int pos = offset;
+    for (int i = 0; i < protocol->max_joysticks; ++i) {
         /* Add axis data */
-        for (int a = 0; a < protocol->maxAxisCount; ++a) {
+        for (int a = 0; a < protocol->max_axis_count; ++a) {
             data [pos] = (uint8_t) (DS_GetJoystickAxis (i, a) * 127);
             ++pos;
         }
@@ -295,7 +299,7 @@ static uint8_t* create_radio_packet()
 static uint8_t* create_robot_packet()
 {
     /* Create a 1024-byte long packet */
-    uint8_t* data = (uint8_t*) malloc (sizeof (uint8_t) * 1024);
+    uint8_t* data = (uint8_t*) calloc (1024, sizeof (uint8_t));
 
     /* Add packet index */
     data [0] = (sent_robot_packets & 0xff00) >> 8;
@@ -496,15 +500,15 @@ DS_Protocol* DS_GetProtocolFRC_2014()
         protocol->restart_robot_code = &restart_robot_code;
 
         /* Set packet intervals */
-        protocol->fmsInterval = 500;
-        protocol->radioInterval = 0;
-        protocol->robotInterval = 20;
+        protocol->fms_interval = 500;
+        protocol->radio_interval = 0;
+        protocol->robot_interval = 20;
 
         /* Set joystick properties */
-        protocol->maxJoysticks = 4;
-        protocol->maxAxisCount = 6;
-        protocol->maxHatsCount = 0;
-        protocol->maxButtonCount = 10;
+        protocol->max_joysticks = 4;
+        protocol->max_axis_count = 6;
+        protocol->max_hat_count = 0;
+        protocol->max_button_count = 10;
 
         /* Define FMS socket properties */
         DS_Socket fms_socket;
@@ -529,10 +533,10 @@ DS_Protocol* DS_GetProtocolFRC_2014()
         netconsole_socket.disabled = 1;
 
         /* Assign socket objects */
-        protocol->fmsSocket = fms_socket;
-        protocol->radioSocket = radio_socket;
-        protocol->robotSocket = robot_socket;
-        protocol->netconsoleSocket = netconsole_socket;
+        protocol->fms_socket = fms_socket;
+        protocol->radio_socket = radio_socket;
+        protocol->robot_socket = robot_socket;
+        protocol->netconsole_socket = netconsole_socket;
     }
 
     return protocol;

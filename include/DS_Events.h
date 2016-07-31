@@ -147,6 +147,8 @@ typedef union {
     DS_NetConsoleEvent netconsole; /**< NetConsole event data */
 } DS_Event;
 
+extern void Events_Init();
+extern void Events_Close();
 extern int DS_PollEvent (DS_Event* event);
 
 #ifdef __cplusplus

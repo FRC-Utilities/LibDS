@@ -22,6 +22,7 @@
  */
 
 #include "DS_Config.h"
+#include <string.h>
 
 /*
  * These variables hold the state(s) of the LibDS and its modules
@@ -34,6 +35,7 @@ static int robot_code;
 static int robot_enabled;
 static int can_utilization;
 static double robot_voltage;
+static char* netconsole_data;
 static int emergency_stopped;
 static int fms_communications;
 static int radio_communications;
@@ -177,6 +179,14 @@ DS_Position CFG_GetPosition()
 }
 
 /**
+ * Returns the current NetConsole messages to send
+ */
+char* CFG_GetNetConsoleData()
+{
+    return netconsole_data;
+}
+
+/**
  * Returns \c 1 if the robot is emergency stopped, otherwise, it returns \c 0
  */
 int CFG_GetEmergencyStopped()
@@ -249,6 +259,17 @@ void CFG_SetRobotEnabled (const int enabled)
 
     if (robot_enabled != boolean)
         robot_enabled = boolean;
+}
+
+/**
+ * Updates the NetConsole message to send
+ */
+void CFG_SetNetConsoleData (const char* data)
+{
+    if (!netconsole_data)
+        netconsole_data = (char*) malloc (sizeof (char));
+
+    strcpy (netconsole_data, data);
 }
 
 /**
@@ -378,4 +399,36 @@ void CFG_SetRobotCommunications (const int communications)
 
     if (robot_communications != boolean)
         robot_communications = boolean;
+}
+
+/**
+ * Called when the FMS watchdog expires
+ */
+void CFG_FMSWatchdogExpired()
+{
+    CFG_SetFMSCommunications (0);
+}
+
+/**
+ * Called when the radio watchdog expires
+ */
+void CFG_RadioWatchdogExpired()
+{
+    CFG_SetRadioCommunications (0);
+}
+
+/**
+ * Called when the robot watchdog expires
+ */
+void CFG_RobotWatchdogExpired()
+{
+    CFG_SetRobotCode (0);
+    CFG_SetRobotVoltage (0);
+    CFG_SetRobotEnabled (0);
+    CFG_SetRobotCPUUsage (0);
+    CFG_SetRobotRAMUsage (0);
+    CFG_SetRobotDiskUsage (0);
+    CFG_SetEmergencyStopped (0);
+    CFG_SetRobotCommunications (0);
+    CFG_SetControlMode (DS_CONTROL_TELEOPERATED);
 }
