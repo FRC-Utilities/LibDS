@@ -31,6 +31,8 @@ extern "C" {
 #include <stdlib.h>
 #include <stdint.h>
 
+#define DS_SizeOf(data,type) (sizeof (data) / sizeof (type))
+
 extern uint32_t DS_CRC32 (uint32_t crc, const void* buf, size_t size);
 
 extern int DS_StringIsEmpty (const char* string);

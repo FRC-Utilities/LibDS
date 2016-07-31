@@ -55,13 +55,12 @@ static const uint8_t cRed3               = 0x02;
 static const uint8_t cBlue1              = 0x03;
 static const uint8_t cBlue2              = 0x04;
 static const uint8_t cBlue3              = 0x05;
-static const uint8_t cRTagCpuInfo        = 0x05;
-static const uint8_t cRTagMemInfo        = 0x06;
+static const uint8_t cRTagCANInfo        = 0x0e;
+static const uint8_t cRTagCPUInfo        = 0x05;
+static const uint8_t cRTagRAMInfo        = 0x06;
 static const uint8_t cRTagDiskInfo       = 0x04;
-static const uint8_t cRTagJoystickOut    = 0x01;
 static const uint8_t cRequestTime        = 0x01;
 static const uint8_t cRobotHasCode       = 0x20;
-static const uint8_t cVoltageBrownout    = 0x10;
 
 /*
  * Sent robot and FMS packet counters
@@ -87,7 +86,7 @@ static DS_Protocol* protocol;
  */
 static double decode_voltage (uint8_t upper, uint8_t lower)
 {
-    return upper + ((double) lower / 0xff);
+    return ((double) upper) + ((double) lower / 0xff);
 }
 
 /**
@@ -95,7 +94,7 @@ static double decode_voltage (uint8_t upper, uint8_t lower)
  */
 static void encode_voltage (double voltage, uint8_t* upper, uint8_t* lower)
 {
-    if (voltage && upper && lower) {
+    if (upper && lower) {
         upper[0] = (uint8_t) (voltage);
         lower[0] = (uint8_t) (voltage - (int) voltage) * 100;
     }
@@ -273,7 +272,7 @@ static void add_timezone_data (uint8_t* data, const int offset)
     time_t rt;
     time (&rt);
     struct tm* timeinfo = localtime (&rt);
-    int length = sizeof (timeinfo->tm_zone) / sizeof (char);
+    int length = DS_SizeOf (timeinfo->tm_zone, char);
 
     /* Resize datagram */
     data = (uint8_t*) realloc (data,
@@ -308,6 +307,32 @@ static void add_timezone_data (uint8_t* data, const int offset)
  */
 static void add_joystick_data (uint8_t* data, const int offset)
 {
+}
+
+/**
+ * Obtains the CPU, RAM, Disk and CAN information from the robot packet
+ */
+static void read_extended (const uint8_t* data, const int offset)
+{
+    /* Check if data pointer is valid */
+    if (!data)
+        return;
+
+    /* Get header tag */
+    switch (data [offset + 1]) {
+    case cRTagCANInfo:
+        CFG_SetCANUtilization (data [offset + 10]);
+        break;
+    case cRTagCPUInfo:
+        CFG_SetRobotCPUUsage (data [offset + 3]);
+        break;
+    case cRTagRAMInfo:
+        CFG_SetRobotRAMUsage (data [offset + 4]);
+        break;
+    case cRTagDiskInfo:
+        CFG_SetRobotDiskUsage (data [offset + 4]);
+        break;
+    }
 }
 
 /**
@@ -420,6 +445,16 @@ static uint8_t* create_radio_packet()
     return (uint8_t*) null_char;
 }
 
+/**
+ * Generates a packet that the DS will send to the robot, it contains the
+ * following information:
+ *    - Packet index / ID
+ *    - Control code (control modes, e-stop state, etc)
+ *    - Request code (robot reboot, restart code, normal operation, etc)
+ *    - Team station (alliance & position)
+ *    - Date and time data (if robot requests it)
+ *    - Joystick information (if the robot does not want date/time)
+ */
 static uint8_t* create_robot_packet()
 {
     uint8_t* data = malloc (sizeof (uint8_t) * 8);
@@ -441,7 +476,7 @@ static uint8_t* create_robot_packet()
         add_timezone_data (data, 6);
 
     /* Add joystick data */
-    else
+    else if (sent_robot_packets > 5)
         add_joystick_data (data, 6);
 
     return data;
@@ -462,7 +497,7 @@ static int read_fms_packet (const uint8_t* data)
         return 0;
 
     /* The packet is long enough to be read */
-    if (sizeof (data) > 21) {
+    if (DS_SizeOf (data, uint8_t) >= 22) {
         uint8_t control = data [3];
         uint8_t station = data [5];
 
@@ -498,11 +533,45 @@ static int read_radio_packet (const uint8_t* data)
     return 0;
 }
 
+/**
+ * Interprets the packet and obtains the following information:
+ *    - The user code state of the robot
+ *    - If the robot needs to get the current date/time from the client
+ *    - The emergency stop state of the robot
+ *    - The robot voltage
+ *    - Extended information (CPU usage, RAM usage, Disk Usage and CAN status)
+ */
 static int read_robot_packet (const uint8_t* data)
 {
     /* Data pointer is invalid */
     if (data == NULL)
         return 0;
+
+    /* The packet is long enough to be read */
+    if (DS_SizeOf (data, uint8_t) >= 8) {
+        uint8_t control = data [3];
+        uint8_t status  = data [4];
+        uint8_t request = data [7];
+
+        /* Update client information */
+        CFG_SetRobotCode (status & cRobotHasCode);
+        CFG_SetEmergencyStopped (control & cEmergencyStop);
+
+        /* Update date/time request flag */
+        send_time_data = (request == cRequestTime);
+
+        /* Calculate the voltage */
+        uint8_t upper = data [5];
+        uint8_t lower = data [6];
+        CFG_SetRobotVoltage (decode_voltage (upper, lower));
+
+        /* This is an extended packet, read its extra data */
+        if (DS_SizeOf (data, uint8_t) > 9)
+            read_extended (data, 8);
+
+        /* Packet read, feed the watchdog some meat */
+        return 1;
+    }
 
     return 0;
 }
@@ -604,22 +673,25 @@ DS_Protocol* DS_GetProtocolFRC_2015()
 
         /* Define FMS socket properties */
         DS_Socket fms_socket;
+        fms_socket.disabled = 0;
         fms_socket.input_port = 1120;
         fms_socket.output_port = 1160;
         fms_socket.type = DS_SOCKET_UDP;
 
         /* Define radio socket properties */
         DS_Socket radio_socket;
-        radio_socket.type = DS_SOCKET_INVALID;
+        radio_socket.disabled = 1;
 
         /* Define robot socket properties */
         DS_Socket robot_socket;
+        robot_socket.disabled = 0;
         robot_socket.input_port = 1150;
         robot_socket.output_port = 1110;
         robot_socket.type = DS_SOCKET_UDP;
 
         /* Define netconsole socket properties */
         DS_Socket netconsole_socket;
+        netconsole_socket.disabled = 0;
         netconsole_socket.input_port = 6666;
         netconsole_socket.output_port = 6668;
         netconsole_socket.type = DS_SOCKET_UDP;

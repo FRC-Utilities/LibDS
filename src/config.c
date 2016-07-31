@@ -32,6 +32,7 @@ static int ram_usage;
 static int disk_usage;
 static int robot_code;
 static int robot_enabled;
+static int can_utilization;
 static double robot_voltage;
 static int emergency_stopped;
 static int fms_communications;
@@ -40,6 +41,32 @@ static int robot_communications;
 static DS_Alliance robot_alliance;
 static DS_Position robot_position;
 static DS_ControlMode control_mode;
+
+/**
+ * Ensures that the given \a input number is either \c 0 or \c 1.
+ */
+static int to_boolean (const int input)
+{
+    if (input < 1)
+        return 0;
+
+    return 1;
+}
+
+/**
+ * Ensures that the given \a input stays within the range established by the
+ * \a min and \a max numbers
+ */
+static int respect_range (const int input, const int min, const int max)
+{
+    if (input < min)
+        return min;
+
+    else if (input > max)
+        return max;
+
+    return input;
+}
 
 /**
  * Initializes the members of the CFG module to default values
@@ -53,6 +80,7 @@ void CFG_Init()
     robot_code = 0;
     robot_enabled = 0;
     robot_voltage = 0;
+    can_utilization = 0;
     emergency_stopped = 0;
     fms_communications = 0;
     radio_communications = 0;
@@ -62,156 +90,292 @@ void CFG_Init()
     control_mode = DS_CONTROL_TELEOPERATED;
 }
 
+/**
+ * Returns the current team number, which may be used by the protocols to
+ * specifiy the default addresses and generate specialized packets
+ */
 int CFG_GetTeamNumber()
 {
     return team;
 }
 
+/**
+ * Returns \c 0 if there is no robot code running, otherwise, it returns \c 1
+ */
 int CFG_GetRobotCode()
 {
     return robot_code;
 }
 
+/**
+ * Returns \c 1 if the robot is enabled, otherwise, it returns \c 0
+ */
 int CFG_GetRobotEnabled()
 {
     return robot_enabled;
 }
 
+/**
+ * Returns the current CPU usage of the robot
+ */
 int CFG_GetRobotCPUUsage()
 {
     return cpu_usage;
 }
 
+/**
+ * Returns the current RAM usage of the robot
+ */
 int CFG_GetRobotRAMUsage()
 {
     return ram_usage;
 }
 
+/**
+ * Returns the current utilization of the robot's CAN-BUS
+ */
+int CFG_GetCANUtilization()
+{
+    return can_utilization;
+}
+
+/**
+ * Returns the current disk usage of the robot
+ */
 int CFG_GetRobotDiskUsage()
 {
     return disk_usage;
 }
 
+/**
+ * Returns the current voltage of the robot
+ */
 double CFG_GetRobotVoltage()
 {
     return robot_voltage;
 }
 
+/**
+ * Returns the current alliance of the robot, possible values are:
+ *    - \c DS_ALLIANCE_RED
+ *    - \c DS_ALLIANCE_BLUE
+ */
 DS_Alliance CFG_GetAlliance()
 {
     return robot_alliance;
 }
 
+/**
+ * Returns the current team position of the robot, possible values are:
+ *    - \c DS_POSITION_1
+ *    - \c DS_POSITION_2
+ *    - \c DS_POSITION_3
+ */
 DS_Position CFG_GetPosition()
 {
     return robot_position;
 }
 
+/**
+ * Returns \c 1 if the robot is emergency stopped, otherwise, it returns \c 0
+ */
 int CFG_GetEmergencyStopped()
 {
     return emergency_stopped;
 }
 
+/**
+ * Returns \c 1 if the client has communications with the FMS, otherwise,
+ * it returns \c 0
+ */
 int CFG_GetFMSCommunications()
 {
     return fms_communications;
 }
 
+/**
+ * Returns \c 1 if the client has communications with the radio, otherwise,
+ * it returns \c 0
+ */
 int CFG_GetRadioCommunications()
 {
     return radio_communications;
 }
 
+/**
+ * Returns \c 1 if the client has communications with the robot, otherwise,
+ * it returns \c 0
+ */
 int CFG_GetRobotCommunications()
 {
     return robot_communications;
 }
 
+/**
+ * Returns the current control mode of the robot, possible values are:
+ *    - \c DS_CONTROL_TEST
+ *    - \c DS_CONTROL_AUTONOMOUS
+ *    - \c DS_CONTROL_TELEOPERATED
+ */
 DS_ControlMode CFG_GetControlMode()
 {
     return control_mode;
 }
 
+/**
+ * Updates the available state of the robot code
+ */
 void CFG_SetRobotCode (const int code)
 {
     if (robot_code != code)
         robot_code = code;
 }
 
+/**
+ * Updates the team \a number
+ */
 void CFG_SetTeamNumber (const int number)
 {
     if (team != number)
         team = number;
 }
 
+/**
+ * Updates the robot's \a enabled state
+ */
 void CFG_SetRobotEnabled (const int enabled)
 {
-    if (robot_enabled != enabled)
-        robot_enabled = enabled;
+    int boolean = to_boolean (enabled);
+
+    if (robot_enabled != boolean)
+        robot_enabled = boolean;
 }
 
+/**
+ * Updates the robot's CPU usage.
+ * You must input a value between \c 0 and \c 100
+ */
 void CFG_SetRobotCPUUsage (const int percent)
 {
-    if (cpu_usage != percent)
-        cpu_usage = percent;
+    int value = respect_range (percent, 0, 100);
+
+    if (cpu_usage != value)
+        cpu_usage = value;
 }
 
+/**
+ * Updates the robot's RAM/memory usage.
+ * You must input a value between \c 0 and \c 100
+ */
 void CFG_SetRobotRAMUsage (const int percent)
 {
-    if (ram_usage != percent)
-        ram_usage = percent;
+    int value = respect_range (percent, 0, 100);
+
+    if (ram_usage != value)
+        ram_usage = value;
 }
 
+/**
+ * Updates the robot's disk usage.
+ * You must input a value between \c 0 and \c 100
+ */
 void CFG_SetRobotDiskUsage (const int percent)
 {
-    if (disk_usage != percent)
-        disk_usage = percent;
+    int value = respect_range (percent, 0, 100);
+
+    if (disk_usage != value)
+        disk_usage = value;
 }
 
+/**
+ * Updates the robot's \a voltage, there are no range limits
+ */
 void CFG_SetRobotVoltage (const double voltage)
 {
     if (robot_voltage != voltage)
         robot_voltage = voltage;
 }
 
+/**
+ * Updates the emergency \a stopped state of the robot.
+ * The input value must be either \c 0 or \c 1.
+ */
 void CFG_SetEmergencyStopped (const int stopped)
 {
-    if (emergency_stopped != stopped)
-        emergency_stopped = stopped;
+    int boolean = to_boolean (stopped);
+
+    if (emergency_stopped != boolean)
+        emergency_stopped = boolean;
 }
 
+/**
+ * Changes the \a alliance of the robot
+ */
 void CFG_SetAlliance (const DS_Alliance alliance)
 {
     if (robot_alliance != alliance)
         robot_alliance = alliance;
 }
 
+/**
+ * Changes the \a position of the robot
+ */
 void CFG_SetPosition (const DS_Position position)
 {
     if (robot_position != position)
         robot_position = position;
 }
 
+/**
+ * Updates the CAN \a utilization
+ */
+void CFG_SetCANUtilization (const int utilization)
+{
+    if (can_utilization != utilization)
+        can_utilization = utilization;
+}
+
+/**
+ * Changes the control \a mode of the robot
+ */
 void CFG_SetControlMode (const DS_ControlMode mode)
 {
     if (control_mode != mode)
         control_mode = mode;
 }
 
+/**
+ * Updates the state of the FMS communications.
+ * You must input a value that is either \c 0 (false) or \c 1 (true)
+ */
 void CFG_SetFMSCommunications (const int communications)
 {
-    if (fms_communications != communications)
-        fms_communications = communications;
+    int boolean = to_boolean (communications);
+
+    if (fms_communications != boolean)
+        fms_communications = boolean;
 }
 
+/**
+ * Updates the state of the radio communications.
+ * You must input a value that is either \c 0 (false) or \c 1 (true)
+ */
 void CFG_SetRadioCommunications (const int communications)
 {
-    if (radio_communications != communications)
-        radio_communications = communications;
+    int boolean = to_boolean (communications);
+
+    if (radio_communications != boolean)
+        radio_communications = boolean;
 }
 
+/**
+ * Updates the state of the robot communications.
+ * You must input a value that is either \c 0 (false) or \c 1 (true)
+ */
 void CFG_SetRobotCommunications (const int communications)
 {
-    if (robot_communications != communications)
-        robot_communications = communications;
+    int boolean = to_boolean (communications);
+
+    if (robot_communications != boolean)
+        robot_communications = boolean;
 }

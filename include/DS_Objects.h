@@ -33,6 +33,7 @@ extern "C" {
 
 typedef struct _socket {
     int socket;
+    int disabled;
     unsigned long address;
     unsigned short int type;
     unsigned short int input_port;

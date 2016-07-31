@@ -364,7 +364,7 @@ static int read_fms_packet (const uint8_t* data)
         return 0;
 
     /* The packet is long enough to be read */
-    if (sizeof (data) > 74) {
+    if (DS_SizeOf (data, uint8_t) > 72) {
         uint8_t robotmod = data [2];
         uint8_t alliance = data [3];
         uint8_t position = data [4];
@@ -430,7 +430,7 @@ int read_robot_packet (const uint8_t* data)
         return 0;
 
     /* The packet is long enough to be read */
-    if (sizeof (data) >= 1024) {
+    if (DS_SizeOf (data, uint8_t) >= 1024) {
         uint8_t opcode = data [0];
         uint8_t integer = data [1];
         uint8_t decimal = data [2];
@@ -549,25 +549,25 @@ DS_Protocol* DS_GetProtocolFRC_2014()
 
         /* Define FMS socket properties */
         DS_Socket fms_socket;
+        fms_socket.disabled = 0;
         fms_socket.input_port = 1120;
         fms_socket.output_port = 1160;
         fms_socket.type = DS_SOCKET_UDP;
 
         /* Define radio socket properties */
         DS_Socket radio_socket;
-        radio_socket.type = DS_SOCKET_INVALID;
+        radio_socket.disabled = 1;
 
         /* Define robot socket properties */
         DS_Socket robot_socket;
+        robot_socket.disabled = 0;
         robot_socket.input_port = 1150;
         robot_socket.output_port = 1110;
         robot_socket.type = DS_SOCKET_UDP;
 
         /* Define netconsole socket properties */
         DS_Socket netconsole_socket;
-        netconsole_socket.input_port = 6666;
-        netconsole_socket.output_port = 6668;
-        netconsole_socket.type = DS_SOCKET_UDP;
+        netconsole_socket.disabled = 1;
 
         /* Assign socket objects */
         protocol->fmsSocket = fms_socket;

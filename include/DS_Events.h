@@ -67,6 +67,7 @@ typedef enum {
     DS_ROBOT_CODE_UNLOADED,             /**< Robot code is not available */
     DS_ROBOT_CODE_RESTARTED,            /**< Robot code re-loaded */
     DS_ROBOT_VOLTAGE_CHANGED,           /**< Robot voltage changed */
+    DS_ROBOT_CAN_UTIL_CHANGED,          /**< Robot CAN utilization updated */
     DS_ROBOT_CPU_INFO_CHANGED,          /**< Robot CPU usage updated */
     DS_ROBOT_RAM_INFO_CHANGED,          /**< Robot RAM usage updated */
     DS_ROBOT_DISK_INFO_CHANGED,         /**< Robot disk usage updated */
@@ -107,6 +108,7 @@ typedef struct {
     uint32_t timestamp; /**< Timestamp of event */
     int code;           /**< Set to \c 1 if robot code is loaded */
     int enabled;        /**< Set to \c 1 if the robot is enabled */
+    int can_util;       /**< Represents the robot's CAN utilization */
     int cpu_usage;      /**< Represents the CPU usage (from 0 to 100) */
     int ram_usage;      /**< Represents the RAM usage (from 0 to 100) */
     int estopped;       /**< Set to \c 1 if robot is emergency stopped */
