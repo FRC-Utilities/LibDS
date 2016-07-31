@@ -1,4 +1,4 @@
-/*
+﻿/*
  * The Driver Station Library (LibDS)
  * Copyright (C) 2015-2016 Alex Spataru <alex_spataru@outlook>
  *

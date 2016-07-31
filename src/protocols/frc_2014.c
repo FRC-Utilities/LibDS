@@ -213,35 +213,21 @@ static void add_joystick_data (uint8_t* data, const int offset)
 {
     int pos = offset;
 
+    /* Add data for every joystick */
     for (int i = 0; i < protocol->maxJoysticks; ++i) {
-        /* Get joystick properties */
-        int num_axes = DS_GetJoystickNumAxes (i);
-        int num_buttons = DS_GetJoystickNumButtons (i);
-        int joystick_exists = DS_GetJoystickCount() > i;
-
         /* Add axis data */
-        for (int axis = 0; axis < protocol->maxAxisCount; ++i) {
-            /* Add real axis value */
-            if (joystick_exists && axis < num_axes)
-                data [pos] = (uint8_t) (DS_GetJoystickAxis (i, axis) * 127);
-
-            /* Add neutral values */
-            else
-                data [pos] = (uint8_t) 0x00;
-
-            /* Increase offset */
+        for (int a = 0; a < protocol->maxAxisCount; ++a) {
+            data [pos] = (uint8_t) (DS_GetJoystickAxis (i, a) * 127);
             ++pos;
         }
 
-        /* Calculate button code */
-        int button_flags = 0x00;
-        for (int button = 0; button < num_buttons; ++button) {
-            if (joystick_exists && button < num_buttons)
-                button_flags |= (uint8_t) pow (2, button);
-        }
+        /* Generate button data */
+        uint8_t button_flags = 0;
+        for (int b = 0; b < DS_GetJoystickNumButtons (i); ++b)
+            button_flags += DS_GetJoystickButton (i, b) ? pow (2, b) : 0;
 
         /* Add button data */
-        data [pos] = (button_flags & 0xff00) >> 8;
+        data [pos + 0] = (button_flags & 0xff00) >> 8;
         data [pos + 1] = (button_flags & 0xff);
 
         /* Increase offset for next joystick */
@@ -363,50 +349,27 @@ static int read_fms_packet (const uint8_t* data)
     if (data == NULL)
         return 0;
 
-    /* The packet is long enough to be read */
-    if (DS_SizeOf (data, uint8_t) > 72) {
-        uint8_t robotmod = data [2];
-        uint8_t alliance = data [3];
-        uint8_t position = data [4];
+    /* Read FMS packet */
+    uint8_t robotmod = data [2];
+    uint8_t alliance = data [3];
+    uint8_t position = data [4];
 
-        /* Get the operation mode & enable status */
-        int enabled;
-        DS_ControlMode mode;
-        switch (robotmod) {
-        case (cFMSAutonomous):
-            enabled =  0;
-            mode = DS_CONTROL_AUTONOMOUS;
-            break;
-        case (cFMSAutonomous | cEnabled):
-            enabled =  1;
-            mode = DS_CONTROL_AUTONOMOUS;
-            break;
-        case (cFMSTeleoperated):
-            enabled = 0;
-            mode = DS_CONTROL_TELEOPERATED;
-            break;
-        case (cFMSTeleoperated | cEnabled):
-            enabled = 1;
-            mode = DS_CONTROL_TELEOPERATED;
-            break;
-        default:
-            enabled = 0;
-            mode = DS_CONTROL_TELEOPERATED;
-            break;
-        }
+    /* Switch to autonomous */
+    if (robotmod & cFMSAutonomous)
+        CFG_SetControlMode (DS_CONTROL_AUTONOMOUS);
 
-        /* Set control mode & enabled status */
-        CFG_SetControlMode (mode);
-        CFG_SetRobotEnabled (enabled);
+    /* Switch to teleoperated */
+    if (robotmod & cFMSTeleoperated)
+        CFG_SetControlMode (DS_CONTROL_TELEOPERATED);
 
-        /* Set team station */
-        CFG_SetAlliance (get_alliance (alliance));
-        CFG_SetPosition (get_position (position));
+    /* Enable (or disable) the robot */
+    CFG_SetRobotEnabled (robotmod & cEnabled);
 
-        return 1;
-    }
+    /* Set team station */
+    CFG_SetAlliance (get_alliance (alliance));
+    CFG_SetPosition (get_position (position));
 
-    return 0;
+    return 1;
 }
 
 /**
@@ -429,25 +392,21 @@ int read_robot_packet (const uint8_t* data)
     if (data == NULL)
         return 0;
 
-    /* The packet is long enough to be read */
-    if (DS_SizeOf (data, uint8_t) >= 1024) {
-        uint8_t opcode = data [0];
-        uint8_t integer = data [1];
-        uint8_t decimal = data [2];
+    /* Read robot packet */
+    uint8_t opcode = data [0];
+    uint8_t integer = data [1];
+    uint8_t decimal = data [2];
 
-        /* Parse the voltage */
+    /* Parse the voltage */
 
-        /* Check if robot is e-stopepd */
-        CFG_SetEmergencyStopped (opcode == cEmergencyStopOn);
+    /* Check if robot is e-stopepd */
+    CFG_SetEmergencyStopped (opcode == cEmergencyStopOn);
 
-        /* Update code status */
-        CFG_SetRobotCode ((integer != 0x37) && (decimal != 0x37));
+    /* Update code status */
+    CFG_SetRobotCode ((integer != 0x37) && (decimal != 0x37));
 
-        /* Packet read successfully */
-        return 1;
-    }
-
-    return 0;
+    /* Packet read successfully */
+    return 1;
 }
 
 /**

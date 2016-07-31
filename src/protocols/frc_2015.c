@@ -23,9 +23,11 @@
 
 #include "DS_Utils.h"
 #include "DS_Config.h"
+#include "DS_Joysticks.h"
 #include "DS_Protocols.h"
 
 #include <time.h>
+#include <math.h>
 #include <stdio.h>
 
 /*
@@ -256,6 +258,21 @@ static uint8_t get_station_code()
 }
 
 /**
+ * Returns the size of the given \a joystick. This function is used to generate
+ * joystick data (which is sent to the robot) and to resize the client->robot
+ * datagram automatically.
+ */
+static uint8_t get_joystick_size (const int joystick)
+{
+    int header_size = 2;
+    int button_data = 3;
+    int axis_data = DS_GetJoystickNumAxes (joystick) + 1;
+    int hat_data = (DS_GetJoystickNumHats (joystick) * 2) + 1;
+
+    return header_size + button_data + axis_data + hat_data;
+}
+
+/**
  * Returns information regarding the current date and time and the timezone
  * of the client computer.
  *
@@ -272,12 +289,10 @@ static void add_timezone_data (uint8_t* data, const int offset)
     time_t rt;
     time (&rt);
     struct tm* timeinfo = localtime (&rt);
-    int length = DS_SizeOf (timeinfo->tm_zone, char);
+    int length = DS_SizeOf (timeinfo->tm_zone);
 
     /* Resize datagram */
-    data = (uint8_t*) realloc (data,
-                               sizeof (data) +
-                               sizeof (uint8_t) * (12 + length));
+    data = (uint8_t*) realloc (data, sizeof (data) + (sizeof (uint8_t) * length));
 
     /* Encode date/time in datagram */
     data [offset + 0] = (uint8_t) 0x0b;
@@ -307,6 +322,49 @@ static void add_timezone_data (uint8_t* data, const int offset)
  */
 static void add_joystick_data (uint8_t* data, const int offset)
 {
+    /* Calculate size of joystick data */
+    int length = 0;
+    for (int i = 0; i < DS_GetJoystickCount(); ++i)
+        length += get_joystick_size (i);
+
+    /* Resize datagram */
+    data = (uint8_t*) realloc (data, sizeof (data) + (sizeof (uint8_t) * length));
+
+    /* Generate data for each joystick */
+    int pos = offset;
+    for (int i = 0; i < DS_GetJoystickCount(); ++i) {
+        data [pos + 0] = get_joystick_size (i);
+        data [pos + 1] = cTagJoystick;
+
+        /* Add axis data (and automatically increase offset) */
+        pos += 2;
+        for (int a = 0; a < DS_GetJoystickNumAxes (i); ++a) {
+            data [pos] = (uint8_t) (DS_GetJoystickAxis (i, a) * 127);
+            ++pos;
+        }
+
+        /* Generate button data */
+        uint8_t button_flags = 0;
+        for (int b = 0; b < DS_GetJoystickNumButtons (i); ++b)
+            button_flags += DS_GetJoystickButton (i, b) ? pow (2, b) : 0;
+
+        /* Add button data */
+        data [pos + 1] = DS_GetJoystickNumButtons (i);
+        data [pos + 2] = (button_flags & 0xff00) >> 8;
+        data [pos + 3] = (button_flags & 0xff);
+
+        /* Add hat data (and automatically increase offset) */
+        pos += 4;
+        data [pos] = DS_GetJoystickNumHats (i);
+        for (int h = 0; h < DS_GetJoystickNumHats (i); ++h) {
+            data [pos + 1] = (DS_GetJoystickHat (i, h) & 0xff00) >> 8;
+            data [pos + 2] = (DS_GetJoystickHat (i, h) & 0xff);
+            pos += 2;
+        }
+
+        /* Increase offset by 1 (to avoid writing next joystick on last POV byte) */
+        pos += 1;
+    }
 }
 
 /**
@@ -319,20 +377,23 @@ static void read_extended (const uint8_t* data, const int offset)
         return;
 
     /* Get header tag */
-    switch (data [offset + 1]) {
-    case cRTagCANInfo:
+    uint8_t tag = data [offset + 1];
+
+    /* Get CAN information */
+    if (tag == cRTagCANInfo)
         CFG_SetCANUtilization (data [offset + 10]);
-        break;
-    case cRTagCPUInfo:
+
+    /* Get CPU usage */
+    else if (tag == cRTagCPUInfo)
         CFG_SetRobotCPUUsage (data [offset + 3]);
-        break;
-    case cRTagRAMInfo:
+
+    /* Get RAM usage */
+    else if (tag == cRTagRAMInfo)
         CFG_SetRobotRAMUsage (data [offset + 4]);
-        break;
-    case cRTagDiskInfo:
+
+    /* Get disk usage */
+    else if (tag == cRTagDiskInfo)
         CFG_SetRobotDiskUsage (data [offset + 4]);
-        break;
-    }
 }
 
 /**
@@ -479,6 +540,9 @@ static uint8_t* create_robot_packet()
     else if (sent_robot_packets > 5)
         add_joystick_data (data, 6);
 
+    /* Increase packet counter */
+    ++sent_robot_packets;
+
     return data;
 }
 
@@ -496,31 +560,27 @@ static int read_fms_packet (const uint8_t* data)
     if (data == NULL)
         return 0;
 
-    /* The packet is long enough to be read */
-    if (DS_SizeOf (data, uint8_t) >= 22) {
-        uint8_t control = data [3];
-        uint8_t station = data [5];
+    /* Read FMS packet */
+    uint8_t control = data [3];
+    uint8_t station = data [5];
 
-        /* Change robot enabled state based on what FMS tells us to do*/
-        CFG_SetRobotEnabled (control & cEnabled);
+    /* Change robot enabled state based on what FMS tells us to do*/
+    CFG_SetRobotEnabled (control & cEnabled);
 
-        /* Get FMS robot mode */
-        if (control & cTeleoperated)
-            CFG_SetControlMode (DS_CONTROL_TELEOPERATED);
-        else if (control & cAutonomous)
-            CFG_SetControlMode (DS_CONTROL_AUTONOMOUS);
-        else if (control & cTest)
-            CFG_SetControlMode (DS_CONTROL_TEST);
+    /* Get FMS robot mode */
+    if (control & cTeleoperated)
+        CFG_SetControlMode (DS_CONTROL_TELEOPERATED);
+    else if (control & cAutonomous)
+        CFG_SetControlMode (DS_CONTROL_AUTONOMOUS);
+    else if (control & cTest)
+        CFG_SetControlMode (DS_CONTROL_TEST);
 
-        /* Update to correct alliance and position */
-        CFG_SetAlliance (get_alliance (station));
-        CFG_SetPosition (get_position (station));
+    /* Update to correct alliance and position */
+    CFG_SetAlliance (get_alliance (station));
+    CFG_SetPosition (get_position (station));
 
-        /* Packet read successfully */
-        return 1;
-    }
-
-    return 0;
+    /* Packet read successfully */
+    return 1;
 }
 
 /**
@@ -547,33 +607,29 @@ static int read_robot_packet (const uint8_t* data)
     if (data == NULL)
         return 0;
 
-    /* The packet is long enough to be read */
-    if (DS_SizeOf (data, uint8_t) >= 8) {
-        uint8_t control = data [3];
-        uint8_t status  = data [4];
-        uint8_t request = data [7];
+    /* Read robot packet */
+    uint8_t control = data [3];
+    uint8_t status  = data [4];
+    uint8_t request = data [7];
 
-        /* Update client information */
-        CFG_SetRobotCode (status & cRobotHasCode);
-        CFG_SetEmergencyStopped (control & cEmergencyStop);
+    /* Update client information */
+    CFG_SetRobotCode (status & cRobotHasCode);
+    CFG_SetEmergencyStopped (control & cEmergencyStop);
 
-        /* Update date/time request flag */
-        send_time_data = (request == cRequestTime);
+    /* Update date/time request flag */
+    send_time_data = (request == cRequestTime);
 
-        /* Calculate the voltage */
-        uint8_t upper = data [5];
-        uint8_t lower = data [6];
-        CFG_SetRobotVoltage (decode_voltage (upper, lower));
+    /* Calculate the voltage */
+    uint8_t upper = data [5];
+    uint8_t lower = data [6];
+    CFG_SetRobotVoltage (decode_voltage (upper, lower));
 
-        /* This is an extended packet, read its extra data */
-        if (DS_SizeOf (data, uint8_t) > 9)
-            read_extended (data, 8);
+    /* This is an extended packet, read its extra data */
+    if (DS_SizeOf (data) > 9)
+        read_extended (data, 8);
 
-        /* Packet read, feed the watchdog some meat */
-        return 1;
-    }
-
-    return 0;
+    /* Packet read, feed the watchdog some meat */
+    return 1;
 }
 
 /**

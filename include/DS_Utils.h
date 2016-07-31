@@ -31,7 +31,7 @@ extern "C" {
 #include <stdlib.h>
 #include <stdint.h>
 
-#define DS_SizeOf(data,type) (sizeof (data) / sizeof (type))
+#define DS_SizeOf(data) (sizeof (data) / sizeof (*data))
 
 extern uint32_t DS_CRC32 (uint32_t crc, const void* buf, size_t size);
 
