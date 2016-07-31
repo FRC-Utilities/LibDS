@@ -21,7 +21,9 @@
  * DEALINGS IN THE SOFTWARE.
  */
 
+#include "DS_Config.h"
 #include "DS_Protocols.h"
+
 #include <stdio.h>
 
 /*
@@ -36,7 +38,7 @@ static DS_Protocol* protocol;
  */
 static char* robot_address()
 {
-    char* str = (char*) malloc (sizeof (char*) * 22);
+    char* str = (char*) malloc (sizeof (char) * 22);
     sprintf (str, "roboRIO-%d-FRC.local", CFG_GetTeamNumber());
     return str;
 }
