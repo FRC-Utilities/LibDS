@@ -531,7 +531,7 @@ static uint8_t* create_radio_packet()
  */
 static uint8_t* create_robot_packet()
 {
-    uint8_t* data = calloc (8, sizeof (uint8_t));
+    uint8_t* data = (uint8_t*) calloc (8, sizeof (uint8_t));
 
     /* Add packet index */
     data [0] = (sent_robot_packets & 0xff00) >> 8;

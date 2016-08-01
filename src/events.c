@@ -27,7 +27,9 @@
 #include "DS_Timer.h"
 #include "DS_Protocol.h"
 
+#include <stdio.h>
 #include <stdlib.h>
+#include <pthread.h>
 
 /*
  * Define the sender watchdogs (when one expires, we send a packet)
@@ -226,15 +228,17 @@ static void check_protocol()
  *    - Feed/reset the watchdogs
  *    - Check if any of the watchdogs has expired
  */
-static void run_event_loop()
+static void* run_event_loop()
 {
-    check_protocol();
+    while (running) {
+        check_protocol();
 
-    if (running) {
         send_data();
         recv_data();
         update_watchdogs();
     }
+
+    return NULL;
 }
 
 /**
@@ -255,9 +259,18 @@ void Events_Init()
         DS_TimerInit (&robot_send_timer, 0);
         DS_TimerInit (&robot_recv_timer, 0);
 
-        /* Start the event loop */
+        /* Allow the event loop to run */
         running = 1;
-        run_event_loop();
+
+        /* Configure the thread */
+        pthread_t thread;
+        int err = pthread_create (&thread, NULL, &run_event_loop, NULL);
+
+        /* Quit if the thread fails to start */
+        if (err != 0) {
+            fprintf (stderr, "Cannot create event thread (%d)", err);
+            exit (err);
+        }
     }
 }
 
