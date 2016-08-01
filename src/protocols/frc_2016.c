@@ -30,7 +30,7 @@
 /*
  * Pointer to the protocol
  */
-static DS_Protocol* protocol;
+static DS_Protocol* protocol = NULL;
 
 /**
  * The 2016 FRC control system is very similar to the FRC 2015 control system,

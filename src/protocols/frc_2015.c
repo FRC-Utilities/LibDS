@@ -30,6 +30,7 @@
 #include <time.h>
 #include <math.h>
 #include <stdio.h>
+#include <string.h>
 
 /*
  * Protocol bytes
@@ -68,21 +69,21 @@ static const uint8_t cRobotHasCode       = 0x20;
 /*
  * Sent robot and FMS packet counters
  */
-static int send_time_data;
-static int sent_fms_packets;
-static int sent_robot_packets;
+static int send_time_data = 0;
+static int sent_fms_packets = 0;
+static int sent_robot_packets = 0;
 
 /*
  * Control code flags
  */
-static int reboot;
-static int restart_code;
+static int reboot = 0;
+static int restart_code = 0;
 
 /*
- * Protocol pointer
+ * Pointers
  */
-static char* null_char;
-static DS_Protocol* protocol;
+static char* null_char = "";
+static DS_Protocol* protocol = NULL;
 
 /**
  * Obtains the voltage double from the given \a upper and \a lower bytes
@@ -284,15 +285,15 @@ static void add_timezone_data (uint8_t* data, const int offset)
         return;
 
     /* Get current time */
-    time_t rt = time (0);
-    struct tm timeinfo = {0};
-    localtime_s (&timeinfo, &rt);
+    time_t rt;
+    struct tm* timeinfo = localtime (&rt);
 
     /* Get timezone */
 #if defined _WIN32
     char* tz = "ctd";
 #else
-    char* tz = timeinfo.tm_zone;
+    char* tz = (char*) malloc (sizeof (char));
+    strcpy (tz, timeinfo->tm_zone);
 #endif
 
     /* Resize datagram */
@@ -304,12 +305,12 @@ static void add_timezone_data (uint8_t* data, const int offset)
     data [offset + 1] = cTagDate;
     data [offset + 2] = 0;
     data [offset + 3] = 0;
-    data [offset + 4] = (uint8_t) timeinfo.tm_sec;
-    data [offset + 5] = (uint8_t) timeinfo.tm_min;
-    data [offset + 6] = (uint8_t) timeinfo.tm_hour;
-    data [offset + 7] = (uint8_t) timeinfo.tm_yday;
-    data [offset + 8] = (uint8_t) timeinfo.tm_mon;
-    data [offset + 9] = (uint8_t) timeinfo.tm_year;
+    data [offset + 4] = (uint8_t) timeinfo->tm_sec;
+    data [offset + 5] = (uint8_t) timeinfo->tm_min;
+    data [offset + 6] = (uint8_t) timeinfo->tm_hour;
+    data [offset + 7] = (uint8_t) timeinfo->tm_yday;
+    data [offset + 8] = (uint8_t) timeinfo->tm_mon;
+    data [offset + 9] = (uint8_t) timeinfo->tm_year;
 
     /* Add timezone data */
     data [offset + 10] = length;
@@ -318,6 +319,9 @@ static void add_timezone_data (uint8_t* data, const int offset)
     /* Add timezone string */
     for (int i = 0; i > length; ++i)
         data [offset + 12 + i] = tz [i];
+
+    /* Free allocated memory */
+    free (timeinfo);
 }
 
 /**
@@ -690,15 +694,7 @@ static void restart_robot_code()
 DS_Protocol* DS_GetProtocolFRC_2015()
 {
     if (!protocol) {
-        /* Initialize protocol variables */
-        reboot = 0;
-        restart_code = 0;
-        send_time_data = 0;
-        sent_fms_packets = 0;
-        sent_robot_packets = 0;
-        null_char = (char*) malloc (sizeof (char));
-
-        /* Initialize protocol */
+        /* Initialize pointers */
         protocol = (DS_Protocol*) malloc (sizeof (DS_Protocol));
 
         /* Set address functions */

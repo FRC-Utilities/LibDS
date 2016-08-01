@@ -52,25 +52,25 @@ static const uint8_t cFMSTeleoperated  = 0x43;
 /*
  * CRC32 code
  */
-static uint32_t crc32;
+static uint32_t crc32 = 0;
 
 /*
  * Sent robot acket counters, they are used as packet IDs
  */
-static int sent_robot_packets;
+static int sent_robot_packets = 0;
 
 /*
  * Control code flags
  */
-static int resync;
-static int reboot;
-static int restart_code;
+static int resync = 0;
+static int reboot = 0;
+static int restart_code = 0;
 
 /*
- * Protocol pointer
+ * Pointers
  */
-static char* null_char;
-static DS_Protocol* protocol;
+static char* null_char = "";
+static DS_Protocol* protocol = NULL;
 
 /**
  * Gets the alliance type from the received \a byte
@@ -464,15 +464,7 @@ void restart_robot_code()
 DS_Protocol* DS_GetProtocolFRC_2014()
 {
     if (!protocol) {
-        /* Initialize protocol variables */
-        crc32 = 0;
-        resync = 0;
-        reboot = 0;
-        restart_code = 0;
-        sent_robot_packets = 0;
-        null_char = (char*) malloc (sizeof (char));
-
-        /* Initialize protocol */
+        /* Initialize pointers */
         protocol = (DS_Protocol*) malloc (sizeof (DS_Protocol));
 
         /* Set address functions */

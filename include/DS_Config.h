@@ -41,8 +41,6 @@
 extern "C" {
 #endif
 
-extern void CFG_Init();
-
 /* Getters */
 extern int CFG_GetTeamNumber();
 extern int CFG_GetRobotCode();

@@ -30,7 +30,7 @@ extern "C" {
 
 #include "DS_Types.h"
 
-/* Init/closintnctions */
+/* Init/Close functions */
 extern void Client_Init();
 extern void Client_Close();
 

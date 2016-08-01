@@ -62,7 +62,7 @@ static int robot_read = 0;
  * Holds a pointer to the current protocol, we use it to know if the
  * current protocol has changed (and update the configuration as needed).
  */
-static DS_Protocol* protocol;
+static DS_Protocol* protocol = NULL;
 
 /**
  * Sends a new packet to the FMS
@@ -162,9 +162,9 @@ static void recv_data()
     DS_SocketRead (&protocol->robot_socket, robot_data);
 
     /* Let the protocol interpret received data */
-    fms_read = protocol->read_fms_packet (fms_data);
-    radio_read = protocol->read_radio_packet (radio_data);
-    robot_read = protocol->read_robot_packet (robot_data);
+    fms_read = protocol->read_fms_packet ((uint8_t*) fms_data);
+    radio_read = protocol->read_radio_packet ((uint8_t*) radio_data);
+    robot_read = protocol->read_robot_packet ((uint8_t*) robot_data);
 
     /* Free the data pointers */
     free (fms_data);

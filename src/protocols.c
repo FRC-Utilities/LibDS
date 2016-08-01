@@ -26,7 +26,7 @@
 /**
  * Holds a pointer to the current protocol in use
  */
-static DS_Protocol* protocol;
+static DS_Protocol* protocol = NULL;
 
 /**
  * Returns a pointer to the current protocol

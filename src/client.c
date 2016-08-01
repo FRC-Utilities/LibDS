@@ -31,9 +31,9 @@
 /*
  * These variables hold the user-set addresses
  */
-static char* custom_fms_address;
-static char* custom_radio_address;
-static char* custom_robot_address;
+static char* custom_fms_address = NULL;
+static char* custom_radio_address = NULL;
+static char* custom_robot_address = NULL;
 
 /**
  * Allocates memory for the members of the client module

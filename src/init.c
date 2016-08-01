@@ -22,14 +22,12 @@
  */
 
 #include "LibDS.h"
-#include "DS_Config.h"
 
 /**
  * Initializes all the modules of the LibDS library
  */
 void DS_Init()
 {
-    CFG_Init();
     Client_Init();
     Joysticks_Init();
 

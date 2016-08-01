@@ -27,22 +27,26 @@
 /*
  * These variables hold the state(s) of the LibDS and its modules
  */
-static int team;
-static int cpu_usage;
-static int ram_usage;
-static int disk_usage;
-static int robot_code;
-static int robot_enabled;
-static int can_utilization;
-static double robot_voltage;
-static char* netconsole_data;
-static int emergency_stopped;
-static int fms_communications;
-static int radio_communications;
-static int robot_communications;
-static DS_Alliance robot_alliance;
-static DS_Position robot_position;
-static DS_ControlMode control_mode;
+static int team = 0;
+static int cpu_usage = 0;
+static int ram_usage = 0;
+static int disk_usage = 0;
+static int robot_code = 0;
+static int robot_enabled = 0;
+static int can_utilization = 0;
+static double robot_voltage = 0;
+static int emergency_stopped = 0;
+static int fms_communications = 0;
+static int radio_communications = 0;
+static int robot_communications = 0;
+static DS_Position robot_position = DS_POSITION_1;
+static DS_Alliance robot_alliance = DS_ALLIANCE_RED;
+static DS_ControlMode control_mode = DS_CONTROL_TELEOPERATED;
+
+/*
+ * Initialize the default netconsole message
+ */
+static char* netconsole_data = NULL;
 
 /**
  * Ensures that the given \a input number is either \c 0 or \c 1.
@@ -68,28 +72,6 @@ static int respect_range (const int input, const int min, const int max)
         return max;
 
     return input;
-}
-
-/**
- * Initializes the members of the CFG module to default values
- */
-void CFG_Init()
-{
-    team = 0;
-    cpu_usage = 0;
-    ram_usage = 0;
-    disk_usage = 0;
-    robot_code = 0;
-    robot_enabled = 0;
-    robot_voltage = 0;
-    can_utilization = 0;
-    emergency_stopped = 0;
-    fms_communications = 0;
-    radio_communications = 0;
-    robot_communications = 0;
-    robot_position = DS_POSITION_1;
-    robot_alliance = DS_ALLIANCE_RED;
-    control_mode = DS_CONTROL_TELEOPERATED;
 }
 
 /**
