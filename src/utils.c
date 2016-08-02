@@ -52,7 +52,7 @@ int DS_StringIsEmpty (const char* string)
  */
 char* DS_GetStaticIP (const int net, const int team, const int host)
 {
-    char* string = (char*) malloc (sizeof (char) * 15);
+    char* string = (char*) calloc (sizeof (char) * 15);
 
     sprintf (string,
              "%d.%d.%d.%d",

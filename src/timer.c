@@ -125,8 +125,8 @@ int DS_TimerInit (DS_Timer* timer, const int time, const int precision)
         timer->expired = 0;
         timer->elapsed = 0;
         timer->time = time;
-        timer->precision = precision;
         timer->initialized = 1;
+        timer->precision = precision;
 
         /* Configure the thread */
         pthread_t thread;
