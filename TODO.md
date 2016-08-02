@@ -1,9 +1,12 @@
+
 # TODOs
 
 - [x] Define types, events and basic objects
 - [x] Define base library functions
+- [x] Implement timers
+- [ ] Create byte array type (and be able to know its size)
 - [ ] Implement a way to register events
-- [ ] Implement the event loop
+- [x] Implement the event loop
 - [x] Implement 2014 protocol
 - [x] Implement 2016 protocol
 - [x] Implement joystick encoding in 2015 protocol

@@ -23,27 +23,122 @@
 
 #include "DS_Timer.h"
 
+#include <stdio.h>
+#include <pthread.h>
+
+#if defined _WIN32
+    #include <windows.h>
+#elif defined __unix__
+    #include <unistd.h>
+#endif
+
+/**
+ * Updates the properties of the given \a timer
+ * This function is called in a separate thread for each timer that
+ * we use.
+ */
+static void* update_timer (DS_Timer* timer)
+{
+    if (!timer)
+        return NULL;
+
+    while (1) {
+        if (timer->enabled && timer->time > 0 && !timer->expired) {
+            timer->elapsed += timer->precision;
+
+            if (timer->elapsed >= timer->time)
+                timer->expired = 1;
+        }
+
+        DS_Sleep (timer->precision);
+    }
+
+    return NULL;
+}
+
+/**
+ * Pauses the execution state of the program/thread for the given
+ * number of \a millisecs.
+ *
+ * We use this function to update each timer based on its precision
+ */
+void DS_Sleep (const int millisecs)
+{
+#if defined _WIN32
+    Sleep (millisecs);
+#elif defined __unix__
+    usleep (millisecs * 1000);
+#endif
+}
+
+/**
+ * Resets and disables the given \a timer
+ */
+void DS_TimerStop (DS_Timer* timer)
+{
+    if (timer) {
+        timer->enabled = 0;
+        timer->expired = 0;
+        timer->elapsed = 0;
+    }
+}
+
+/**
+ * Resets and enables the given \a timer
+ */
+void DS_TimerStart (DS_Timer* timer)
+{
+    if (timer) {
+        timer->enabled = 1;
+        timer->expired = 0;
+        timer->elapsed = 0;
+    }
+}
+
+/**
+ * Resets the elapsed time and expired state of the given \a timer
+ */
 void DS_TimerReset (DS_Timer* timer)
 {
     if (timer) {
         timer->expired = 0;
-        timer->time = timer->remaining;
+        timer->elapsed = 0;
     }
 }
 
-void DS_TimerUpdate (DS_Timer* timer)
+/**
+ * Initializes the given \a timer with the given \a time and \a precision.
+ * The timers are updated using a threaded while loop (that sleeps the number
+ * of milliseconds specified with \a precision).
+ *
+ * This function will return \c 0 if the timer thread fails to start.
+ */
+int DS_TimerInit (DS_Timer* timer, const int time, const int precision)
 {
     if (timer) {
+        /* Timer has already been initialized, fuck off */
+        if (timer->initialized)
+            return 0;
 
-    }
-}
-
-void DS_TimerInit (DS_Timer* timer, const int time)
-{
-    if (timer) {
+        /* Configure the timer */
+        timer->enabled = 0;
         timer->expired = 0;
+        timer->elapsed = 0;
         timer->time = time;
-        timer->remaining = time;
+        timer->precision = precision;
+        timer->initialized = 1;
+
+        /* Configure the thread */
+        pthread_t thread;
+        int error = pthread_create (&thread, NULL, &update_timer, timer);
+
+        /* Warn the user if thread fails to start */
+        if (error)
+            printf ("Cannot start timer %p (%d)", timer, error);
+
+        return !error;
     }
+
+    return 0;
 }
 

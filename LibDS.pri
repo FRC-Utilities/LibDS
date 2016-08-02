@@ -1,5 +1,7 @@
 INCLUDEPATH += $$PWD/include
 
+LIBS += -pthread
+
 HEADERS += \
     $$PWD/include/DS_Client.h \
     $$PWD/include/DS_Config.h \

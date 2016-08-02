@@ -131,8 +131,6 @@ static uint8_t fms_control_code()
     case DS_CONTROL_TELEOPERATED:
         code |= cTeleoperated;
         break;
-    default:
-        break;
     }
 
     /* Let the FMS know if robot is e-stopped */

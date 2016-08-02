@@ -29,6 +29,7 @@
 
 #include <stdio.h>
 #include <stdlib.h>
+#include <unistd.h>
 #include <pthread.h>
 
 /*
@@ -65,6 +66,18 @@ static int robot_read = 0;
  * current protocol has changed (and update the configuration as needed).
  */
 static DS_Protocol* protocol = NULL;
+
+/**
+ * Ensures that the packet sending interval is invalid if the protocol
+ * fails to define a valid interval.
+ */
+static int get_interval (const int original)
+{
+    if (original > 0)
+        return original;
+
+    return -1;
+}
 
 /**
  * Sends a new packet to the FMS
@@ -116,11 +129,6 @@ static void send_data()
     if (!protocol)
         return;
 
-    /* Update sender timers */
-    DS_TimerUpdate (&fms_send_timer);
-    DS_TimerUpdate (&radio_send_timer);
-    DS_TimerUpdate (&robot_send_timer);
-
     /* Send FMS packet */
     if (fms_send_timer.expired) {
         send_fms_data();
@@ -154,9 +162,9 @@ static void recv_data()
         return;
 
     /* Create the data pointers */
-    char* fms_data = (char*) malloc (sizeof (char));
-    char* radio_data = (char*) malloc (sizeof (char));
-    char* robot_data = (char*) malloc (sizeof (char));
+    char* fms_data = (char*) calloc (0, sizeof (char));
+    char* radio_data = (char*) calloc (0, sizeof (char));
+    char* robot_data = (char*) calloc (0, sizeof (char));
 
     /* Read data from sockets */
     DS_SocketRead (&protocol->fms_socket, fms_data);
@@ -179,20 +187,28 @@ static void recv_data()
  */
 static void update_watchdogs()
 {
-    /* Feed the watchdogs if applicable */
+    /* Feed the watchdogs if packets are read */
     if (fms_read)   DS_TimerReset (&fms_recv_timer);
     if (radio_read) DS_TimerReset (&radio_recv_timer);
     if (robot_read) DS_TimerReset (&robot_recv_timer);
 
-    /* Update watchdog timings */
-    DS_TimerUpdate (&fms_recv_timer);
-    DS_TimerUpdate (&radio_recv_timer);
-    DS_TimerUpdate (&robot_recv_timer);
+    /* Reset the FMS if the watchdog expires */
+    if (fms_recv_timer.expired) {
+        CFG_FMSWatchdogExpired();
+        DS_TimerReset (&fms_recv_timer);
+    }
 
-    /* Check if any of the watchdogs expired */
-    if (fms_recv_timer.expired)   CFG_FMSWatchdogExpired();
-    if (radio_recv_timer.expired) CFG_RadioWatchdogExpired();
-    if (robot_recv_timer.expired) CFG_RobotWatchdogExpired();
+    /* Reset the radio if the watchdog expires */
+    if (radio_recv_timer.expired) {
+        CFG_RadioWatchdogExpired();
+        DS_TimerReset (&radio_recv_timer);
+    }
+
+    /* Reset the robot if the watchdog expires */
+    if (robot_recv_timer.expired) {
+        CFG_RobotWatchdogExpired();
+        DS_TimerReset (&robot_recv_timer);
+    }
 
     /* Clear the read success values */
     fms_read = 0;
@@ -210,14 +226,22 @@ static void check_protocol()
         protocol = DS_CurrentProtocol();
 
         /* Update sender timers */
-        fms_send_timer.time = protocol->fms_interval;
-        radio_send_timer.time = protocol->radio_interval;
-        robot_send_timer.time = protocol->robot_interval;
+        fms_send_timer.time = get_interval (protocol->fms_interval);
+        radio_send_timer.time = get_interval (protocol->radio_interval);
+        robot_send_timer.time = get_interval (protocol->robot_interval);
 
         /* Updater receiver timers */
-        fms_recv_timer.time = protocol->fms_interval * 50;
-        radio_recv_timer.time = protocol->radio_interval * 50;
-        robot_recv_timer.time = protocol->robot_interval * 50;
+        fms_recv_timer.time = get_interval (protocol->fms_interval) * 50;
+        radio_recv_timer.time = get_interval (protocol->radio_interval) * 50;
+        robot_recv_timer.time = get_interval (protocol->robot_interval) * 50;
+
+        /* Start the timers */
+        DS_TimerStart (&fms_send_timer);
+        DS_TimerStart (&fms_recv_timer);
+        DS_TimerStart (&radio_send_timer);
+        DS_TimerStart (&radio_recv_timer);
+        DS_TimerStart (&robot_send_timer);
+        DS_TimerStart (&robot_recv_timer);
     }
 }
 
@@ -236,6 +260,8 @@ static void* run_event_loop()
         send_data();
         recv_data();
         update_watchdogs();
+
+        DS_Sleep (5);
     }
 
     return NULL;
@@ -247,29 +273,25 @@ static void* run_event_loop()
 void Events_Init()
 {
     if (!running) {
-        /* Initialize FMS timers */
-        DS_TimerInit (&fms_send_timer, 0);
-        DS_TimerInit (&fms_recv_timer, 0);
-
-        /* Initialize radio timers */
-        DS_TimerInit (&radio_send_timer, 0);
-        DS_TimerInit (&radio_recv_timer, 0);
-
-        /* Initialize robot timers */
-        DS_TimerInit (&robot_send_timer, 0);
-        DS_TimerInit (&robot_recv_timer, 0);
+        /* Initialize timers */
+        DS_TimerInit (&fms_send_timer, 0, 5);
+        DS_TimerInit (&fms_recv_timer, 0, 5);
+        DS_TimerInit (&radio_send_timer, 0, 5);
+        DS_TimerInit (&radio_recv_timer, 0, 5);
+        DS_TimerInit (&robot_send_timer, 0, 5);
+        DS_TimerInit (&robot_recv_timer, 0, 5);
 
         /* Allow the event loop to run */
         running = 1;
 
         /* Configure the thread */
         pthread_t thread;
-        int err = pthread_create (&thread, NULL, &run_event_loop, NULL);
+        int error = pthread_create (&thread, NULL, &run_event_loop, NULL);
 
         /* Quit if the thread fails to start */
-        if (err != 0) {
-            fprintf (stderr, "Cannot create event thread (%d)", err);
-            exit (err);
+        if (error) {
+            fprintf (stderr, "Cannot create event thread (%d)", error);
+            exit (error);
         }
     }
 }
