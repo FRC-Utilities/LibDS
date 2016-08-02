@@ -82,7 +82,6 @@ static int restart_code = 0;
 /*
  * Pointers
  */
-static char* null_char = "";
 static DS_Protocol* protocol = NULL;
 
 /**
@@ -445,7 +444,7 @@ static DS_Position get_position (const uint8_t byte)
  */
 static char* fms_address()
 {
-    return null_char;
+    return (char*) calloc (0, sizeof (char));
 }
 
 /**
@@ -514,7 +513,7 @@ static uint8_t* create_fms_packet()
  */
 static uint8_t* create_radio_packet()
 {
-    return (uint8_t*) null_char;
+    return (uint8_t*) calloc (0, sizeof (uint8_t));
 }
 
 /**

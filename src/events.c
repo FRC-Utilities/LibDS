@@ -233,7 +233,6 @@ static void check_protocol()
         robot_send_timer.time = get_interval (protocol->robot_interval);
 
         /* Updater receiver timers */
-
         fms_recv_timer.time = DS_Min (get_interval (protocol->fms_interval) * 50, 1000);
         radio_recv_timer.time = DS_Min (get_interval (protocol->radio_interval) * 50, 1000);
         robot_recv_timer.time = DS_Min (get_interval (protocol->robot_interval) * 50, 1000);

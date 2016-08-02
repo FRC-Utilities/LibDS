@@ -69,7 +69,6 @@ static int restart_code = 0;
 /*
  * Pointers
  */
-static char* null_char = "";
 static DS_Protocol* protocol = NULL;
 
 /**
@@ -245,7 +244,7 @@ static void add_joystick_data (uint8_t* data, const int offset)
  */
 static char* fms_address()
 {
-    return null_char;
+    return (char*) calloc (0, sizeof (char));
 }
 
 /**
@@ -271,7 +270,7 @@ static char* robot_address()
  */
 static uint8_t* create_fms_packet()
 {
-    return (uint8_t*) null_char;
+    return (uint8_t*) calloc (0, sizeof (uint8_t));
 }
 
 /**
@@ -281,7 +280,7 @@ static uint8_t* create_fms_packet()
  */
 static uint8_t* create_radio_packet()
 {
-    return (uint8_t*) null_char;
+    return (uint8_t*) calloc (0, sizeof (uint8_t));
 }
 
 /**
