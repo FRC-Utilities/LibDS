@@ -43,7 +43,7 @@ static DS_Timer robot_send_timer;
 
 /*
  * Define the receiver watchdogs.
- * When one of the watchdog expires, the communications with the exired target
+ * When one of the watchdogs expires, the communications with the target
  * will be reset and the configuration will be updated to a safe state (e.g.
  * disabling the robot when the robot watchdog expires).
  */
