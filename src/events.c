@@ -192,7 +192,7 @@ static void update_watchdogs()
     /* Feed the watchdogs if packets are read */
     if (fms_read)   DS_TimerReset (&fms_recv_timer);
     if (radio_read) DS_TimerReset (&radio_recv_timer);
-    //if (robot_read) DS_TimerReset (&robot_recv_timer);
+    if (robot_read) DS_TimerReset (&robot_recv_timer);
 
     /* Reset the FMS if the watchdog expires */
     if (fms_recv_timer.expired) {
