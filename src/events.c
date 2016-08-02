@@ -21,12 +21,14 @@
  * DEALINGS IN THE SOFTWARE.
  */
 
+#include "DS_Timer.h"
+#include "DS_Utils.h"
 #include "DS_Config.h"
 #include "DS_Client.h"
 #include "DS_Events.h"
-#include "DS_Timer.h"
 #include "DS_Protocol.h"
 
+#include <math.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
@@ -190,7 +192,7 @@ static void update_watchdogs()
     /* Feed the watchdogs if packets are read */
     if (fms_read)   DS_TimerReset (&fms_recv_timer);
     if (radio_read) DS_TimerReset (&radio_recv_timer);
-    if (robot_read) DS_TimerReset (&robot_recv_timer);
+    //if (robot_read) DS_TimerReset (&robot_recv_timer);
 
     /* Reset the FMS if the watchdog expires */
     if (fms_recv_timer.expired) {
@@ -231,9 +233,10 @@ static void check_protocol()
         robot_send_timer.time = get_interval (protocol->robot_interval);
 
         /* Updater receiver timers */
-        fms_recv_timer.time = get_interval (protocol->fms_interval) * 50;
-        radio_recv_timer.time = get_interval (protocol->radio_interval) * 50;
-        robot_recv_timer.time = get_interval (protocol->robot_interval) * 50;
+
+        fms_recv_timer.time = DS_Min (get_interval (protocol->fms_interval) * 50, 1000);
+        radio_recv_timer.time = DS_Min (get_interval (protocol->radio_interval) * 50, 1000);
+        robot_recv_timer.time = DS_Min (get_interval (protocol->robot_interval) * 50, 1000);
 
         /* Start the timers */
         DS_TimerStart (&fms_send_timer);
@@ -273,13 +276,15 @@ static void* run_event_loop()
 void Events_Init()
 {
     if (!running) {
-        /* Initialize timers */
+        /* Initialize sender timers */
         DS_TimerInit (&fms_send_timer, 0, 5);
-        DS_TimerInit (&fms_recv_timer, 0, 5);
         DS_TimerInit (&radio_send_timer, 0, 5);
-        DS_TimerInit (&radio_recv_timer, 0, 5);
         DS_TimerInit (&robot_send_timer, 0, 5);
-        DS_TimerInit (&robot_recv_timer, 0, 5);
+
+        /* Initialize watchdog timers */
+        DS_TimerInit (&fms_recv_timer, 0, 250);
+        DS_TimerInit (&radio_recv_timer, 0, 250);
+        DS_TimerInit (&robot_recv_timer, 0, 250);
 
         /* Allow the event loop to run */
         running = 1;

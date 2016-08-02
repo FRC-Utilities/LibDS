@@ -32,6 +32,8 @@ extern "C" {
 #include <stdint.h>
 
 #define DS_SizeOf(data) (sizeof (data) / sizeof (*data))
+#define DS_Max(a,b) ((a) > (b) ? a : b)
+#define DS_Min(a,b) ((a) < (b) ? a : b)
 
 extern uint32_t DS_CRC32 (uint32_t crc, const void* buf, size_t size);
 
