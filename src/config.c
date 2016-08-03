@@ -46,7 +46,7 @@ static DS_ControlMode control_mode = DS_CONTROL_TELEOPERATED;
 /*
  * Initialize the default netconsole message
  */
-static char* netconsole_data = NULL;
+static sds netconsole_data;
 
 /**
  * Ensures that the given \a input number is either \c 0 or \c 1.
@@ -163,7 +163,7 @@ DS_Position CFG_GetPosition()
 /**
  * Returns the current NetConsole messages to send
  */
-char* CFG_GetNetConsoleData()
+sds CFG_GetNetConsoleData()
 {
     return netconsole_data;
 }
@@ -246,12 +246,12 @@ void CFG_SetRobotEnabled (const int enabled)
 /**
  * Updates the NetConsole message to send
  */
-void CFG_SetNetConsoleData (const char* data)
+void CFG_SetNetConsoleData (const sds data)
 {
     if (!netconsole_data)
-        netconsole_data = (char*) malloc (sizeof (char));
+        netconsole_data = sdsempty();
 
-    strcpy (netconsole_data, data);
+    sdscpy (netconsole_data, data);
 }
 
 /**

@@ -24,6 +24,7 @@
 #ifndef _LIB_DS_SOCKET_H
 #define _LIB_DS_SOCKET_H
 
+#include <sds.h>
 #include <stdint.h>
 #include <stdlib.h>
 
@@ -32,18 +33,19 @@ extern "C" {
 #endif
 
 typedef struct _socket {
-    int socket;
+    sds address;
     int disabled;
-    unsigned long address;
+    int descriptor;
+    int initialized;
     unsigned short int type;
     unsigned short int input_port;
     unsigned short int output_port;
 } DS_Socket;
 
-extern int DS_SocketClose (DS_Socket* socket);
-extern int DS_SocketDescriptor (DS_Socket* socket);
-extern int DS_SocketSend (DS_Socket* socket, char* data);
-extern int DS_SocketRead (DS_Socket* socket, char* data);
+extern int DS_SocketOpen (DS_Socket* p);
+extern int DS_SocketClose (DS_Socket* p);
+extern int DS_SocketSend (DS_Socket* p, sds data);
+extern int DS_SocketRead (DS_Socket* p, sds data);
 
 #ifdef __cplusplus
 }

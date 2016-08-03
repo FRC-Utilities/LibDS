@@ -209,7 +209,7 @@ static uint8_t get_digital_inputs()
  * Button states are stored in a similar way as enumerated flags in a C/C++
  * program.
  */
-static void add_joystick_data (uint8_t* data, const int offset)
+static void add_joystick_data (sds data, const int offset)
 {
     /* Do not proceed if data pointer is invalid */
     if (!data)
@@ -242,15 +242,15 @@ static void add_joystick_data (uint8_t* data, const int offset)
  * The FMS address is not defined, it will be assigned automatically when the
  * DS receives a FMS packet
  */
-static char* fms_address()
+static sds fms_address()
 {
-    return (char*) calloc (0, sizeof (char));
+    return sdsempty();
 }
 
 /**
  * The 2014 control systems assigns the radio IP in 10.te.am.1
  */
-static char* radio_address()
+static sds radio_address()
 {
     return DS_GetStaticIP (10, CFG_GetTeamNumber(), 1);
 }
@@ -258,7 +258,7 @@ static char* radio_address()
 /**
  * The 2014 control systems assigns the radio IP in 10.te.am.2
  */
-static char* robot_address()
+static sds robot_address()
 {
     return DS_GetStaticIP (10, CFG_GetTeamNumber(), 2);
 }
@@ -268,9 +268,9 @@ static char* robot_address()
  * A spaceship from another world will visit here somehow,
  * and they shall implement this function.
  */
-static uint8_t* create_fms_packet()
+static sds create_fms_packet()
 {
-    return (uint8_t*) calloc (0, sizeof (uint8_t));
+    return sdsempty();
 }
 
 /**
@@ -278,9 +278,9 @@ static uint8_t* create_fms_packet()
  * to the DS Radio / Bridge. For that reason, the 2014 communication protocol
  * generates empty radio packets.
  */
-static uint8_t* create_radio_packet()
+static sds create_radio_packet()
 {
-    return (uint8_t*) calloc (0, sizeof (uint8_t));
+    return sdsempty();
 }
 
 /**
@@ -295,10 +295,10 @@ static uint8_t* create_radio_packet()
  *     - The version of the FRC Driver Station
  *     - The CRC32 checksum of the packet
  */
-static uint8_t* create_robot_packet()
+static sds create_robot_packet()
 {
     /* Create a 1024-byte long packet */
-    uint8_t* data = (uint8_t*) calloc (1024, sizeof (uint8_t));
+    sds data = sdsnewlen (NULL, 2014);
 
     /* Add packet index */
     data [0] = (sent_robot_packets & 0xff00) >> 8;
@@ -346,10 +346,14 @@ static uint8_t* create_robot_packet()
 /**
  * Gets the team station and the robot control mode from the FMS
  */
-static int read_fms_packet (const uint8_t* data)
+static int read_fms_packet (const sds data)
 {
     /* Data pointer is invalid */
-    if (data == NULL)
+    if (!data)
+        return 0;
+
+    /* Packet is too small */
+    if (sdslen (data) < 5)
         return 0;
 
     /* Read FMS packet */
@@ -379,7 +383,7 @@ static int read_fms_packet (const uint8_t* data)
  * Since the DS does not interact directly with the radio/bridge, any incoming
  * packets shall be ignored.
  */
-static int read_radio_packet (const uint8_t* data)
+static int read_radio_packet (const sds data)
 {
     (void) data;
     return 0;
@@ -389,10 +393,14 @@ static int read_radio_packet (const uint8_t* data)
  * Interprets the given robot packet \a data and updates the emergency stop
  * state and the robot voltage values.
  */
-int read_robot_packet (const uint8_t* data)
+int read_robot_packet (const sds data)
 {
     /* Data pointer is invalid */
-    if (data == NULL)
+    if (!data)
+        return 0;
+
+    /* Packet is too small */
+    if (sdslen (data) < 1024)
         return 0;
 
     /* Read robot packet */

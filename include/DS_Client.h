@@ -28,6 +28,7 @@
 extern "C" {
 #endif
 
+#include <sds.h>
 #include "DS_Types.h"
 
 /* Init/Close functions */
@@ -35,19 +36,22 @@ extern void Client_Init();
 extern void Client_Close();
 
 /* User-set addresses */
-extern const char* DS_GetCustomFMSAddress();
-extern const char* DS_GetCustomRadioAddress();
-extern const char* DS_GetCustomRobotAddress();
+extern sds DS_GetCustomFMSAddress();
+extern sds DS_GetCustomRadioAddress();
+extern sds DS_GetCustomRobotAddress();
 
 /* Protocol-set addresses */
-extern const char* DS_GetDefaultFMSAddress();
-extern const char* DS_GetDefaultRadioAddress();
-extern const char* DS_GetDefaultRobotAddress();
+extern sds DS_GetDefaultFMSAddress();
+extern sds DS_GetDefaultRadioAddress();
+extern sds DS_GetDefaultRobotAddress();
 
 /* Used addresses */
-extern const char* DS_GetAppliedFMSAddress();
-extern const char* DS_GetAppliedRadioAddress();
-extern const char* DS_GetAppliedRobotAddress();
+extern sds DS_GetAppliedFMSAddress();
+extern sds DS_GetAppliedRadioAddress();
+extern sds DS_GetAppliedRobotAddress();
+
+/* Status string */
+extern sds DS_GetStatusString();
 
 /* Getters */
 extern int DS_GetTeamNumber();
@@ -75,10 +79,10 @@ extern void DS_SetEmergencyStopped (const int stop);
 extern void DS_SetAlliance (const DS_Alliance alliance);
 extern void DS_SetPosition (const DS_Position position);
 extern void DS_SetControlMode (const DS_ControlMode mode);
-extern void DS_SetCustomFMSAddress (const char* address);
-extern void DS_SetCustomRadioAddress (const char* address);
-extern void DS_SetCustomRobotAddress (const char* address);
-extern void DS_SendNetConsoleMessage (const char* message);
+extern void DS_SetCustomFMSAddress (const sds address);
+extern void DS_SetCustomRadioAddress (const sds address);
+extern void DS_SetCustomRobotAddress (const sds address);
+extern void DS_SendNetConsoleMessage (const sds message);
 
 #ifdef __cplusplus
 }

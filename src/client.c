@@ -26,23 +26,23 @@
 #include "DS_Config.h"
 #include "DS_Protocol.h"
 
+#include <stdio.h>
 #include <string.h>
 
-/*
- * These variables hold the user-set addresses
- */
-static char* custom_fms_address = NULL;
-static char* custom_radio_address = NULL;
-static char* custom_robot_address = NULL;
+static sds status_string = NULL;
+static sds custom_fms_address = NULL;
+static sds custom_radio_address = NULL;
+static sds custom_robot_address = NULL;
 
 /**
  * Allocates memory for the members of the client module
  */
 void Client_Init()
 {
-    custom_fms_address = (char*) malloc (sizeof (char));
-    custom_radio_address = (char*) malloc (sizeof (char));
-    custom_robot_address = (char*) malloc (sizeof (char));
+    status_string = sdsempty();
+    custom_fms_address = sdsempty();
+    custom_radio_address = sdsempty();
+    custom_robot_address = sdsempty();
 }
 
 /**
@@ -50,15 +50,15 @@ void Client_Init()
  */
 void Client_Close()
 {
-    free (custom_fms_address);
-    free (custom_radio_address);
-    free (custom_robot_address);
+    sdsfree (custom_fms_address);
+    sdsfree (custom_radio_address);
+    sdsfree (custom_robot_address);
 }
 
 /**
  * Returns the user-set FMS address
  */
-const char* DS_GetCustomFMSAddress()
+sds DS_GetCustomFMSAddress()
 {
     return custom_fms_address;
 }
@@ -66,7 +66,7 @@ const char* DS_GetCustomFMSAddress()
 /**
  * Returns the user-set radio address
  */
-const char* DS_GetCustomRadioAddress()
+sds DS_GetCustomRadioAddress()
 {
     return custom_radio_address;
 }
@@ -74,7 +74,7 @@ const char* DS_GetCustomRadioAddress()
 /**
  * Returns the user-set robot address
  */
-const char* DS_GetCustomRobotAddress()
+sds DS_GetCustomRobotAddress()
 {
     return custom_robot_address;
 }
@@ -82,7 +82,7 @@ const char* DS_GetCustomRobotAddress()
 /**
  * Returns the protocol-set FMS address
  */
-const char* DS_GetDefaultFMSAddress()
+sds DS_GetDefaultFMSAddress()
 {
     return DS_CurrentProtocol()->fms_address();
 }
@@ -90,7 +90,7 @@ const char* DS_GetDefaultFMSAddress()
 /**
  * Returns the protocol-set radio address
  */
-const char* DS_GetDefaultRadioAddress()
+sds DS_GetDefaultRadioAddress()
 {
     return DS_CurrentProtocol()->radio_address();
 }
@@ -98,7 +98,7 @@ const char* DS_GetDefaultRadioAddress()
 /**
  * Returns the protocol-set robot address
  */
-const char* DS_GetDefaultRobotAddress()
+sds DS_GetDefaultRobotAddress()
 {
     return DS_CurrentProtocol()->robot_address();
 }
@@ -106,7 +106,7 @@ const char* DS_GetDefaultRobotAddress()
 /**
  * Returns the address used to communicate with the FMS
  */
-const char* DS_GetAppliedFMSAddress()
+sds DS_GetAppliedFMSAddress()
 {
     if (DS_StringIsEmpty (DS_GetCustomFMSAddress()))
         return DS_GetDefaultFMSAddress();
@@ -117,7 +117,7 @@ const char* DS_GetAppliedFMSAddress()
 /**
  * Returns the address used to communicate with the radios
  */
-const char* DS_GetAppliedRadioAddress()
+sds DS_GetAppliedRadioAddress()
 {
     if (DS_StringIsEmpty (DS_GetCustomRadioAddress()))
         return DS_GetDefaultRadioAddress();
@@ -128,12 +128,63 @@ const char* DS_GetAppliedRadioAddress()
 /**
  * Returns the address used to communicate with the robot
  */
-const char* DS_GetAppliedRobotAddress()
+sds DS_GetAppliedRobotAddress()
 {
     if (DS_StringIsEmpty (DS_GetCustomRobotAddress()))
         return DS_GetDefaultRobotAddress();
 
     return DS_GetCustomRobotAddress();
+}
+
+/**
+ * Returns the current status of the robot/DS.
+ * This string is meant to be used by the client application
+ */
+sds DS_GetStatusString()
+{
+    sdsfree (status_string);
+    status_string = sdsempty();
+
+    if (!DS_GetRobotCommunications())
+        status_string = "No Robot Communications";
+
+    else if (!DS_GetRobotCode())
+        status_string = "No Robot Code";
+
+    else if (DS_GetEmergencyStopped())
+        status_string = "Emergency Stopped";
+
+    else {
+        static sds mode;
+        static sds enabled;
+
+        switch (DS_GetControlMode()) {
+        case DS_CONTROL_TELEOPERATED:
+            mode = "Teleoperated";
+            break;
+        case DS_CONTROL_AUTONOMOUS:
+            mode = "Autonomous";
+            break;
+        case DS_CONTROL_TEST:
+            mode = "Test";
+            break;
+        default:
+            mode = "";
+            break;
+        }
+
+        if (DS_GetRobotEnabled())
+            enabled = "Enabled";
+
+        else
+            enabled = "Disabled";
+
+        status_string = sdscatfmt ("%S %S", mode, enabled);
+        sdsfree (mode);
+        sdsfree (enabled);
+    }
+
+    return status_string;
 }
 
 /**
@@ -329,34 +380,34 @@ void DS_SetControlMode (const DS_ControlMode mode)
 /**
  * Changes the \a address used to communicate with the FMS
  */
-void DS_SetCustomFMSAddress (const char* address)
+void DS_SetCustomFMSAddress (sds address)
 {
-    if (address != NULL)
-        strcpy (custom_fms_address, address);
+    if (address)
+        sdscpy (custom_fms_address, address);
 }
 
 /**
  * Changes the \a address used to communicate with the radio
  */
-void DS_SetCustomRadioAddress (const char* address)
+void DS_SetCustomRadioAddress (sds address)
 {
-    if (address != NULL)
-        strcpy (custom_radio_address, address);
+    if (address)
+        sdscpy (custom_radio_address, address);
 }
 
 /**
  * Changes the \a address used to communicate with the robot
  */
-void DS_SetCustomRobotAddress (const char* address)
+void DS_SetCustomRobotAddress (sds address)
 {
-    if (address != NULL)
-        strcpy (custom_robot_address, address);
+    if (address)
+        sdscpy (custom_robot_address, address);
 }
 
 /**
  * Sends the given \a message to the NetConsole of the robot
  */
-void DS_SendNetConsoleMessage (const char* message)
+void DS_SendNetConsoleMessage (sds message)
 {
     CFG_SetNetConsoleData (message);
 }

@@ -86,9 +86,9 @@ static int get_interval (const int original)
  */
 static void send_fms_data()
 {
-    uint8_t* data = protocol->create_fms_packet();
-    DS_SocketSend (&protocol->fms_socket, (char*) data);
-    free (data);
+    sds data = protocol->create_fms_packet();
+    DS_SocketSend (&protocol->fms_socket, data);
+    sdsfree (data);
 }
 
 /**
@@ -96,9 +96,9 @@ static void send_fms_data()
  */
 static void send_radio_data()
 {
-    uint8_t* data = protocol->create_radio_packet();
-    DS_SocketSend (&protocol->radio_socket, (char*) data);
-    free (data);
+    sds data = protocol->create_radio_packet();
+    DS_SocketSend (&protocol->radio_socket, data);
+    sdsfree (data);
 }
 
 /**
@@ -106,9 +106,9 @@ static void send_radio_data()
  */
 static void send_robot_data()
 {
-    uint8_t* data = protocol->create_robot_packet();
-    DS_SocketSend (&protocol->robot_socket, (char*) data);
-    free (data);
+    sds data = protocol->create_robot_packet();
+    DS_SocketSend (&protocol->robot_socket, data);
+    sdsfree (data);
 }
 
 /**
@@ -116,9 +116,9 @@ static void send_robot_data()
  */
 static void send_netconsole_data()
 {
-    char* data = CFG_GetNetConsoleData();
+    sds data = CFG_GetNetConsoleData();
     DS_SocketSend (&protocol->netconsole_socket, data);
-    free (data);
+    sdsfree (data);
 }
 
 /**
@@ -164,9 +164,9 @@ static void recv_data()
         return;
 
     /* Create the data pointers */
-    char* fms_data = (char*) calloc (0, sizeof (char));
-    char* radio_data = (char*) calloc (0, sizeof (char));
-    char* robot_data = (char*) calloc (0, sizeof (char));
+    sds fms_data = sdsempty();
+    sds radio_data = sdsempty();
+    sds robot_data = sdsempty();
 
     /* Read data from sockets */
     DS_SocketRead (&protocol->fms_socket, fms_data);
@@ -174,14 +174,14 @@ static void recv_data()
     DS_SocketRead (&protocol->robot_socket, robot_data);
 
     /* Let the protocol interpret received data */
-    fms_read = protocol->read_fms_packet ((uint8_t*) fms_data);
-    radio_read = protocol->read_radio_packet ((uint8_t*) radio_data);
-    robot_read = protocol->read_robot_packet ((uint8_t*) robot_data);
+    fms_read = protocol->read_fms_packet (fms_data);
+    radio_read = protocol->read_radio_packet (radio_data);
+    robot_read = protocol->read_robot_packet (robot_data);
 
     /* Free the data pointers */
-    free (fms_data);
-    free (radio_data);
-    free (robot_data);
+    sdsfree (fms_data);
+    sdsfree (radio_data);
+    sdsfree (robot_data);
 }
 
 /**

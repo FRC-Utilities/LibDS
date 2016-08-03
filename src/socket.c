@@ -24,22 +24,21 @@
 #include "DS_Config.h"
 #include "DS_Socket.h"
 
-extern int DS_SocketClose (DS_Socket* socket)
+int DS_SocketOpen (DS_Socket* p)
+{
+}
+
+int DS_SocketClose (DS_Socket* p)
+{
+}
+
+int DS_SocketSend (DS_Socket* p, sds data)
+{
+}
+
+int DS_SocketRead (DS_Socket* p, sds data)
 {
 
 }
 
-extern int DS_SocketDescriptor (DS_Socket* socket)
-{
 
-}
-
-extern int DS_SocketSend (DS_Socket* socket, char* data)
-{
-
-}
-
-extern int DS_SocketRead (DS_Socket* socket, char* data)
-{
-
-}

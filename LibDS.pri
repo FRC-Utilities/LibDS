@@ -31,3 +31,5 @@ SOURCES += \
     $$PWD/src/utils/crc32.c \
     $$PWD/src/array.c \
     $$PWD/src/timer.c
+    
+include ($$PWD/lib/SDS/SDS.pri)

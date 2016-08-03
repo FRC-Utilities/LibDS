@@ -28,6 +28,7 @@
 extern "C" {
 #endif
 
+#include "DS_Timer.h"
 #include "DS_Types.h"
 #include "DS_Utils.h"
 #include "DS_Events.h"

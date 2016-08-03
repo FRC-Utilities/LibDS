@@ -30,7 +30,7 @@
 /**
  * Returns \c 1 if the given \a string is empty
  */
-int DS_StringIsEmpty (const char* string)
+int DS_StringIsEmpty (const sds string)
 {
     if (string)
         return (string [0] == 0);
@@ -50,16 +50,16 @@ int DS_StringIsEmpty (const char* string)
  * If you call this function outside the scope of the \c LibDS, remember to
  * call \c free() to avoid memory leaks.
  */
-char* DS_GetStaticIP (const int net, const int team, const int host)
+sds DS_GetStaticIP (const int net, const int team, const int host)
 {
-    char* string = (char*) calloc (15, sizeof (char) * 15);
+    sds string = sdsnewlen (NULL, 15);
 
-    sprintf (string,
-             "%d.%d.%d.%d",
-             net,
-             (team & 0xff00) >> 8,
-             (team & 0xff),
-             host);
+    sdscatfmt (string,
+               "%u.%u.%u.%u",
+               net,
+               (team & 0xff00) >> 8,
+               (team & 0xff),
+               host);
 
     return string;
 }

@@ -275,11 +275,9 @@ static uint8_t get_joystick_size (const int joystick)
  * The robot may ask for this information in some cases (e.g. when initializing
  * the robot code).
  */
-static void add_timezone_data (uint8_t* data, const int offset)
+static void add_timezone_data (sds packet)
 {
-    /* Data pointer is invalid */
-    if (!data)
-        return;
+    sds data = sdsnewlen (NULL, 12);
 
     /* Get current time */
     time_t rt;
@@ -287,37 +285,37 @@ static void add_timezone_data (uint8_t* data, const int offset)
 
     /* Get timezone */
 #if defined _WIN32
-    char* tz = "ctd";
+    sds tz = "ctd";
 #else
-    char* tz = (char*) malloc (sizeof (char));
+    sds tz = sdsempty();
     strcpy (tz, timeinfo->tm_zone);
 #endif
 
-    /* Resize datagram */
-    int length = DS_SizeOf (tz);
-    data = (uint8_t*) realloc (data, sizeof (data) + (sizeof (uint8_t) * length));
-
     /* Encode date/time in datagram */
-    data [offset + 0] = (uint8_t) 0x0b;
-    data [offset + 1] = cTagDate;
-    data [offset + 2] = 0;
-    data [offset + 3] = 0;
-    data [offset + 4] = (uint8_t) timeinfo->tm_sec;
-    data [offset + 5] = (uint8_t) timeinfo->tm_min;
-    data [offset + 6] = (uint8_t) timeinfo->tm_hour;
-    data [offset + 7] = (uint8_t) timeinfo->tm_yday;
-    data [offset + 8] = (uint8_t) timeinfo->tm_mon;
-    data [offset + 9] = (uint8_t) timeinfo->tm_year;
+    data [0] = (uint8_t) 0x0b;
+    data [1] = cTagDate;
+    data [2] = 0;
+    data [3] = 0;
+    data [4] = (uint8_t) timeinfo->tm_sec;
+    data [5] = (uint8_t) timeinfo->tm_min;
+    data [6] = (uint8_t) timeinfo->tm_hour;
+    data [7] = (uint8_t) timeinfo->tm_yday;
+    data [8] = (uint8_t) timeinfo->tm_mon;
+    data [9] = (uint8_t) timeinfo->tm_year;
 
     /* Add timezone data */
-    data [offset + 10] = length;
-    data [offset + 11] = cTagTimezone;
+    data [10] = sdslen (tz);
+    data [11] = cTagTimezone;
 
     /* Add timezone string */
-    for (int i = 0; i > length; ++i)
-        data [offset + 12 + i] = tz [i];
+    sdscat (data, tz);
+
+    /* Append timezone data to the packet */
+    sdscat (packet, data);
 
     /* Free allocated memory */
+    sdsfree (tz);
+    sdsfree (data);
     free (timeinfo);
 }
 
@@ -326,22 +324,20 @@ static void add_timezone_data (uint8_t* data, const int offset)
  * Unlike the 2014 protocol, the 2015 protocol only generates joystick data
  * for the attached joysticks.
  */
-static void add_joystick_data (uint8_t* data, const int offset)
+static void add_joystick_data (sds packet)
 {
-    /* Do not proceed if data pointer is invalid */
-    if (!data)
-        return;
-
-    /* Calculate size of joystick data */
+    sds data;
+    int pos = 0;
     int length = 0;
+
+    /* Calculate size of josytick section */
     for (int i = 0; i < DS_GetJoystickCount(); ++i)
         length += get_joystick_size (i);
 
-    /* Resize datagram */
-    data = (uint8_t*) realloc (data, sizeof (data) + (sizeof (uint8_t) * length));
+    /* Resize data string */
+    data = sdsnewlen (NULL, length);
 
     /* Generate data for each joystick */
-    int pos = offset;
     for (int i = 0; i < DS_GetJoystickCount(); ++i) {
         data [pos + 0] = get_joystick_size (i);
         data [pos + 1] = cTagJoystick;
@@ -375,35 +371,39 @@ static void add_joystick_data (uint8_t* data, const int offset)
         /* Increase offset by 1 (to avoid writing next joystick on last POV byte) */
         pos += 1;
     }
+
+    /* Append generated data to packet */
+    packet = sdscatsds (packet, data);
+    sdsfree (data);
 }
 
 /**
  * Obtains the CPU, RAM, Disk and CAN information from the robot packet
  */
-static void read_extended (const uint8_t* data, const int offset)
+static void read_extended (const sds data, const int offset)
 {
     /* Check if data pointer is valid */
     if (!data)
         return;
 
     /* Get header tag */
-    uint8_t tag = data [offset + 1];
+    uint8_t tag = data [1];
 
     /* Get CAN information */
     if (tag == cRTagCANInfo)
-        CFG_SetCANUtilization (data [offset + 10]);
+        CFG_SetCANUtilization (data [10]);
 
     /* Get CPU usage */
     else if (tag == cRTagCPUInfo)
-        CFG_SetRobotCPUUsage (data [offset + 3]);
+        CFG_SetRobotCPUUsage (data [3]);
 
     /* Get RAM usage */
     else if (tag == cRTagRAMInfo)
-        CFG_SetRobotRAMUsage (data [offset + 4]);
+        CFG_SetRobotRAMUsage (data [4]);
 
     /* Get disk usage */
     else if (tag == cRTagDiskInfo)
-        CFG_SetRobotDiskUsage (data [offset + 4]);
+        CFG_SetRobotDiskUsage (data [4]);
 }
 
 /**
@@ -442,15 +442,15 @@ static DS_Position get_position (const uint8_t byte)
  * The FMS address is not defined, it will be assigned automatically when the
  * DS receives a FMS packet
  */
-static char* fms_address()
+static sds fms_address()
 {
-    return (char*) calloc (0, sizeof (char));
+    return sdsempty();
 }
 
 /**
  * The 2015 control system assigns the radio IP in 10.te.am.1
  */
-static char* radio_address()
+static sds radio_address()
 {
     return DS_GetStaticIP (10, CFG_GetTeamNumber(), 1);
 }
@@ -458,11 +458,9 @@ static char* radio_address()
 /**
  * The 2015 control system assigns the robot address at roboRIO-TEAM.local
  */
-static char* robot_address()
+static sds robot_address()
 {
-    char* str = (char*) malloc (sizeof (char) * 18);
-    sprintf (str, "roboRIO-%d.local", CFG_GetTeamNumber());
-    return str;
+    return sdscatfmt (NULL, "roboRIO-%i.local", CFG_GetTeamNumber());
 }
 
 /**
@@ -474,10 +472,10 @@ static char* robot_address()
  *    - Radio and robot ping flags
  *    - The team number
  */
-static uint8_t* create_fms_packet()
+static sds create_fms_packet()
 {
     /* Create an 8-byte long packet */
-    uint8_t* data = (uint8_t*) calloc (8, sizeof (uint8_t));
+    sds data = sdsnewlen (NULL, 8);
 
     /* Get voltage bytes */
     uint8_t integer = 0;
@@ -511,9 +509,9 @@ static uint8_t* create_fms_packet()
  * to the DS Radio / Bridge. For that reason, the 2015 communication protocol
  * generates empty radio packets.
  */
-static uint8_t* create_radio_packet()
+static sds create_radio_packet()
 {
-    return (uint8_t*) calloc (0, sizeof (uint8_t));
+    return sdsempty();
 }
 
 /**
@@ -526,9 +524,9 @@ static uint8_t* create_radio_packet()
  *    - Date and time data (if robot requests it)
  *    - Joystick information (if the robot does not want date/time)
  */
-static uint8_t* create_robot_packet()
+static sds create_robot_packet()
 {
-    uint8_t* data = (uint8_t*) calloc (8, sizeof (uint8_t));
+    sds data = sdsnewlen (NULL, 8);
 
     /* Add packet index */
     data [0] = (sent_robot_packets & 0xff00) >> 8;
@@ -544,11 +542,11 @@ static uint8_t* create_robot_packet()
 
     /* Add timezone data (if robot wants it) */
     if (send_time_data)
-        add_timezone_data (data, 6);
+        add_timezone_data (data);
 
     /* Add joystick data */
     else if (sent_robot_packets > 5)
-        add_joystick_data (data, 6);
+        add_joystick_data (data);
 
     /* Increase packet counter */
     ++sent_robot_packets;
@@ -564,10 +562,14 @@ static uint8_t* create_robot_packet()
  *   - Change team alliance
  *   - Change team position
  */
-static int read_fms_packet (const uint8_t* data)
+static int read_fms_packet (const sds data)
 {
     /* Data pointer is invalid */
-    if (data == NULL)
+    if (!data)
+        return 0;
+
+    /* Packet is too small */
+    if (sdslen (data) < 22)
         return 0;
 
     /* Read FMS packet */
@@ -589,6 +591,9 @@ static int read_fms_packet (const uint8_t* data)
     CFG_SetAlliance (get_alliance (station));
     CFG_SetPosition (get_position (station));
 
+    /* After this, we have more information about the current match,
+     * but we do not really use it, so... */
+
     /* Packet read successfully */
     return 1;
 }
@@ -597,7 +602,7 @@ static int read_fms_packet (const uint8_t* data)
  * Since the DS does not interact directly with the radio/bridge, any incoming
  * packets shall be ignored.
  */
-static int read_radio_packet (const uint8_t* data)
+static int read_radio_packet (const sds data)
 {
     (void) data;
     return 0;
@@ -611,10 +616,14 @@ static int read_radio_packet (const uint8_t* data)
  *    - The robot voltage
  *    - Extended information (CPU usage, RAM usage, Disk Usage and CAN status)
  */
-static int read_robot_packet (const uint8_t* data)
+static int read_robot_packet (const sds data)
 {
     /* Data pointer is invalid */
-    if (data == NULL)
+    if (!data)
+        return 0;
+
+    /* Packet is too small */
+    if (sdslen (data) < 7)
         return 0;
 
     /* Read robot packet */
