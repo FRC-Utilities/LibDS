@@ -1,13 +1,18 @@
 # LibDS C
 
-
 > **Warning:** This project will be subject to many changes (and complete rewrites) as I learn new things about C.
 
 > If you are interested in learning how the Driver Station works, check the [original LibDS](https://github.com/frc-utilities/libds). It contains everything needed to operate FRC 2014 and 2015/2016 robots.
 
-This is a re-implementation of LibDS in plain-old C. For the moment, this code is not really useful, since I doing this just because I want to learn to use C (as I will probably use it a lot in the following years). 
+This is a re-implementation of LibDS in plain C (with SDS for dynamic string handling). For the moment, this code is not really useful, since I doing this just because I want to learn to use C (as I will probably use it a lot in the following years). 
 
 You may find a lot of mistakes here, be it design choices or just dumb mistakes. If you spot something, I would be very grateful if you could tell me about it (or make a pull request).
+
+### Example Project
+
+![example/screenshot.png]
+
+I have made a simple command-line Driver Station with SDL and ncurses/pdcurses to demostrate the uses of LibDS, check it [here](example/)!.
 
 ### Project Architecture
 
