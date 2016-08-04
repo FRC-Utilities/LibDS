@@ -20,13 +20,18 @@ My current idea is to design LibDS in a similar way that [SDL](http://libsdl.org
 
 #### 'Private' vs. 'Public' members
 
-- All the functions that a client application would be interested in are located in [`LibDS.h`](https://github.com/FRC-Utilities/LibDS-C/blob/master/include/LibDS.h). 
+- All the functions that a client application would be interested in are located in [`DS_Client.h`](https://github.com/FRC-Utilities/LibDS-C/blob/master/include/DS_Client.h). 
 
 - Functions that are used by the protocols to update the state of the LibDS are made available in [`DS_Config.h`](https://github.com/FRC-Utilities/LibDS-C/blob/master/include/DS_Config.h). Calling any of the 'setter' functions in [`DS_Config`](https://github.com/FRC-Utilities/LibDS-C/blob/master/include/DS_Config.h) will trigger an event (which can later be used by the client application).
 
 #### Event system
 
-For the moment, I am designing an event system that is very similar to SDL's event system. You can check [`DS_Events.h`](https://github.com/FRC-Utilities/LibDS-C/blob/master/include/DS_Events.h) for current state, I still haven't done any actual implementation of the events system.
+For the moment, I am designing an event system that is very similar to SDL's event system. You can check [`DS_Events.h`](https://github.com/FRC-Utilities/LibDS-C/blob/master/include/DS_Events.h) for current state.
+
+Current State:
+
+- [ ] Register signals when an event has occurred
+- [x] Implement the event loop ([code](https://github.com/FRC-Utilities/LibDS-C/blob/master/src/events.c#L257)
 
 #### Protocols
 
