@@ -6,10 +6,15 @@ A simple DS implementatation for command line interfaces with ncurses/pdcurses. 
 
 If you are using Linux, you will need to install the following packages:
 
-- libsdl1.2-dev (for joystick input)
-- ncurses-dev (for text-user-interface)
+- `sudo apt-get install libsdl1.2-dev`
+- `sudo apt-get install ncurses-dev`
 
-This project already provides the libraries for Windows and Mac OSX.
+If you are using Mac OSX, just use [HomeBrew](https://brew.sh):
+
+- `brew install ncurses`
+- `brew install sdl sdl_image sdl_ttf sdl_mixer`
+
+This project already provides the libraries for Microsoft Windows.
 
 ### License
 
