@@ -72,6 +72,7 @@ typedef enum {
     DS_ROBOT_RAM_INFO_CHANGED,          /**< Robot RAM usage updated */
     DS_ROBOT_DISK_INFO_CHANGED,         /**< Robot disk usage updated */
     DS_ROBOT_EMERGENCY_STOPPED,         /**< Robot entered e-stop */
+    DS_STATUS_STRING_CHANGED,           /**< Status label should be updated */
 } DS_EventType;
 
 /**
