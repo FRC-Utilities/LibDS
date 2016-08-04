@@ -31,17 +31,41 @@ win32* {
 #-------------------------------------------------------------------------------
 
 win32* {
-   INCLUDEPATH += $$PWD/lib/sdl/include
-   LIBS += -L$$PWD/lib/sdl/win32/ -lSDL
+    INCLUDEPATH += $$PWD/lib/sdl/include
+    LIBS += -L$$PWD/lib/sdl/win32/ -lSDL
 }
+
 macx* {
-   INCLUDEPATH += $$PWD/lib/sdl/include
-   LIBS += -L$$PWD/lib/sdl/macx/ -lSDL
+    INCLUDEPATH += $$PWD/lib/sdl/include
+    LIBS += -L$$PWD/lib/sdl/macx/ -lSDL
+
+    LIBS += -framework AudioToolbox
+    LIBS += -framework AudioUnit
+    LIBS += -framework Cocoa
+    LIBS += -framework CoreAudio
+    LIBS += -framework IOKit
+    LIBS += -framework OpenGL
+    LIBS += -framework CoreFoundation
+    LIBS += -framework Carbon
+    LIBS += -framework ForceFeedback
+    LIBS += -framework CoreVideo
+
+    QMAKE_LFLAGS += -F /System/Library/Frameworks/AudioToolbox.framework/
+    QMAKE_LFLAGS += -F /System/Library/Frameworks/AudioUnit.framework/
+    QMAKE_LFLAGS += -F /System/Library/Frameworks/Cocoa.framework/
+    QMAKE_LFLAGS += -F /System/Library/Frameworks/CoreAudio.framework/
+    QMAKE_LFLAGS += -F /System/Library/Frameworks/IOKit.framework/
+    QMAKE_LFLAGS += -F /System/Library/Frameworks/OpenGL.framework/
+    QMAKE_LFLAGS += -F /System/Library/Frameworks/CoreFoundation.framework/
+    QMAKE_LFLAGS += -F /System/Library/Frameworks/Carbon.framework/
+    QMAKE_LFLAGS += -F /System/Library/Frameworks/ForceFeedback.framework/
+    QMAKE_LFLAGS += -F /System/Library/Frameworks/CoreVideo.framework/
 }
-#linux {
-#    INCLUDEPATH += /usr/include/SDL
-#    LIBS += -lSDL
-#}
+
+linux {
+    INCLUDEPATH += /usr/include/SDL
+    LIBS += -lSDL
+}
 
 #-------------------------------------------------------------------------------
 # Include LibDS

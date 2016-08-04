@@ -39,14 +39,14 @@ typedef struct _joystick {
 /**
  * Holds all the joysticks
  */
-static DS_Array* array;
+static DS_Array array;
 
 /**
  * Returns the joystick structure at the given index
  */
 DS_Joystick* get_joystick (int joystick)
 {
-    return (DS_Joystick*) array->data [joystick];
+    return (DS_Joystick*) array.data [joystick];
 }
 
 /**
@@ -54,8 +54,7 @@ DS_Joystick* get_joystick (int joystick)
  */
 void Joysticks_Init()
 {
-    array = (DS_Array*) malloc (sizeof (DS_Array));
-    DS_ArrayInit (array, (sizeof (DS_Joystick) * 2));
+    DS_ArrayInit (&array, (sizeof (DS_Joystick) * 2));
 }
 
 /**
@@ -64,7 +63,6 @@ void Joysticks_Init()
 void Joysticks_Close()
 {
     DS_JoysticksReset();
-    free (array);
 }
 
 /**
@@ -72,7 +70,7 @@ void Joysticks_Close()
  */
 int DS_GetJoystickCount()
 {
-    return array->used;
+    return array.used;
 }
 
 /**
@@ -158,7 +156,7 @@ int DS_GetJoystickButton (int joystick, int button)
  */
 void DS_JoysticksReset()
 {
-    DS_ArrayFree (array);
+    DS_ArrayFree (&array);
 }
 
 /**
@@ -166,7 +164,7 @@ void DS_JoysticksReset()
  * \a buttons. All joystick values are set to a neutral state to ensure
  * safe operation of the robot.
  */
-void DS_JoysticksAdd (int axes, int hats, int buttons)
+void DS_JoysticksAdd (const int axes, const int hats, const int buttons)
 {
     /* Initialize the joystick values */
     int* v_hats    = (int*) malloc (sizeof (int) * hats);
@@ -199,7 +197,7 @@ void DS_JoysticksAdd (int axes, int hats, int buttons)
     joystick->buttons = v_buttons;
 
     /* Register the new joystick in the joystick list */
-    DS_ArrayInsert (array, (void*) joystick);
+    DS_ArrayInsert (&array, (void*) joystick);
 }
 
 /**

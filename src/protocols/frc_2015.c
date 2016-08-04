@@ -329,6 +329,10 @@ static sds add_timezone_data (sds packet)
  */
 static sds add_joystick_data (sds packet)
 {
+    if (DS_GetJoystickCount() <= 0)
+        return packet;
+
+    /* Initialize the variables */
     sds data;
     int pos = 0;
     int length = 0;
@@ -346,9 +350,9 @@ static sds add_joystick_data (sds packet)
         data [pos + 1] = cTagJoystick;
 
         /* Add axis data (and automatically increase offset) */
-        pos += 2;
+        data [pos + 2] = DS_GetJoystickNumAxes (i);
         for (int a = 0; a < DS_GetJoystickNumAxes (i); ++a) {
-            data [pos] = (uint8_t) (DS_GetJoystickAxis (i, a) * 127);
+            data [pos + 3 + a] = (uint8_t) (DS_GetJoystickAxis (i, a) * 127);
             ++pos;
         }
 
@@ -358,6 +362,7 @@ static sds add_joystick_data (sds packet)
             button_flags += DS_GetJoystickButton (i, b) ? pow (2, b) : 0;
 
         /* Add button data */
+        pos += 2;
         data [pos + 1] = DS_GetJoystickNumButtons (i);
         data [pos + 2] = (button_flags & 0xff00) >> 8;
         data [pos + 3] = (button_flags & 0xff);
@@ -377,7 +382,7 @@ static sds add_joystick_data (sds packet)
 
     /* Append generated data to packet */
     packet = sdscatsds (packet, data);
-    sdsfree (data);
+    //sdsfree (data);
 
     /* Return the new reference */
     return packet;

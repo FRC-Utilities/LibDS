@@ -1,6 +1,8 @@
 INCLUDEPATH += $$PWD/include
 
-LIBS += -pthread
+!macx* {
+    LIBS += -pthread
+}
 
 HEADERS += \
     $$PWD/include/DS_Client.h \

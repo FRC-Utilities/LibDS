@@ -41,7 +41,6 @@ int main()
     DS_Init();
     init_interface();
     init_joysticks();
-
     DS_ConfigureProtocol (DS_GetProtocolFRC_2016());
 
     pthread_t thread;

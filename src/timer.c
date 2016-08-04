@@ -28,7 +28,7 @@
 
 #if defined _WIN32
     #include <windows.h>
-#elif defined __unix__
+#else
     #include <unistd.h>
 #endif
 
@@ -66,7 +66,7 @@ void DS_Sleep (const int millisecs)
 {
 #if defined _WIN32
     Sleep (millisecs);
-#elif defined __unix__
+#else
     usleep (millisecs * 1000);
 #endif
 }
