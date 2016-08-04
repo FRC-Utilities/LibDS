@@ -4,7 +4,12 @@ A simple DS implementatation for command line interfaces with ncurses/pdcurses. 
 
 ### Dependencies
 
-If you are using UNIX (Mac or Linux), you will need to install ncurses or pdcurses.
+If you are using Linux, you will need to install the following packages:
+
+- libsdl1.2-dev (for joystick input)
+- ncurses-dev (for text-user-interface)
+
+This project already provides the libraries for Windows and Mac OSX.
 
 ### License
 
