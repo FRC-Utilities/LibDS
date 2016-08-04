@@ -30,16 +30,18 @@ win32* {
 # Link with SDL
 #-------------------------------------------------------------------------------
 
-INCLUDEPATH += $$PWD/lib/sdl/include
 win32* {
+   INCLUDEPATH += $$PWD/lib/sdl/include
    LIBS += -L$$PWD/lib/sdl/win32/ -lSDL
 }
 macx* {
+   INCLUDEPATH += $$PWD/lib/sdl/include
    LIBS += -L$$PWD/lib/sdl/macx/ -lSDL
 }
-else {
-    LIBS += -lSDL
-}
+#linux {
+#    INCLUDEPATH += /usr/include/SDL
+#    LIBS += -lSDL
+#}
 
 #-------------------------------------------------------------------------------
 # Include LibDS

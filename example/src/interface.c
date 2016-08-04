@@ -47,13 +47,13 @@
 /*
  * Define windows
  */
-static WINDOW* window = NULL;
-static WINDOW* enabled_win = NULL;
-static WINDOW* console_win = NULL;
-static WINDOW* status_info = NULL;
-static WINDOW* voltage_win = NULL;
-static WINDOW* robot_status = NULL;
-static WINDOW* bottom_window = NULL;
+static WINDOW* window;
+static WINDOW* enabled_win;
+static WINDOW* console_win;
+static WINDOW* status_info;
+static WINDOW* voltage_win;
+static WINDOW* robot_status;
+static WINDOW* bottom_window;
 
 /*
  * Define window elements
@@ -213,6 +213,7 @@ void init_interface()
 
     noecho();
     curs_set (0);
+    keypad (window, 1);
 }
 
 /**

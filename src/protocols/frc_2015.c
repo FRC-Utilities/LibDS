@@ -69,9 +69,9 @@ static const uint8_t cRobotHasCode       = 0x20;
 /*
  * Sent robot and FMS packet counters
  */
-static int send_time_data = 0;
-static int sent_fms_packets = 0;
-static int sent_robot_packets = 0;
+static unsigned int send_time_data = 0;
+static unsigned int sent_fms_packets = 0;
+static unsigned int sent_robot_packets = 0;
 
 /*
  * Control code flags
@@ -275,7 +275,7 @@ static uint8_t get_joystick_size (const int joystick)
  * The robot may ask for this information in some cases (e.g. when initializing
  * the robot code).
  */
-static void add_timezone_data (sds packet)
+static sds add_timezone_data (sds packet)
 {
     sds data = sdsnewlen (NULL, 12);
 
@@ -317,6 +317,9 @@ static void add_timezone_data (sds packet)
     sdsfree (tz);
     sdsfree (data);
     free (timeinfo);
+
+    /* Return the new reference */
+    return packet;
 }
 
 /**
@@ -324,7 +327,7 @@ static void add_timezone_data (sds packet)
  * Unlike the 2014 protocol, the 2015 protocol only generates joystick data
  * for the attached joysticks.
  */
-static void add_joystick_data (sds packet)
+static sds add_joystick_data (sds packet)
 {
     sds data;
     int pos = 0;
@@ -375,6 +378,9 @@ static void add_joystick_data (sds packet)
     /* Append generated data to packet */
     packet = sdscatsds (packet, data);
     sdsfree (data);
+
+    /* Return the new reference */
+    return packet;
 }
 
 /**
@@ -387,7 +393,7 @@ static void read_extended (const sds data, const int offset)
         return;
 
     /* Get header tag */
-    uint8_t tag = data [1];
+    uint8_t tag = data [offset + 1];
 
     /* Get CAN information */
     if (tag == cRTagCANInfo)
@@ -542,11 +548,11 @@ static sds create_robot_packet()
 
     /* Add timezone data (if robot wants it) */
     if (send_time_data)
-        add_timezone_data (data);
+        data = add_timezone_data (data);
 
     /* Add joystick data */
     else if (sent_robot_packets > 5)
-        add_joystick_data (data);
+        data = add_joystick_data (data);
 
     /* Increase packet counter */
     ++sent_robot_packets;

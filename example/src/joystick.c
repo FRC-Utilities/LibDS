@@ -22,17 +22,17 @@
 
 #include "joystick.h"
 
-#include <SDL.h>
+//#include <SDL.h>
 #include <LibDS.h>
 
 void init_joysticks()
 {
-    SDL_Init (SDL_INIT_JOYSTICK);
+    //  SDL_Init (SDL_INIT_JOYSTICK);
 }
 
 void close_joysticks()
 {
-    SDL_Quit();
+    //SDL_Quit();
 }
 
 void update_joysticks()

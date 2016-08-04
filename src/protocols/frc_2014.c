@@ -57,7 +57,7 @@ static uint32_t crc32 = 0;
 /*
  * Sent robot acket counters, they are used as packet IDs
  */
-static int sent_robot_packets = 0;
+static unsigned int sent_robot_packets = 0;
 
 /*
  * Control code flags

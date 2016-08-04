@@ -54,7 +54,7 @@ DS_Joystick* get_joystick (int joystick)
  */
 void Joysticks_Init()
 {
-    array = malloc (sizeof (DS_Array));
+    array = (DS_Array*) malloc (sizeof (DS_Array));
     DS_ArrayInit (array, (sizeof (DS_Joystick) * 2));
 }
 
@@ -186,7 +186,7 @@ void DS_JoysticksAdd (int axes, int hats, int buttons)
         v_buttons [i] = 0;
 
     /* Allocate memory for a new joystick */
-    DS_Joystick* joystick = malloc (sizeof (DS_Joystick));
+    DS_Joystick* joystick = (DS_Joystick*) malloc (sizeof (DS_Joystick));
 
     /* Set joystick properties */
     joystick->num_axes = axes;
