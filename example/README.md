@@ -9,7 +9,7 @@ If you are using Linux, you will need to install the following packages:
 - `sudo apt-get install libsdl1.2-dev`
 - `sudo apt-get install ncurses-dev`
 
-If you are using Mac OSX, just use [HomeBrew](https://brew.sh):
+If you are using Mac OSX, just use [HomeBrew](http://brew.sh):
 
 - `brew install ncurses`
 - `brew install sdl sdl_image sdl_ttf sdl_mixer`
