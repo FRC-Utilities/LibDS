@@ -10,7 +10,7 @@ You may find a lot of mistakes here, be it design choices or just dumb mistakes.
 
 ### Example Project
 
-![example/screenshot.png]
+![Image](example/screenshot.png)
 
 I have made a simple command-line Driver Station with SDL and ncurses/pdcurses to demostrate the uses of LibDS, check it [here](example/)!.
 
