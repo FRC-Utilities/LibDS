@@ -31,7 +31,7 @@ For the moment, I am designing an event system that is very similar to SDL's eve
 Current State:
 
 - [ ] Register signals when an event has occurred
-- [x] Implement the event loop ([code](https://github.com/FRC-Utilities/LibDS-C/blob/master/src/events.c#L257)
+- [x] Implement the event loop ([code](https://github.com/FRC-Utilities/LibDS-C/blob/master/src/events.c#L257))
 
 #### Protocols
 
