@@ -12,7 +12,7 @@ You may find a lot of mistakes here, be it design choices or just dumb mistakes.
 
 ![Image](example/screenshot.png)
 
-I have made a simple command-line Driver Station with SDL and ncurses/pdcurses to demostrate the uses of LibDS, check it [here](example/)!.
+I have made a simple command-line Driver Station with SDL and ncurses/pdcurses to demostrate the uses of LibDS. You can check it [here](example/).
 
 ### Project Architecture
 
