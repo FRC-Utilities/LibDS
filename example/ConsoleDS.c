@@ -30,6 +30,15 @@
 #include <LibDS.h>
 
 /*
+ * Set clear command
+ */
+#ifdef WIN32
+    #define CLEAR system ("cls")
+#else
+    #define CLEAR system ("clear")
+#endif
+
+/*
  * Define window sizes
  */
 #define TOP_HEIGHT     3
@@ -107,7 +116,7 @@ int main()
 
     /* NCurses failed to start */
     if (!window) {
-        printf ("Cannot initialize ncurses!\n");
+        printf ("Cannot initialize window!\n");
         return EXIT_FAILURE;
     }
 
@@ -142,6 +151,7 @@ int main()
     DS_Close();
 
     /* Exit the application */
+    CLEAR;
     return EXIT_SUCCESS;
 }
 
