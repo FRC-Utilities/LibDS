@@ -31,13 +31,13 @@ win32* {
 #-------------------------------------------------------------------------------
 
 win32* {
-    INCLUDEPATH += $$PWD/lib/sdl/include
     LIBS += -L$$PWD/lib/sdl/win32/ -lSDL
+    INCLUDEPATH += $$PWD/lib/sdl/win32/include
 }
 
 macx* {
-    INCLUDEPATH += $$PWD/lib/sdl/include
     LIBS += -L$$PWD/lib/sdl/macx/ -lSDL
+    INCLUDEPATH += $$PWD/lib/sdl/macx/include
 
     LIBS += -framework AudioToolbox
     LIBS += -framework AudioUnit
@@ -63,8 +63,8 @@ macx* {
 }
 
 linux {
-    INCLUDEPATH += /usr/include/SDL
     LIBS += -lSDL
+    INCLUDEPATH += /usr/include/SDL
 }
 
 #-------------------------------------------------------------------------------

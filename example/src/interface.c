@@ -53,7 +53,7 @@ static sds can_str;
 static sds cpu_str;
 static sds ram_str;
 static sds disk_str;
-static sds status_str;
+static sds rstatus_str;
 static sds enabled_str;
 static sds voltage_str;
 static sds console_str;
@@ -69,7 +69,6 @@ static sds set_checked (sds label, int checked)
 {
     sdsfree (label);
     label = sdsnew (checked ? "[*]" : "[ ]");
-
     return label;
 }
 
@@ -88,7 +87,7 @@ static void init_strings()
     disk_str = sdsnew (NO_DATA);
     voltage_str = sdsnew (NO_DATA);
     enabled_str = sdsnew (DISABLED);
-    status_str = sdsnew (DS_GetStatusString());
+    rstatus_str = sdsnew (DS_GetStatusString());
     console_str = sdsnew ("[INFO] Welcome to the ConsoleDS!");
 }
 
@@ -101,7 +100,7 @@ static void close_strings()
     sdsfree (cpu_str);
     sdsfree (ram_str);
     sdsfree (disk_str);
-    sdsfree (status_str);
+    sdsfree (rstatus_str);
     sdsfree (enabled_str);
     sdsfree (voltage_str);
     sdsfree (console_str);
@@ -149,10 +148,10 @@ static void draw_windows()
     wborder (status_info,   0, 0, 0, 0, 0, 0, 0, 0);
     wborder (bottom_window, 0, 0, 0, 0, 0, 0, 0, 0);
 
-    /* Add topbar elements */
+    /* Add top window elements */
     mvwaddstr (console_win,  1, 2, console_str);
     mvwaddstr (enabled_win,  1, 2, enabled_str);
-    mvwaddstr (robot_status, 1, 2, status_str);
+    mvwaddstr (robot_status, 1, 2, rstatus_str);
 
     /* Add voltage elements */
     mvwaddstr (voltage_win,  1,  2, "Voltage:");
@@ -250,8 +249,8 @@ void update_interface()
  */
 void update_status_label()
 {
-    sdsfree (status_str);
-    status_str = sdsnew (DS_GetStatusString());
+    sdsfree (rstatus_str);
+    rstatus_str = sdsnew (DS_GetStatusString());
 }
 
 /**
@@ -259,6 +258,8 @@ void update_status_label()
  */
 void set_can (const int can)
 {
+    sdsfree (can_str);
+    can_str = sdsempty();
     can_str = sdscatfmt (can_str, "%i %%", can);
 }
 
@@ -267,6 +268,8 @@ void set_can (const int can)
  */
 void set_cpu (const int cpu)
 {
+    sdsfree (cpu_str);
+    cpu_str = sdsempty();
     cpu_str = sdscatfmt (cpu_str, "%i %%", cpu);
 }
 
@@ -275,6 +278,8 @@ void set_cpu (const int cpu)
  */
 void set_ram (const int ram)
 {
+    sdsfree (ram_str);
+    ram_str = sdsempty();
     ram_str = sdscatfmt (ram_str, "%i %%", ram);
 }
 
@@ -283,6 +288,8 @@ void set_ram (const int ram)
  */
 void set_disk (const int disk)
 {
+    sdsfree (disk_str);
+    disk_str = sdsempty();
     disk_str = sdscatfmt (disk_str, "%i %%", disk);
 }
 
@@ -316,7 +323,9 @@ void set_robot_comms (const int comms)
  */
 void set_voltage (const double voltage)
 {
-    voltage_str = sdscatprintf (voltage_str, "%f", voltage);
+    sdsfree (voltage_str);
+    voltage_str = sdsempty();
+    voltage_str = sdscatprintf (voltage_str, "%f V", voltage);
 }
 
 /**

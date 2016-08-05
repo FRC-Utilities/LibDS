@@ -52,14 +52,7 @@ int DS_StringIsEmpty (const sds string)
  */
 sds DS_GetStaticIP (const int net, const int team, const int host)
 {
-    sds string = sdsnewlen (NULL, 15);
-
-    sdscatfmt (string,
-               "%u.%u.%u.%u",
-               net,
-               (team & 0xff00) >> 8,
-               (team & 0xff),
-               host);
-
-    return string;
+    int te = team / 100;
+    int am = team - (te * 100);
+    return sdscatfmt (sdsempty(), "%u.%u.%u.%u", net, te, am, host);
 }

@@ -471,7 +471,7 @@ static sds radio_address()
  */
 static sds robot_address()
 {
-    return sdscatfmt (NULL, "roboRIO-%i.local", CFG_GetTeamNumber());
+    return sdscatfmt (sdsempty(), "roboRIO-%i.local", CFG_GetTeamNumber());
 }
 
 /**

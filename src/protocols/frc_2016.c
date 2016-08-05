@@ -37,11 +37,9 @@ static DS_Protocol* protocol = NULL;
  * the only (DS/Comms) difference is that the robot address is found at
  * roboRIO-TEAM-FRC.local (instead of roboRIO-TEAM.local).
  */
-static char* robot_address()
+static sds robot_address()
 {
-    char* str = (char*) malloc (sizeof (char) * 22);
-    sprintf (str, "roboRIO-%d-FRC.local", CFG_GetTeamNumber());
-    return str;
+    return sdscatfmt (sdsempty(), "roboRIO-%i-FRC.local", CFG_GetTeamNumber());
 }
 
 /**

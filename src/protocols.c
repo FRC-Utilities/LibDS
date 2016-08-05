@@ -41,7 +41,8 @@ DS_Protocol* DS_CurrentProtocol()
  */
 void Protocol_Close()
 {
-    free (protocol);
+    if (protocol)
+        free (protocol);
 }
 
 /**
@@ -49,6 +50,8 @@ void Protocol_Close()
  */
 void DS_ConfigureProtocol (DS_Protocol* p)
 {
-    free (protocol);
-    protocol = p;
+    if (p) {
+        free (protocol);
+        protocol = p;
+    }
 }

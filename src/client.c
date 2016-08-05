@@ -50,6 +50,7 @@ void Client_Init()
  */
 void Client_Close()
 {
+    sdsfree (status_string);
     sdsfree (custom_fms_address);
     sdsfree (custom_radio_address);
     sdsfree (custom_robot_address);
@@ -143,44 +144,31 @@ sds DS_GetAppliedRobotAddress()
 sds DS_GetStatusString()
 {
     sdsfree (status_string);
-    status_string = sdsempty();
 
     if (!DS_GetRobotCommunications())
-        status_string = "No Robot Communications";
+        status_string = sdsnew ("No Robot Communications");
 
     else if (!DS_GetRobotCode())
-        status_string = "No Robot Code";
+        status_string = sdsnew ("No Robot Code");
 
     else if (DS_GetEmergencyStopped())
-        status_string = "Emergency Stopped";
+        status_string = sdsnew ("Emergency Stopped");
 
     else {
-        static sds mode;
-        static sds enabled;
-
         switch (DS_GetControlMode()) {
         case DS_CONTROL_TELEOPERATED:
-            mode = "Teleoperated";
+            status_string = sdsnew ("Teleoperated");
             break;
         case DS_CONTROL_AUTONOMOUS:
-            mode = "Autonomous";
+            status_string = sdsnew ("Autonomous");
             break;
         case DS_CONTROL_TEST:
-            mode = "Test";
-            break;
-        default:
-            mode = "";
+            status_string = sdsnew ("Test");
             break;
         }
 
-        if (DS_GetRobotEnabled())
-            enabled = "Enabled";
-
-        else
-            enabled = "Disabled";
-
-        status_string = sdscatfmt ("%S %S", mode, enabled);
-        sdsfree (mode);
+        sds enabled = sdsnew (DS_GetRobotEnabled() ? "Enabled" : "Disabled");
+        status_string = sdscatfmt (status_string, " %s", enabled);
         sdsfree (enabled);
     }
 
@@ -382,8 +370,10 @@ void DS_SetControlMode (const DS_ControlMode mode)
  */
 void DS_SetCustomFMSAddress (sds address)
 {
-    if (address)
-        sdscpy (custom_fms_address, address);
+    if (address) {
+        sdsfree (custom_fms_address);
+        custom_fms_address = sdsdup (address);
+    }
 }
 
 /**
@@ -391,8 +381,10 @@ void DS_SetCustomFMSAddress (sds address)
  */
 void DS_SetCustomRadioAddress (sds address)
 {
-    if (address)
-        sdscpy (custom_radio_address, address);
+    if (address) {
+        sdsfree (custom_radio_address);
+        custom_radio_address = sdsdup (address);
+    }
 }
 
 /**
@@ -400,8 +392,10 @@ void DS_SetCustomRadioAddress (sds address)
  */
 void DS_SetCustomRobotAddress (sds address)
 {
-    if (address)
-        sdscpy (custom_robot_address, address);
+    if (address) {
+        sdsfree (custom_robot_address);
+        custom_robot_address = sdsdup (address);
+    }
 }
 
 /**

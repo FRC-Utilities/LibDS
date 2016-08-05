@@ -301,7 +301,6 @@ void CFG_SetRobotVoltage (const double voltage)
 
 /**
  * Updates the emergency \a stopped state of the robot.
- * The input value must be either \c 0 or \c 1.
  */
 void CFG_SetEmergencyStopped (const int stopped)
 {
@@ -349,7 +348,6 @@ void CFG_SetControlMode (const DS_ControlMode mode)
 
 /**
  * Updates the state of the FMS communications.
- * You must input a value that is either \c 0 (false) or \c 1 (true)
  */
 void CFG_SetFMSCommunications (const int communications)
 {
@@ -361,7 +359,6 @@ void CFG_SetFMSCommunications (const int communications)
 
 /**
  * Updates the state of the radio communications.
- * You must input a value that is either \c 0 (false) or \c 1 (true)
  */
 void CFG_SetRadioCommunications (const int communications)
 {
@@ -373,7 +370,6 @@ void CFG_SetRadioCommunications (const int communications)
 
 /**
  * Updates the state of the robot communications.
- * You must input a value that is either \c 0 (false) or \c 1 (true)
  */
 void CFG_SetRobotCommunications (const int communications)
 {

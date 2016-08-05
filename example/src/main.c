@@ -22,7 +22,6 @@
 
 #include <LibDS.h>
 #include <stdio.h>
-#include <curses.h>
 #include <stdlib.h>
 #include <pthread.h>
 
@@ -38,28 +37,32 @@ static void* get_user_input();
  */
 int main()
 {
+    /* Initialize the DS and the application modules */
     DS_Init();
     init_interface();
     init_joysticks();
+
+    /* Load the 2016 protocol */
     DS_ConfigureProtocol (DS_GetProtocolFRC_2016());
 
-    DS_JoysticksAdd (6, 1, 10);
-
+    /* Get user input from a different thread */
     pthread_t thread;
     pthread_create (&thread, NULL, &get_user_input, NULL);
 
+    /* Start the event loop */
     while (running) {
-        process_events();
-        update_joysticks();
-        update_interface();
-
-        DS_Sleep (5);
+        process_events();   /* Listen for new DS events */
+        update_interface(); /* Re-draw the user interface */
+        update_joysticks(); /* Get joystick input */
+        DS_Sleep (5);       /* Give the CPU a break */
     }
 
+    /* Close the DS and the application modules */
     DS_Close();
     close_interface();
     close_joysticks();
 
+    /* Exit the application */
     return EXIT_SUCCESS;
 }
 
@@ -71,53 +74,53 @@ static void process_events()
 {
     DS_Event event;
 
-    if (!DS_PollEvent (&event))
-        return;
-
-    switch (event.type) {
-    case DS_JOYSTICK_COUNT_CHANGED:
-        set_has_joysticks (DS_GetJoystickCount());
-        break;
-    case DS_NETCONSOLE_NEW_MESSAGE:
-        break;
-    case DS_ROBOT_ENABLED:
-        set_enabled (event.robot.enabled);
-        break;
-    case DS_ROBOT_DISABLED:
-        set_enabled (event.robot.enabled);
-        break;
-    case DS_ROBOT_CONNECTED:
-        set_robot_comms (event.robot.connected);
-        break;
-    case DS_ROBOT_CODE_LOADED:
-        set_robot_code (event.robot.code);
-        break;
-    case DS_ROBOT_DISCONNECTED:
-        set_robot_comms (event.robot.connected);
-        break;
-    case DS_ROBOT_CODE_UNLOADED:
-        set_robot_code (event.robot.code);
-        break;
-    case DS_ROBOT_VOLTAGE_CHANGED:
-        set_voltage (event.robot.voltage);
-        break;
-    case DS_ROBOT_CAN_UTIL_CHANGED:
-        set_can (event.robot.can_util);
-        break;
-    case DS_ROBOT_CPU_INFO_CHANGED:
-        set_cpu (event.robot.cpu_usage);
-        break;
-    case DS_ROBOT_RAM_INFO_CHANGED:
-        set_ram (event.robot.ram_usage);
-        break;
-    case DS_ROBOT_DISK_INFO_CHANGED:
-        set_disk (event.robot.disk_usage);
-        break;
-    case DS_STATUS_STRING_CHANGED:
-        update_status_label();
-        break;
-    default:
-        break;
+    /* React to every DS event so far */
+    while (DS_PollEvent (&event)) {
+        switch (event.type) {
+        case DS_JOYSTICK_COUNT_CHANGED:
+            set_has_joysticks (DS_GetJoystickCount());
+            break;
+        case DS_NETCONSOLE_NEW_MESSAGE:
+            break;
+        case DS_ROBOT_ENABLED:
+            set_enabled (event.robot.enabled);
+            break;
+        case DS_ROBOT_DISABLED:
+            set_enabled (event.robot.enabled);
+            break;
+        case DS_ROBOT_CONNECTED:
+            set_robot_comms (event.robot.connected);
+            break;
+        case DS_ROBOT_CODE_LOADED:
+            set_robot_code (event.robot.code);
+            break;
+        case DS_ROBOT_DISCONNECTED:
+            set_robot_comms (event.robot.connected);
+            break;
+        case DS_ROBOT_CODE_UNLOADED:
+            set_robot_code (event.robot.code);
+            break;
+        case DS_ROBOT_VOLTAGE_CHANGED:
+            set_voltage (event.robot.voltage);
+            break;
+        case DS_ROBOT_CAN_UTIL_CHANGED:
+            set_can (event.robot.can_util);
+            break;
+        case DS_ROBOT_CPU_INFO_CHANGED:
+            set_cpu (event.robot.cpu_usage);
+            break;
+        case DS_ROBOT_RAM_INFO_CHANGED:
+            set_ram (event.robot.ram_usage);
+            break;
+        case DS_ROBOT_DISK_INFO_CHANGED:
+            set_disk (event.robot.disk_usage);
+            break;
+        case DS_STATUS_STRING_CHANGED:
+            update_status_label();
+            break;
+        default:
+            break;
+        }
     }
 }
 
@@ -128,7 +131,7 @@ static void process_events()
 static void* get_user_input()
 {
     while (running) {
-        switch (getch()) {
+        switch (getchar()) {
         case 'q':
             running = 0;
             break;
@@ -155,7 +158,7 @@ static void* get_user_input()
             break;
         }
 
-        DS_Sleep (10);
+        DS_Sleep (20);
     }
 
     return NULL;
