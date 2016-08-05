@@ -248,7 +248,7 @@ static void check_protocol()
 }
 
 /**
- * This function is called periodically, the function does the following:
+ * This function is executed periodically, the function does the following:
  *    - Send data to the FMS, robot and radio
  *    - Read received data from the FMS, robot and radio
  *    - Feed/reset the watchdogs

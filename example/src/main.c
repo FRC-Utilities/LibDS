@@ -43,6 +43,8 @@ int main()
     init_joysticks();
     DS_ConfigureProtocol (DS_GetProtocolFRC_2016());
 
+    DS_JoysticksAdd (6, 1, 10);
+
     pthread_t thread;
     pthread_create (&thread, NULL, &get_user_input, NULL);
 

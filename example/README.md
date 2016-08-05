@@ -9,11 +9,11 @@ If you are using Linux, you will need to install the following packages:
 - `sudo apt-get install libsdl1.2-dev`
 - `sudo apt-get install ncurses-dev`
 
-If you are using Mac OSX, just use [HomeBrew](http://brew.sh):
+If you are using Mac OSX, use [HomeBrew](http://brew.sh) to install ncurses:
 
 - `brew install ncurses`
-- `brew install sdl sdl_image sdl_ttf sdl_mixer`
 
+I have already included the static SDL library for OSX users.
 This project already provides the libraries for Microsoft Windows.
 
 ### License

@@ -150,7 +150,7 @@ static void draw_windows()
     wborder (bottom_window, 0, 0, 0, 0, 0, 0, 0, 0);
 
     /* Add topbar elements */
-    mvwaddstr (console_win,  1, 1, console_str);
+    mvwaddstr (console_win,  1, 2, console_str);
     mvwaddstr (enabled_win,  1, 2, enabled_str);
     mvwaddstr (robot_status, 1, 2, status_str);
 
