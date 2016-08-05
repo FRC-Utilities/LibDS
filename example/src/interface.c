@@ -29,20 +29,11 @@
 #include <curses.h>
 
 /*
- * Define window sizes
- */
-#define TOP_HEIGHT     3
-#define BOTTOM_HEIGHT  3
-#define CENTRAL_HEIGHT 24 - BOTTOM_HEIGHT - TOP_HEIGHT
-
-/*
  * Define basic label states
  */
-#define CHECKED   "[*]"
-#define UNCHECKED "[ ]"
-#define NO_DATA   "--.--"
-#define ENABLED   "Enabled"
-#define DISABLED  "Disabled"
+#define NO_DATA  "--.--"
+#define ENABLED  "Enabled"
+#define DISABLED "Disabled"
 
 /*
  * Define windows
@@ -77,7 +68,7 @@ static sds robot_check_str;
 static sds set_checked (sds label, int checked)
 {
     sdsfree (label);
-    label = sdsnew (checked ? CHECKED : UNCHECKED);
+    label = sdsnew (checked ? "[*]" : "[ ]");
 
     return label;
 }
@@ -132,13 +123,23 @@ static void draw_windows()
     delwin (robot_status);
     delwin (bottom_window);
 
-    /* Create the windows */
-    voltage_win   = newwin (TOP_HEIGHT, 20, 0, 0);
-    enabled_win   = newwin (TOP_HEIGHT, 20, 0, 60);
-    robot_status  = newwin (TOP_HEIGHT, 40, 0, 20);
-    bottom_window = newwin (BOTTOM_HEIGHT, 80, 24 - BOTTOM_HEIGHT,  0);
-    console_win   = newwin (CENTRAL_HEIGHT, 60, TOP_HEIGHT, 0);
-    status_info   = newwin (CENTRAL_HEIGHT, 20, TOP_HEIGHT, 60);
+    /* Set window sizing */
+    int top_height = 3;
+    int bottom_height = 3;
+    int side_width = DS_Min (COLS / 4, 40);
+    int central_height = LINES - (top_height + bottom_height);
+
+    /* Create top windows */
+    voltage_win  = newwin (top_height, side_width, 0, 0);
+    enabled_win  = newwin (top_height, side_width, 0, COLS - side_width);
+    robot_status = newwin (top_height, COLS - 2 * (side_width), 0, side_width);
+
+    /* Create central windows */
+    console_win = newwin (central_height, COLS - side_width, top_height, 0);
+    status_info = newwin (central_height, side_width, top_height, COLS - side_width);
+
+    /* Create botttom window */
+    bottom_window = newwin (bottom_height, COLS, LINES - bottom_height, 0);
 
     /* Draw borders */
     wborder (voltage_win,   0, 0, 0, 0, 0, 0, 0, 0);
@@ -178,10 +179,10 @@ static void draw_windows()
     mvwaddstr (status_info, 12, 8, disk_str);
 
     /* Add bottom bar labels */
-    mvwaddstr (bottom_window, 1, 1,  "Quit (q)");
-    mvwaddstr (bottom_window, 1, 12, "Set enabled (e,d)");
-    mvwaddstr (bottom_window, 1, 33, "Set Control Mode (o,a,t)");
-    mvwaddstr (bottom_window, 1, 61, "More Options (m)");
+    mvwaddstr (bottom_window, 1, 2,  "Quit (q)");
+    mvwaddstr (bottom_window, 1, 13, "Set enabled (e,d)");
+    mvwaddstr (bottom_window, 1, 34, "Set Control Mode (o,a,t)");
+    mvwaddstr (bottom_window, 1, 62, "More Options (m)");
 }
 
 /**
