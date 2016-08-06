@@ -81,7 +81,7 @@ typedef enum {
 typedef struct {
     uint32_t type;      /**< Event type */
     uint32_t timestamp; /**< Timestamp of event */
-} SDL_CommonEvent;
+} DS_CommonEvent;
 
 /**
  * \brief FMS event fields

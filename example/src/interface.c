@@ -68,7 +68,7 @@ static sds robot_check_str;
 static sds set_checked (sds label, int checked)
 {
     sdsfree (label);
-    label = sdsnew (checked ? "[*]" : "[ ]");
+    label = sdsnew (checked > 0 ? "[*]" : "[ ]");
     return label;
 }
 
@@ -307,7 +307,7 @@ void set_enabled (const int enabled)
  */
 void set_robot_code (const int code)
 {
-    set_checked (rcode_check_str, code);
+    rcode_check_str = set_checked (rcode_check_str, code);
 }
 
 /**
@@ -315,7 +315,7 @@ void set_robot_code (const int code)
  */
 void set_robot_comms (const int comms)
 {
-    set_checked (robot_check_str, comms);
+    robot_check_str = set_checked (robot_check_str, comms);
 }
 
 /**
@@ -333,5 +333,5 @@ void set_voltage (const double voltage)
  */
 void set_has_joysticks (const int joysticks)
 {
-    set_checked (stick_check_str, joysticks);
+    stick_check_str = set_checked (stick_check_str, joysticks);
 }

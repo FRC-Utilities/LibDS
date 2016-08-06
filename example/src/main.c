@@ -39,8 +39,8 @@ int main()
 {
     /* Initialize the DS and the application modules */
     DS_Init();
-    init_interface();
     init_joysticks();
+    init_interface();
 
     /* Load the 2016 protocol */
     DS_ConfigureProtocol (DS_GetProtocolFRC_2016());
@@ -51,10 +51,10 @@ int main()
 
     /* Start the event loop */
     while (running) {
-        process_events();   /* Listen for new DS events */
-        update_interface(); /* Re-draw the user interface */
-        update_joysticks(); /* Get joystick input */
-        DS_Sleep (5);       /* Give the CPU a break */
+        process_events();
+        update_interface();
+        update_joysticks();
+        DS_Sleep (5);
     }
 
     /* Close the DS and the application modules */
