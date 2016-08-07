@@ -37,11 +37,10 @@ int main() {
    VoodooInit();
    HeavyWizardry();
    
-   /* Load the 2016 protocol, the protocol can be safely
-    * changed in during runtime. 
+   /* Load the 2016 protocol, the protocol can be safely changed during runtime. 
     *
-    * Also, the LibDS can operate safely without a loaded 
-    * protocol, so there is no rush to call this function. 
+    * Also, the LibDS can operate safely without a loaded protocol, 
+    * so there is no rush to call this function. 
     */
    DS_ConfigureProtocol (DS_GetProtocolFRC_2016());
 }
