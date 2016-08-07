@@ -16,7 +16,8 @@ HEADERS += \
     $$PWD/include/DS_Socket.h \
     $$PWD/include/DS_Protocol.h \
     $$PWD/include/DS_DefaultProtocols.h \
-    $$PWD/include/DS_Timer.h
+    $$PWD/include/DS_Timer.h \
+    $$PWD/include/DS_Queue.h
 
 SOURCES += \
     $$PWD/src/protocols/frc_2014.c \
@@ -30,8 +31,9 @@ SOURCES += \
     $$PWD/src/protocols.c \
     $$PWD/src/socket.c \
     $$PWD/src/utils.c \
-    $$PWD/src/utils/crc32.c \
+    $$PWD/src/crc32.c \
     $$PWD/src/array.c \
-    $$PWD/src/timer.c
+    $$PWD/src/timer.c \
+    $$PWD/src/queue.c
     
 include ($$PWD/lib/SDS/SDS.pri)

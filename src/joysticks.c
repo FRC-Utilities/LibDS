@@ -22,6 +22,7 @@
  */
 
 #include "DS_Array.h"
+#include "DS_Events.h"
 #include "DS_Joysticks.h"
 
 /**
@@ -40,6 +41,17 @@ typedef struct _joystick {
  * Holds all the joysticks
  */
 static DS_Array array;
+
+/**
+ * Registers a joystick event to the LibDS event system
+ */
+static void register_event()
+{
+    DS_Event event;
+    event.joystick.count = DS_GetJoystickCount();
+    event.joystick.type = DS_JOYSTICK_COUNT_CHANGED;
+    DS_AddEvent (&event);
+}
 
 /**
  * Returns the joystick structure at the given index
@@ -157,6 +169,7 @@ int DS_GetJoystickButton (int joystick, int button)
 void DS_JoysticksReset()
 {
     DS_ArrayFree (&array);
+    register_event();
 }
 
 /**
@@ -198,6 +211,9 @@ void DS_JoysticksAdd (const int axes, const int hats, const int buttons)
 
     /* Register the new joystick in the joystick list */
     DS_ArrayInsert (&array, (void*) joystick);
+
+    /* Emit the joystick count changed event */
+    register_event();
 }
 
 /**

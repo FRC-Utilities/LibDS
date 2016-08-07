@@ -24,71 +24,51 @@
 #ifndef _LIB_DS_EVENTS_H
 #define _LIB_DS_EVENTS_H
 
-#include <stdint.h>
-
 #ifdef __cplusplus
 extern "C" {
 #endif
+
+#include <sds.h>
+#include <stdint.h>
+
+#include "DS_Types.h"
 
 /**
  * \brief The types of events that can be delivered.
  */
 typedef enum {
-    DS_FIRST_EVENT             = 0x000, /**< Unused (do not remove) */
-    DS_QUIT                    = 0x100, /**< User-requested quit */
-
-    /* FMS events */
-    DS_FMS_EVENT               = 0x200, /**< FMS event */
-    DS_FMS_CONNECTED,                   /**< DS connected with FMS */
-    DS_FMS_DISCONNECTED,                /**< DS disconnected from FMS */
-
-    /* Radio/bridge events */
-    DS_RADIO_EVENT             = 0x300, /**< Radio event */
-    DS_RADIO_CONNECTED,                 /**< DS connected with radio */
-    DS_RADIO_DISCONNECTED,              /**< DS disconnected from radio */
-
-    /* Joystick events */
-    DS_JOYSTICK_EVENT          = 0x400, /**< Joystick event */
-    DS_JOYSTICK_COUNT_CHANGED,          /**< Joystick count changed */
-
-    /* NetConsole events */
-    DS_NETCONSOLE_EVENT        = 0x500, /**< NetConsole event */
-    DS_NETCONSOLE_NEW_MESSAGE,          /**< DS received a message from NC */
-
-    /* Robot events */
-    DS_ROBOT_EVENT             = 0x600, /**< Robot event */
-    DS_ROBOT_ENABLED,                   /**< Robot has been enabled */
-    DS_ROBOT_DISABLED,                  /**< Robot has been disabled */
-    DS_ROBOT_REBOOTED,                  /**< DS-led robot reboot */
-    DS_ROBOT_CONNECTED,                 /**< DS conencted with robot */
-    DS_ROBOT_EXIT_ESTOP,                /**< Robot exited e-stop */
-    DS_ROBOT_CODE_LOADED,               /**< Robot code is available */
-    DS_ROBOT_DISCONNECTED,              /**< DS disconnected from robot */
-    DS_ROBOT_CODE_UNLOADED,             /**< Robot code is not available */
-    DS_ROBOT_CODE_RESTARTED,            /**< Robot code re-loaded */
-    DS_ROBOT_VOLTAGE_CHANGED,           /**< Robot voltage changed */
-    DS_ROBOT_CAN_UTIL_CHANGED,          /**< Robot CAN utilization updated */
-    DS_ROBOT_CPU_INFO_CHANGED,          /**< Robot CPU usage updated */
-    DS_ROBOT_RAM_INFO_CHANGED,          /**< Robot RAM usage updated */
-    DS_ROBOT_DISK_INFO_CHANGED,         /**< Robot disk usage updated */
-    DS_ROBOT_EMERGENCY_STOPPED,         /**< Robot entered e-stop */
-    DS_STATUS_STRING_CHANGED,           /**< Status label should be updated */
+    DS_NULL_EVENT               = 0x00,
+    DS_FMS_CONNECTED            = 0x01,
+    DS_FMS_DISCONNECTED         = 0x02,
+    DS_RADIO_CONNECTED          = 0x03,
+    DS_RADIO_DISCONNECTED       = 0x04,
+    DS_JOYSTICK_COUNT_CHANGED   = 0x05,
+    DS_NETCONSOLE_NEW_MESSAGE   = 0x06,
+    DS_ROBOT_ENABLED            = 0x07,
+    DS_ROBOT_DISABLED           = 0x08,
+    DS_ROBOT_MODE_CHANGED       = 0x09,
+    DS_ROBOT_REBOOTED           = 0x0a,
+    DS_ROBOT_CONNECTED          = 0x0b,
+    DS_ROBOT_EXIT_ESTOP         = 0x0c,
+    DS_ROBOT_CODE_LOADED        = 0x0d,
+    DS_ROBOT_DISCONNECTED       = 0x0e,
+    DS_ROBOT_CODE_UNLOADED      = 0x0f,
+    DS_ROBOT_CODE_RESTARTED     = 0x10,
+    DS_ROBOT_VOLTAGE_CHANGED    = 0x11,
+    DS_ROBOT_CAN_UTIL_CHANGED   = 0x12,
+    DS_ROBOT_CPU_INFO_CHANGED   = 0x13,
+    DS_ROBOT_RAM_INFO_CHANGED   = 0x14,
+    DS_ROBOT_DISK_INFO_CHANGED  = 0x15,
+    DS_ROBOT_STATION_CHANGED    = 0x16,
+    DS_ROBOT_EMERGENCY_STOPPED  = 0x17,
+    DS_STATUS_STRING_CHANGED    = 0x18,
 } DS_EventType;
-
-/**
- * \brief Fields shared by every event
- */
-typedef struct {
-    uint32_t type;      /**< Event type */
-    uint32_t timestamp; /**< Timestamp of event */
-} DS_CommonEvent;
 
 /**
  * \brief FMS event fields
  */
 typedef struct {
-    uint32_t type;      /**< ::DS_FMS_EVENT */
-    uint32_t timestamp; /**< Timestamp of event */
+    DS_EventType type;  /**< Event type */
     int connected;      /**< Set to \c 1 if FMS is connected */
 } DS_FMSEvent;
 
@@ -96,8 +76,7 @@ typedef struct {
  * \brief Radio event fields
  */
 typedef struct {
-    uint32_t type;      /**< ::DS_RADIO_EVENT */
-    uint32_t timestamp; /**< Timestamp of event */
+    DS_EventType type;  /**< Event type */
     int connected;      /**< Set to \c 1 if radio is connected */
 } DS_RadioEvent;
 
@@ -105,25 +84,24 @@ typedef struct {
  * \brief Robot event fields
  */
 typedef struct {
-    uint32_t type;      /**< ::DS_ROBOT_EVENT */
-    uint32_t timestamp; /**< Timestamp of event */
-    int code;           /**< Set to \c 1 if robot code is loaded */
-    int enabled;        /**< Set to \c 1 if the robot is enabled */
-    int can_util;       /**< Represents the robot's CAN utilization */
-    int cpu_usage;      /**< Represents the CPU usage (from 0 to 100) */
-    int ram_usage;      /**< Represents the RAM usage (from 0 to 100) */
-    int estopped;       /**< Set to \c 1 if robot is emergency stopped */
-    int connected;      /**< Set to \c 1 if robot is connected */
-    int disk_usage;     /**< Represents the disk usage (from 0 to 100) */
-    double voltage;     /**< Holds the current robot voltage */
+    DS_EventType type;  /**< Event type */
+    int code;            /**< Set to \c 1 if robot code is loaded */
+    int enabled;         /**< Set to \c 1 if the robot is enabled */
+    int can_util;        /**< Represents the robot's CAN utilization */
+    int cpu_usage;       /**< Represents the CPU usage (from 0 to 100) */
+    int ram_usage;       /**< Represents the RAM usage (from 0 to 100) */
+    int estopped;        /**< Set to \c 1 if robot is emergency stopped */
+    int connected;       /**< Set to \c 1 if robot is connected */
+    int disk_usage;      /**< Represents the disk usage (from 0 to 100) */
+    double voltage;      /**< Holds the current robot voltage */
+    DS_ControlMode mode; /**< Represents the current control mode */
 } DS_RobotEvent;
 
 /**
  * \brief Joystick event fields
  */
 typedef struct {
-    uint32_t type;      /**< ::DS_JOYSTICK_EVENT */
-    uint32_t timestamp; /**< Timestamp of event */
+    DS_EventType type;  /**< Event type */
     int count;          /**< Holds the new joystick count */
 } DS_JoystickEvent;
 
@@ -131,16 +109,15 @@ typedef struct {
  * \brief NetConsole event fields
  */
 typedef struct {
-    uint32_t type;      /**< ::DS_FMS_EVENT */
-    uint32_t timestamp; /**< Timestamp of event */
-    char* message;      /**< Holds the received message */
+    DS_EventType type;  /**< Event type */
+    sds message;        /**< Holds the received message */
 } DS_NetConsoleEvent;
 
 /**
  * \brief General event structure
  */
 typedef union {
-    uint32_t type;                 /**< Event type */
+    DS_EventType type;             /**< Event type */
     DS_FMSEvent fms;               /**< FMS event data */
     DS_RobotEvent robot;           /**< Robot event data */
     DS_RadioEvent radio;           /**< Radio event data */
@@ -150,6 +127,7 @@ typedef union {
 
 extern void Events_Init();
 extern void Events_Close();
+extern void DS_AddEvent (DS_Event* event);
 extern int DS_PollEvent (DS_Event* event);
 
 #ifdef __cplusplus

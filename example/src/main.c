@@ -74,7 +74,6 @@ static void process_events()
 {
     DS_Event event;
 
-    /* React to every DS event so far */
     while (DS_PollEvent (&event)) {
         switch (event.type) {
         case DS_JOYSTICK_COUNT_CHANGED:

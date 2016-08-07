@@ -21,6 +21,7 @@
  * DEALINGS IN THE SOFTWARE.
  */
 
+#include "DS_Queue.h"
 #include "DS_Timer.h"
 #include "DS_Utils.h"
 #include "DS_Config.h"
@@ -62,6 +63,11 @@ static int running = 0;
 static int fms_read = 0;
 static int radio_read = 0;
 static int robot_read = 0;
+
+/*
+ * Represents the event queue
+ */
+static DS_Queue events;
 
 /*
  * Holds a pointer to the current protocol, we use it to know if the
@@ -292,6 +298,9 @@ void Events_Init()
         pthread_t thread;
         int error = pthread_create (&thread, NULL, &run_event_loop, NULL);
 
+        /* Initialize the event queue (support 512 events) */
+        DS_QueueInit (&events, sizeof (DS_Event) * 512, sizeof (DS_Event));
+
         /* Quit if the thread fails to start */
         if (error) {
             fprintf (stderr, "Cannot create event thread (%d)", error);
@@ -306,14 +315,36 @@ void Events_Init()
 void Events_Close()
 {
     running = 0;
+    DS_QueueFree (&events);
 }
 
 /**
- * Adds the data of the last event in the given event \a info.
- * If there are no events, this function will return \c 0, otherwise, this
- * function will return \c 1
+ * Adds the given \a event to the event queue
  */
-int DS_PollEvent (DS_Event* info)
+void DS_AddEvent (DS_Event* event)
 {
+    if (event)
+        DS_QueuePush (&events, (void*) event);
+}
+
+/**
+ * Polls for currently pending events.
+ * Returns 1 if there are any pending events, or 0 if there are none available.
+ */
+int DS_PollEvent (DS_Event* event)
+{
+    if (!event)
+        event = malloc (sizeof (DS_Event));
+
+    if (DS_QueuePop (&events)) {
+        DS_Event* front = (DS_Event*) events.head;
+
+        if (front != NULL) {
+            memcpy (event, front, sizeof (DS_Event));
+            return 1;
+        }
+    }
+
+
     return 0;
 }

@@ -382,7 +382,7 @@ static sds add_joystick_data (sds packet)
 
     /* Append generated data to packet */
     packet = sdscatsds (packet, data);
-    //sdsfree (data);
+    sdsfree (data);
 
     /* Return the new reference */
     return packet;
