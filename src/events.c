@@ -53,7 +53,7 @@ static DS_Timer radio_recv_timer;
 static DS_Timer robot_recv_timer;
 
 /*
- * If set to \c 1, then the LibDS will send and receive packets
+ * If set to \c 1, then the main event loop will be allowed to run
  */
 static int running = 0;
 
@@ -65,7 +65,8 @@ static int radio_read = 0;
 static int robot_read = 0;
 
 /*
- * Represents the event queue
+ * Represents the event queue, which allows us to register DS events
+ * and help the client application know what is going on
  */
 static DS_Queue events;
 
@@ -339,17 +340,21 @@ void DS_AddEvent (DS_Event* event)
  */
 int DS_PollEvent (DS_Event* event)
 {
+    /* Allocate memory for the event if neccessary */
     if (!event)
         event = malloc (sizeof (DS_Event));
 
+    /* Get the first element of the pending events (FIFO) */
     if (DS_QueuePop (&events)) {
         DS_Event* front = (DS_Event*) events.head;
 
+        /* Copy the event data to the input pointer */
         if (front != NULL) {
             memcpy (event, front, sizeof (DS_Event));
             return 1;
         }
     }
 
+    /* Event info could not be extracted, break the client loop */
     return 0;
 }
