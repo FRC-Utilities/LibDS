@@ -103,7 +103,7 @@ void DS_QueueInit (DS_Queue* queue, size_t capacity, size_t item)
     queue->capacity = capacity;
 
     /* Initialize the data buffer */
-    queue->buffer = calloc (0, capacity * item);
+    queue->buffer = malloc (capacity * item);
     queue->buffer_end = (char*) queue->buffer + capacity * item;
 
     /* Initialize the first and last item pointer */

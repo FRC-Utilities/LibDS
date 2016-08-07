@@ -298,8 +298,14 @@ void Events_Init()
         pthread_t thread;
         int error = pthread_create (&thread, NULL, &run_event_loop, NULL);
 
-        /* Initialize the event queue (support 512 events) */
-        DS_QueueInit (&events, sizeof (DS_Event) * 512, sizeof (DS_Event));
+        /* Settings the queue capacity to one item works pretty good, but it is
+         * more prudent to allow more than one event to be stored at a given
+         * moment (basically, just in case...) */
+        size_t item_size = sizeof (DS_Event);
+        size_t capacity = item_size * 20;
+
+        /* Initialize the event queue (which allows us to register events) */
+        DS_QueueInit (&events, capacity, item_size);
 
         /* Quit if the thread fails to start */
         if (error) {
@@ -344,7 +350,6 @@ int DS_PollEvent (DS_Event* event)
             return 1;
         }
     }
-
 
     return 0;
 }

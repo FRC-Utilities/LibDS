@@ -400,7 +400,7 @@ void CFG_SetFMSCommunications (const int communications)
         DS_Event event;
         event.fms.connected = fms_communications;
         event.fms.type = fms_communications ? DS_FMS_CONNECTED :
-                                              DS_FMS_DISCONNECTED;
+                         DS_FMS_DISCONNECTED;
 
         DS_AddEvent (&event);
     }
@@ -419,7 +419,7 @@ void CFG_SetRadioCommunications (const int communications)
         DS_Event event;
         event.radio.connected = fms_communications;
         event.radio.type = radio_communications ? DS_RADIO_CONNECTED :
-                                                  DS_RADIO_DISCONNECTED;
+                           DS_RADIO_DISCONNECTED;
 
         DS_AddEvent (&event);
     }
@@ -435,7 +435,7 @@ void CFG_SetRobotCommunications (const int communications)
     if (robot_communications != boolean) {
         robot_communications = boolean;
         create_robot_event (robot_communications ? DS_ROBOT_CONNECTED :
-                                                   DS_ROBOT_DISCONNECTED);
+                            DS_ROBOT_DISCONNECTED);
     }
 }
 
