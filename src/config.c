@@ -239,8 +239,18 @@ DS_ControlMode CFG_GetControlMode()
  */
 void CFG_SetRobotCode (const int code)
 {
-    if (robot_code != code)
-        robot_code = code;
+    int boolean = to_boolean (code);
+
+    if (robot_code != boolean) {
+        robot_code = boolean;
+
+        if (robot_code)
+            create_robot_event (DS_ROBOT_CODE_LOADED);
+        else
+            create_robot_event (DS_ROBOT_CODE_UNLOADED);
+
+        create_robot_event (DS_STATUS_STRING_CHANGED);
+    }
 }
 
 /**
@@ -261,8 +271,13 @@ void CFG_SetRobotEnabled (const int enabled)
 
     if (robot_enabled != boolean) {
         robot_enabled = boolean;
-        create_robot_event (robot_enabled ? DS_ROBOT_ENABLED :
-                            DS_ROBOT_DISABLED);
+
+        if (robot_enabled)
+            create_robot_event (DS_ROBOT_ENABLED);
+        else
+            create_robot_event (DS_ROBOT_DISABLED);
+
+        create_robot_event (DS_STATUS_STRING_CHANGED);
     }
 }
 
@@ -340,6 +355,7 @@ void CFG_SetEmergencyStopped (const int stopped)
     if (emergency_stopped != boolean) {
         emergency_stopped = boolean;
         create_robot_event (DS_ROBOT_EMERGENCY_STOPPED);
+        create_robot_event (DS_STATUS_STRING_CHANGED);
     }
 }
 
@@ -384,6 +400,7 @@ void CFG_SetControlMode (const DS_ControlMode mode)
     if (control_mode != mode) {
         control_mode = mode;
         create_robot_event (DS_ROBOT_MODE_CHANGED);
+        create_robot_event (DS_STATUS_STRING_CHANGED);
     }
 }
 
@@ -399,8 +416,11 @@ void CFG_SetFMSCommunications (const int communications)
 
         DS_Event event;
         event.fms.connected = fms_communications;
-        event.fms.type = fms_communications ? DS_FMS_CONNECTED :
-                         DS_FMS_DISCONNECTED;
+
+        if (fms_communications)
+            event.fms.type = DS_FMS_CONNECTED;
+        else
+            event.fms.type = DS_FMS_DISCONNECTED;
 
         DS_AddEvent (&event);
     }
@@ -418,8 +438,11 @@ void CFG_SetRadioCommunications (const int communications)
 
         DS_Event event;
         event.radio.connected = fms_communications;
-        event.radio.type = radio_communications ? DS_RADIO_CONNECTED :
-                           DS_RADIO_DISCONNECTED;
+
+        if (radio_communications)
+            event.radio.type = DS_RADIO_CONNECTED;
+        else
+            event.radio.type = DS_RADIO_DISCONNECTED;
 
         DS_AddEvent (&event);
     }
@@ -434,8 +457,13 @@ void CFG_SetRobotCommunications (const int communications)
 
     if (robot_communications != boolean) {
         robot_communications = boolean;
-        create_robot_event (robot_communications ? DS_ROBOT_CONNECTED :
-                            DS_ROBOT_DISCONNECTED);
+
+        if (robot_communications)
+            create_robot_event (DS_ROBOT_CONNECTED);
+        else
+            create_robot_event (DS_ROBOT_DISCONNECTED);
+
+        create_robot_event (DS_STATUS_STRING_CHANGED);
     }
 }
 
@@ -481,4 +509,5 @@ void CFG_RobotWatchdogExpired()
     CFG_SetControlMode (DS_CONTROL_TELEOPERATED);
 
     create_robot_event (DS_ROBOT_DISCONNECTED);
+    create_robot_event (DS_STATUS_STRING_CHANGED);
 }

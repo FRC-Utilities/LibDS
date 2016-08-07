@@ -73,7 +73,6 @@ int main()
 static void process_events()
 {
     DS_Event event;
-
     while (DS_PollEvent (&event)) {
         switch (event.type) {
         case DS_JOYSTICK_COUNT_CHANGED:
