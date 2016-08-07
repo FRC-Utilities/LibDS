@@ -37,8 +37,10 @@ static void* get_user_input();
  */
 int main()
 {
-    /* Initialize the DS and the application modules */
+    /* Initialize the DS (and its event loop) */
     DS_Init();
+
+    /* Initialize the application modules */
     init_joysticks();
     init_interface();
 
@@ -49,12 +51,12 @@ int main()
     pthread_t thread;
     pthread_create (&thread, NULL, &get_user_input, NULL);
 
-    /* Start the event loop */
+    /* Run the application's event loop (unrelated to DS) */
     while (running) {
-        process_events();
-        update_interface();
-        update_joysticks();
-        DS_Sleep (5);
+        process_events();   /* Check for DS events */
+        update_interface(); /* Re-draw the user interface */
+        update_joysticks(); /* Get joystick input */
+        DS_Sleep (10);      /* A 100 Hz cycle is adequate */
     }
 
     /* Close the DS and the application modules */

@@ -14,9 +14,82 @@ You may find a lot of mistakes here, be it design choices or just stupid mistake
 
 I have made a simple command-line Driver Station with SDL and ncurses/pdcurses to demostrate the uses of LibDS. You can check it [here](example/).
 
-### Project Architecture
+### Quick Introduction
 
-My current idea is to design LibDS in a similar way that [SDL](http://libsdl.org) is designed. Whilst re-using some of the organization of the [original LibDS](https://github.com/frc-utilities/libds).
+#### Initialization
+
+The LibDS has its own event loop, which runs on a separate thread. To start the DS engine, you must call `DS_Init()`, which initializes all the modules of the LibDS (config, events, joysticks, etc).
+
+You should initialize the DS before initalizing any of your application components that interact with the DS. Check this example:
+
+```c
+#include <LibDS.h>
+
+int main() {
+/* Initialize the DS */
+DS_Init();
+
+/* Now proceed to initializing your applicaiton */
+.
+.
+. 
+}
+```
+
+#### Communication protocols
+
+After initializing the DS, you must load a protocol, which instructs the LibDS on the following processes:
+
+- How to create client packets:
+
+- DS-to-robot packets
+- DS-to-radio packets
+- DS-to-FMS packets
+
+- How to read and interpret incoming packets
+
+- How to connect to the different network targets:
+
+- Input and output ports
+- IP protocol type (UDP or TCP)
+- Which IP addresses to use
+
+- Last but not least, the sender timings, for example:
+
+- Send DS-to-robot packets every 20 ms
+- Send DS-to-FMS packets every 500 ms
+- Do not send DS-to-radio packets
+
+The LibDS has built-in support for the following protocols:
+
+- FRC 2009-2014
+- FRC 2015
+- FRC 2016 (same as 2015, but with different robot address)
+
+To load a protocol, use the `DS_ConfigureProtocol()` function. As a final note, you can also implement your own protocols and instruct he LibDS to use it. 
+
+
+#### Interacting with the DS events
+
+The LibDS registers the different events in a FIFO (First In, First Out) queue, to access the events, use the `DS_PollEvent()` function in a while loop. Each event has a "type" code, which allows you to know what kind of event are you dealing with. The easiest way to react to the DS events is the following (pseudo-code):
+
+```c
+DS_Event event;
+while (DS_PollEvent (&event)) {
+   switch (event.type) {
+     case DS_EVENT_X:
+       // react to x event
+       break;
+     case DS_EVENT_Y:
+       // react to y event
+       break;
+}
+}
+```
+
+The code above should be called periodically. Check the example project for more information.
+
+### Project Architecture
 
 #### 'Private' vs. 'Public' members
 
