@@ -37,10 +37,12 @@
  * This function is called in a separate thread for each timer that
  * we use.
  */
-static void* update_timer (DS_Timer* timer)
+static void* update_timer (void* ptr)
 {
-    if (!timer)
+    if (!ptr)
         return NULL;
+
+    DS_Timer* timer = (DS_Timer*) ptr;
 
     while (1) {
         if (timer->enabled && timer->time > 0 && !timer->expired) {
@@ -130,7 +132,7 @@ int DS_TimerInit (DS_Timer* timer, const int time, const int precision)
 
         /* Configure the thread */
         pthread_t thread;
-        int error = pthread_create (&thread, NULL, &update_timer, timer);
+        int error = pthread_create (&thread, NULL, &update_timer, (void*) timer);
 
         /* Warn the user if thread fails to start */
         if (error)
