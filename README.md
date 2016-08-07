@@ -41,27 +41,23 @@ int main() {
 After initializing the DS, you must load a protocol, which instructs the LibDS on the following processes:
 
 - How to create client packets:
-
-- DS-to-robot packets
-- DS-to-radio packets
-- DS-to-FMS packets
+   - DS-to-robot packets
+   - DS-to-radio packets
+   - DS-to-FMS packets
 
 - How to read and interpret incoming packets
 
 - How to connect to the different network targets:
-
-- Input and output ports
-- IP protocol type (UDP or TCP)
-- Which IP addresses to use
+   - Input and output ports
+   - IP protocol type (UDP or TCP)
+   - Which IP addresses to use
 
 - Last but not least, the sender timings, for example:
-
-- Send DS-to-robot packets every 20 ms
-- Send DS-to-FMS packets every 500 ms
-- Do not send DS-to-radio packets
+   - Send DS-to-robot packets every 20 ms
+   - Send DS-to-FMS packets every 500 ms
+   - Do not send DS-to-radio packets
 
 The LibDS has built-in support for the following protocols:
-
 - FRC 2009-2014
 - FRC 2015
 - FRC 2016 (same as 2015, but with different robot address)
