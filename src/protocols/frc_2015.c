@@ -337,29 +337,35 @@ static sds add_joystick_data (sds packet)
     int pos = 0;
     int length = 0;
 
+    /* Initialize the iterator */
+    int i = 0;
+
     /* Calculate size of josytick section */
-    for (int i = 0; i < DS_GetJoystickCount(); ++i)
+    for (i = 0; i < DS_GetJoystickCount(); ++i)
         length += get_joystick_size (i);
 
     /* Resize data string */
     data = sdsnewlen (NULL, length);
 
     /* Generate data for each joystick */
-    for (int i = 0; i < DS_GetJoystickCount(); ++i) {
+    for (i = 0; i < DS_GetJoystickCount(); ++i) {
         data [pos + 0] = get_joystick_size (i);
         data [pos + 1] = cTagJoystick;
 
+        /* Initialize joystick iterator */
+        int j = 0;
+
         /* Add axis data (and automatically increase offset) */
         data [pos + 2] = DS_GetJoystickNumAxes (i);
-        for (int a = 0; a < DS_GetJoystickNumAxes (i); ++a) {
-            data [pos + 3 + a] = (uint8_t) (DS_GetJoystickAxis (i, a) * 127);
+        for (j = 0; j < DS_GetJoystickNumAxes (i); ++j) {
+            data [pos + 3 + j] = (uint8_t) (DS_GetJoystickAxis (i, j) * 127);
             ++pos;
         }
 
         /* Generate button data */
         uint8_t button_flags = 0;
-        for (int b = 0; b < DS_GetJoystickNumButtons (i); ++b)
-            button_flags += DS_GetJoystickButton (i, b) ? pow (2, b) : 0;
+        for (j = 0; j < DS_GetJoystickNumButtons (i); ++j)
+            button_flags += DS_GetJoystickButton (i, j) ? pow (2, j) : 0;
 
         /* Add button data */
         pos += 2;
@@ -367,12 +373,12 @@ static sds add_joystick_data (sds packet)
         data [pos + 2] = (button_flags & 0xff00) >> 8;
         data [pos + 3] = (button_flags & 0xff);
 
-        /* Add hat data (and automatically increase offset) */
+        /* Increase offset and add hat data */
         pos += 4;
         data [pos] = DS_GetJoystickNumHats (i);
-        for (int h = 0; h < DS_GetJoystickNumHats (i); ++h) {
-            data [pos + 1] = (DS_GetJoystickHat (i, h) & 0xff00) >> 8;
-            data [pos + 2] = (DS_GetJoystickHat (i, h) & 0xff);
+        for (j = 0; j < DS_GetJoystickNumHats (i); ++j) {
+            data [pos + 1] = (DS_GetJoystickHat (i, j) & 0xff00) >> 8;
+            data [pos + 2] = (DS_GetJoystickHat (i, j) & 0xff);
             pos += 2;
         }
 

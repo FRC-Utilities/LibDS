@@ -64,7 +64,8 @@ static void register_joysticks()
 {
     DS_JoysticksReset();
 
-    for (int i = 0; i < SDL_NumJoysticks(); ++i) {
+    int i;
+    for (i = 0; i < SDL_NumJoysticks(); ++i) {
         SDL_Joystick* joystick = SDL_JoystickOpen (i);
 
         if (joystick) {
@@ -177,7 +178,8 @@ void init_joysticks()
  */
 void close_joysticks()
 {
-    for (int i = 0; i < SDL_NumJoysticks(); ++i)
+    int i;
+    for (i = 0; i < SDL_NumJoysticks(); ++i)
         SDL_JoystickClose (SDL_JoystickOpen (i));
 
     SDL_Quit();

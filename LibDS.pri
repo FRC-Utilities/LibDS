@@ -4,9 +4,6 @@ INCLUDEPATH += $$PWD/include
     LIBS += -pthread
 }
 
-QMAKE_CFLAGS_DEBUG = -std=gnu99
-QMAKE_CFLAGS_RELEASE = -std=gnu99
-
 HEADERS += \
     $$PWD/include/DS_Client.h \
     $$PWD/include/DS_Config.h \

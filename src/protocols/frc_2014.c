@@ -216,18 +216,22 @@ static void add_joystick_data (sds data, const int offset)
         return;
 
     /* Add data for every joystick */
+    int i = 0;
     int pos = offset;
-    for (int i = 0; i < protocol->max_joysticks; ++i) {
+    for (i = 0; i < protocol->max_joysticks; ++i) {
+        /* Initialize the iterator */
+        int j = 0;
+
         /* Add axis data */
-        for (int a = 0; a < protocol->max_axis_count; ++a) {
-            data [pos] = (uint8_t) (DS_GetJoystickAxis (i, a) * 127);
+        for (j = 0; j < protocol->max_axis_count; ++j) {
+            data [pos] = (uint8_t) (DS_GetJoystickAxis (i, j) * 127);
             ++pos;
         }
 
         /* Generate button data */
         uint8_t button_flags = 0;
-        for (int b = 0; b < DS_GetJoystickNumButtons (i); ++b)
-            button_flags += DS_GetJoystickButton (i, b) ? pow (2, b) : 0;
+        for (j = 0; j < DS_GetJoystickNumButtons (i); ++j)
+            button_flags += DS_GetJoystickButton (i, j) ? pow (2, j) : 0;
 
         /* Add button data */
         data [pos + 0] = (button_flags & 0xff00) >> 8;

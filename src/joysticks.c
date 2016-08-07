@@ -179,22 +179,25 @@ void DS_JoysticksReset()
  */
 void DS_JoysticksAdd (const int axes, const int hats, const int buttons)
 {
+    /* Initialize the iterator */
+    int iterator = 0;
+
     /* Initialize the joystick values */
     int* v_hats    = (int*) malloc (sizeof (int) * hats);
     int* v_buttons = (int*) malloc (sizeof (int) * buttons);
     double* v_axes = (double*) malloc (sizeof (double) * axes);
 
     /* Ensure that hat angles are neutral */
-    for (int i = 0; i < hats; ++i)
-        v_hats [i] = 0;
+    for (iterator = 0; iterator < hats; ++iterator)
+        v_hats [iterator] = 0;
 
     /* Ensure that axis values are neutral */
-    for (int i = 0; i < axes; ++i)
-        v_axes [i] = 0;
+    for (iterator = 0; iterator < axes; ++iterator)
+        v_axes [iterator] = 0;
 
     /* Ensure that button states are neutral */
-    for (int i = 0; i < buttons; ++i)
-        v_buttons [i] = 0;
+    for (iterator = 0; iterator < buttons; ++iterator)
+        v_buttons [iterator] = 0;
 
     /* Allocate memory for a new joystick */
     DS_Joystick* joystick = (DS_Joystick*) malloc (sizeof (DS_Joystick));
