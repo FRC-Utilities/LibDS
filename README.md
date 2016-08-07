@@ -1,5 +1,8 @@
 # LibDS C
 
+[![Build Status](https://img.shields.io/travis/FRC-Utilities/LibDS-C.svg?style=flat-square)](https://travis-ci.org/FRC-Utilities/LibDS-C)
+[![Donate button](https://img.shields.io/badge/bitcoin-donate-brightgreen.svg?style=flat-square)](https://blockchain.info/address/1K85yLxjuqUmhkjP839R7C23XFhSxrefMx "Donate once-off to this project using BitCoin")
+
 > **Warning:** This project will be subject to many changes (and complete rewrites) as I learn new things about C.
 
 > If you are interested in learning how the Driver Station works, check the [original LibDS](https://github.com/frc-utilities/libds). It contains everything needed to operate FRC 2014 and 2015/2016 robots.
