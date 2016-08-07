@@ -32,10 +32,18 @@ int main() {
    /* Initialize the DS */
    DS_Init();
 
-   /* Now proceed to initializing your applicaiton */
-   .
-   .
-   . 
+   /* Now proceed to initializing your application */
+   DeepMagic();
+   VoodooInit();
+   HeavyWizardry();
+   
+   /* Load the 2016 protocol, the protocol can be safely
+    * changed in during runtime. 
+    *
+    * Also, the LibDS can operate safely without a loaded 
+    * protocol, so there is no rush to call this function. 
+    */
+   DS_ConfigureProtocol (DS_GetProtocolFRC_2016());
 }
 ```
 
