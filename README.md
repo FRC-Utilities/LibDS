@@ -72,7 +72,7 @@ The LibDS has built-in support for the following protocols:
 - FRC 2015
 - FRC 2016 (same as 2015, but with different robot address)
 
-To load a protocol, use the `DS_ConfigureProtocol()` function. As a final note, you can also implement your own protocols and instruct he LibDS to use it. 
+To load a protocol, use the `DS_ConfigureProtocol()` function. As a final note, you can also implement your own protocols and instruct the LibDS to use it. 
 
 
 #### Interacting with the DS events
@@ -93,7 +93,51 @@ while (DS_PollEvent (event)) {
 }
 ```
 
-The code above must be called periodically. Check the example project for more information.
+The code above must be called periodically. Here is a (functional) example:
+
+```c
+#include <LibDS.h>
+#include <stdio.h>
+
+static void process_events();
+
+int main() {
+   DS_Init();
+   DS_ConfigureProtocol (DS_GetProtocolFRC_2016());
+   
+   while (1) {
+      process_events();
+      DS_Sleep (10);
+   }
+   
+   return EXIT_SUCCESS;
+}
+
+void process_events() {
+   DS_Event event;
+   while (DS_PollEvent (&event)) {
+      switch (event.type) {
+      case DS_ROBOT_ENABLED:
+         printf ("Robot enabled\n");
+         break;
+      case DS_ROBOT_DISABLED:
+         printf ("Robot disabled\n");
+         break;
+      case DS_ROBOT_CONNECTED:
+         printf ("Connected to robot\n");
+         break;
+      case DS_ROBOT_DISCONNECTED:
+         printf ("Disconnected to robot\n");
+         break;
+      case DS_ROBOT_VOLTAGE_CHANGED:
+         printf ("Robot voltage set to: %f\n", event.robot.voltage);
+         break;
+      default:
+         break;
+      }
+   }
+}
+```
 
 ### Project Architecture
 
