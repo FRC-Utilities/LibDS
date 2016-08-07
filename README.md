@@ -26,13 +26,13 @@ You should initialize the DS before initalizing any of your application componen
 #include <LibDS.h>
 
 int main() {
-/* Initialize the DS */
-DS_Init();
+   /* Initialize the DS */
+   DS_Init();
 
-/* Now proceed to initializing your applicaiton */
-.
-.
-. 
+   /* Now proceed to initializing your applicaiton */
+   .
+   .
+   . 
 }
 ```
 
@@ -71,23 +71,23 @@ To load a protocol, use the `DS_ConfigureProtocol()` function. As a final note, 
 
 #### Interacting with the DS events
 
-The LibDS registers the different events in a FIFO (First In, First Out) queue, to access the events, use the `DS_PollEvent()` function in a while loop. Each event has a "type" code, which allows you to know what kind of event are you dealing with. The easiest way to react to the DS events is the following (pseudo-code):
+The LibDS registers the different events in a FIFO (First In, First Out) queue, to access the events, use the `DS_PollEvent()` function in a while loop. Each event has a "type" code, which allows you to know what kind of event are you dealing with. 
+
+The easiest way to react to the DS events is the following (pseudo-code):
 
 ```c
 DS_Event event;
-while (DS_PollEvent (&event)) {
+while (DS_PollEvent (event)) {
    switch (event.type) {
-     case DS_EVENT_X:
-       // react to x event
-       break;
-     case DS_EVENT_Y:
-       // react to y event
-       break;
-}
+      case DS_EVENT_X:
+         // react to x event
+      case DS_EVENT_Y:
+         // react to y event
+   }
 }
 ```
 
-The code above should be called periodically. Check the example project for more information.
+The code above must be called periodically. Check the example project for more information.
 
 ### Project Architecture
 
