@@ -277,7 +277,7 @@ static uint8_t get_joystick_size (const int joystick)
  */
 static sds add_timezone_data (sds packet)
 {
-    sds data = sdsnewlen (NULL, 12);
+    sds data = sdsgrowzero (sdsempty(), 12);
 
     /* Get current time */
     time_t rt;
@@ -285,10 +285,9 @@ static sds add_timezone_data (sds packet)
 
     /* Get timezone */
 #if defined _WIN32
-    sds tz = "ctd";
+    sds tz = "CST";
 #else
-    sds tz = sdsempty();
-    strcpy (tz, timeinfo->tm_zone);
+    sds tz = sdscpy (sdsempty(), timeinfo->tm_zone);
 #endif
 
     /* Encode date/time in datagram */
@@ -308,15 +307,14 @@ static sds add_timezone_data (sds packet)
     data [11] = cTagTimezone;
 
     /* Add timezone string */
-    sdscat (data, tz);
+    data = sdscatsds (data, tz);
 
     /* Append timezone data to the packet */
-    sdscat (packet, data);
+    packet = sdscatsds (packet, data);
 
     /* Free allocated memory */
     sdsfree (tz);
     sdsfree (data);
-    free (timeinfo);
 
     /* Return the new reference */
     return packet;
@@ -345,7 +343,7 @@ static sds add_joystick_data (sds packet)
         length += get_joystick_size (i);
 
     /* Resize data string */
-    data = sdsnewlen (NULL, length);
+    data = sdsgrowzero (sdsempty(), length);
 
     /* Generate data for each joystick */
     for (i = 0; i < DS_GetJoystickCount(); ++i) {
