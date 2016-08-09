@@ -82,8 +82,8 @@ sds DS_GetCustomRobotAddress()
 
 /**
  * Returns the protocol-set FMS address
- * This value may be empty, if that's the case, then 
- * the Driver Station will use the addresses specified 
+ * This value may be empty, if that's the case, then
+ * the Driver Station will use the addresses specified
  * by the currently loaded protocol.
  */
 sds DS_GetDefaultFMSAddress()
@@ -93,8 +93,8 @@ sds DS_GetDefaultFMSAddress()
 
 /**
  * Returns the protocol-set radio address
- * This value may be empty, if that's the case, then 
- * the Driver Station will use the addresses specified 
+ * This value may be empty, if that's the case, then
+ * the Driver Station will use the addresses specified
  * by the currently loaded protocol.
  */
 sds DS_GetDefaultRadioAddress()
@@ -104,8 +104,8 @@ sds DS_GetDefaultRadioAddress()
 
 /**
  * Returns the protocol-set robot address
- * This value may be empty, if that's the case, then 
- * the Driver Station will use the addresses specified 
+ * This value may be empty, if that's the case, then
+ * the Driver Station will use the addresses specified
  * by the currently loaded protocol.
  */
 sds DS_GetDefaultRobotAddress()
@@ -145,7 +145,7 @@ sds DS_GetAppliedRadioAddress()
 
 /**
  * Returns the address used to communicate with the robot.
- * If the user-set robot address is not empty, then this 
+ * If the user-set robot address is not empty, then this
  * function will return the user-set address.
  * Otherwise, this function will return the address specified
  * by the currently loaded protocol.
@@ -160,7 +160,7 @@ sds DS_GetAppliedRobotAddress()
 
 /**
  * Returns the current status of the robot/DS.
- * This string is meant to be used directly by the clien application, 
+ * This string is meant to be used directly by the clien application,
  * the DS has no real use for it.
  *
  * Possible return values are:
@@ -169,7 +169,7 @@ sds DS_GetAppliedRobotAddress()
  *    - Emergency Stopped
  *    - Teleoperated Enabled/Disabled
  *    - Autonomous Enabled/Disabled
- *    - Test Enabled/Disabled 
+ *    - Test Enabled/Disabled
  */
 sds DS_GetStatusString()
 {
