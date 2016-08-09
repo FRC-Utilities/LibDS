@@ -82,6 +82,9 @@ sds DS_GetCustomRobotAddress()
 
 /**
  * Returns the protocol-set FMS address
+ * This value may be empty, if that's the case, then 
+ * the Driver Station will use the addresses specified 
+ * by the currently loaded protocol.
  */
 sds DS_GetDefaultFMSAddress()
 {
@@ -90,6 +93,9 @@ sds DS_GetDefaultFMSAddress()
 
 /**
  * Returns the protocol-set radio address
+ * This value may be empty, if that's the case, then 
+ * the Driver Station will use the addresses specified 
+ * by the currently loaded protocol.
  */
 sds DS_GetDefaultRadioAddress()
 {
@@ -98,6 +104,9 @@ sds DS_GetDefaultRadioAddress()
 
 /**
  * Returns the protocol-set robot address
+ * This value may be empty, if that's the case, then 
+ * the Driver Station will use the addresses specified 
+ * by the currently loaded protocol.
  */
 sds DS_GetDefaultRobotAddress()
 {
@@ -105,7 +114,11 @@ sds DS_GetDefaultRobotAddress()
 }
 
 /**
- * Returns the address used to communicate with the FMS
+ * Returns the address used to communicate with the FMS.
+ * If the user-set FMS address is not empty, then this
+ * function will return the user-set address.
+ * Otherwise, this function will return the address specified
+ * by the currently loaded protocol.
  */
 sds DS_GetAppliedFMSAddress()
 {
@@ -116,7 +129,11 @@ sds DS_GetAppliedFMSAddress()
 }
 
 /**
- * Returns the address used to communicate with the radios
+ * Returns the address used to communicate with the bridge.
+ * If the user-set radio address is not empty, then this
+ * function will return the user-set address.
+ * Otherwise, this function will return the address specified
+ * by the currently loaded protocol.
  */
 sds DS_GetAppliedRadioAddress()
 {
@@ -127,7 +144,11 @@ sds DS_GetAppliedRadioAddress()
 }
 
 /**
- * Returns the address used to communicate with the robot
+ * Returns the address used to communicate with the robot.
+ * If the user-set robot address is not empty, then this 
+ * function will return the user-set address.
+ * Otherwise, this function will return the address specified
+ * by the currently loaded protocol.
  */
 sds DS_GetAppliedRobotAddress()
 {
@@ -139,7 +160,16 @@ sds DS_GetAppliedRobotAddress()
 
 /**
  * Returns the current status of the robot/DS.
- * This string is meant to be used by the client application
+ * This string is meant to be used directly by the clien application, 
+ * the DS has no real use for it.
+ *
+ * Possible return values are:
+ *    - No Robot Communications
+ *    - No Robot Code
+ *    - Emergency Stopped
+ *    - Teleoperated Enabled/Disabled
+ *    - Autonomous Enabled/Disabled
+ *    - Test Enabled/Disabled 
  */
 sds DS_GetStatusString()
 {

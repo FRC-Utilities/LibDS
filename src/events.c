@@ -299,9 +299,7 @@ void Events_Init()
         pthread_t thread;
         int error = pthread_create (&thread, NULL, &run_event_loop, NULL);
 
-        /* Settings the queue capacity to one item works pretty good, but it is
-         * more prudent to allow more than one event to be stored at a given
-         * moment (basically, just in case...) */
+        /* Allow the queue to hold 20 items at a given moment */
         size_t item_size = sizeof (DS_Event);
         size_t capacity = item_size * 20;
 
