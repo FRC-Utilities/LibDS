@@ -156,8 +156,14 @@ void DS_SocketClose (DS_Socket* ptr)
     /* Close the sockets */
     if (ptr->initialized) {
         ptr->initialized = 0;
+
+#ifdef WIN32
         closesocket (ptr->input_socket);
         closesocket (ptr->output_socket);
+#else
+        close (ptr->input_socket);
+        close (ptr->output_socket);
+#endif
     }
 }
 
