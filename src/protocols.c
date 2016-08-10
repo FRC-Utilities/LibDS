@@ -21,6 +21,7 @@
  * DEALINGS IN THE SOFTWARE.
  */
 
+#include "DS_Socket.h"
 #include "DS_Protocol.h"
 
 /**
@@ -41,17 +42,28 @@ DS_Protocol* DS_CurrentProtocol()
  */
 void Protocol_Close()
 {
-    if (protocol)
+    if (protocol) {
+        DS_SocketClose (&protocol->fms_socket);
+        DS_SocketClose (&protocol->radio_socket);
+        DS_SocketClose (&protocol->robot_socket);
+        DS_SocketClose (&protocol->netconsole_socket);
+
         free (protocol);
+    }
 }
 
 /**
  * De-allocates the current protocol and loads the given \a protocol
  */
-void DS_ConfigureProtocol (DS_Protocol* p)
+void DS_ConfigureProtocol (DS_Protocol* ptr)
 {
-    if (p) {
-        free (protocol);
-        protocol = p;
+    if (ptr) {
+        Protocol_Close();
+
+        protocol = ptr;
+        DS_SocketOpen (&protocol->fms_socket);
+        DS_SocketOpen (&protocol->radio_socket);
+        DS_SocketOpen (&protocol->robot_socket);
+        DS_SocketOpen (&protocol->netconsole_socket);
     }
 }

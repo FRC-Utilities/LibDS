@@ -29,6 +29,7 @@
 void DS_Init()
 {
     Client_Init();
+    Sockets_Init();
     Joysticks_Init();
 
     Events_Init();

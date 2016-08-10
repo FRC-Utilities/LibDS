@@ -68,7 +68,7 @@ typedef struct _protocol {
 extern DS_Protocol* DS_CurrentProtocol();
 
 extern void Protocol_Close();
-extern void DS_ConfigureProtocol (DS_Protocol* p);
+extern void DS_ConfigureProtocol (DS_Protocol* ptr);
 
 #ifdef __cplusplus
 }

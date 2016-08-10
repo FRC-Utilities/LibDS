@@ -759,6 +759,7 @@ DS_Protocol* DS_GetProtocolFRC_2015()
         fms_socket.input_port = 1120;
         fms_socket.output_port = 1160;
         fms_socket.type = DS_SOCKET_UDP;
+        fms_socket.address = fms_address();
 
         /* Define radio socket properties */
         DS_Socket radio_socket;
@@ -770,6 +771,7 @@ DS_Protocol* DS_GetProtocolFRC_2015()
         robot_socket.input_port = 1150;
         robot_socket.output_port = 1110;
         robot_socket.type = DS_SOCKET_UDP;
+        robot_socket.address = robot_address();
 
         /* Define netconsole socket properties */
         DS_Socket netconsole_socket;

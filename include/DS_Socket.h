@@ -24,28 +24,41 @@
 #ifndef _LIB_DS_SOCKET_H
 #define _LIB_DS_SOCKET_H
 
-#include <sds.h>
-#include <stdint.h>
-#include <stdlib.h>
-
 #ifdef __cplusplus
 extern "C" {
 #endif
 
+#include <sds.h>
+#include <stdint.h>
+#include <stdlib.h>
+
+#ifdef WIN32
+#include <winsock2.h>
+#include <ws2tcpip.h>
+#else
+#include <sys/types.h>
+#include <sys/socket.h>
+#endif
+
+#include "DS_Types.h"
+
 typedef struct _socket {
     sds address;
     int disabled;
-    int descriptor;
     int initialized;
-    unsigned short int type;
+    DS_SocketType type;
+    uintptr_t input_socket;
+    uintptr_t output_socket;
+    struct sockaddr_in sockaddr;
     unsigned short int input_port;
     unsigned short int output_port;
 } DS_Socket;
 
-extern int DS_SocketOpen (DS_Socket* p);
-extern int DS_SocketClose (DS_Socket* p);
-extern int DS_SocketSend (DS_Socket* p, sds data);
-extern int DS_SocketRead (DS_Socket* p, sds data);
+extern void Sockets_Init();
+extern int DS_SocketOpen (DS_Socket* ptr);
+extern void DS_SocketClose (DS_Socket* ptr);
+extern int DS_SocketSend (DS_Socket* ptr, sds buf);
+extern int DS_SocketRead (DS_Socket* ptr, sds buf);
 
 #ifdef __cplusplus
 }

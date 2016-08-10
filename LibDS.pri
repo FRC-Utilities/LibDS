@@ -4,6 +4,10 @@ INCLUDEPATH += $$PWD/include
     LIBS += -pthread
 }
 
+win32* {
+    LIBS += -lws2_32
+}
+
 HEADERS += \
     $$PWD/include/DS_Client.h \
     $$PWD/include/DS_Config.h \
