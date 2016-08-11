@@ -77,24 +77,24 @@ static int get_type (DS_Socket* ptr)
  * Standard socket error report function
  *
  * \param ptr pointer to a \c DS_Socket structure
- * \param message the message to show
+ * \param msg the message to show
  * \param error the error code
  */
-static void error (DS_Socket* ptr, const sds message, int error)
+static void error (DS_Socket* ptr, const sds msg, int error)
 {
-    printf ("Socket %p (%s): %s %d\n", ptr, ptr->address, message, error);
+    fprintf (stderr, "Socket %p (%s): %s %d\n", ptr, ptr->address, msg, error);
 }
 
 /**
  * Standard socket error report function
  *
  * \param ptr pointer to a \c DS_Socket structure
- * \param message the message to show
+ * \param msg the message to show
  * \param error the error string
  */
-static void error_str (DS_Socket* ptr, const sds message, const char* error)
+static void error_str (DS_Socket* ptr, const sds msg, const char* error)
 {
-    printf ("Socket %p (%s): %s %s\n", ptr, ptr->address, message, error);
+    fprintf (stderr, "Socket %p (%s): %s %s\n", ptr, ptr->address, msg, error);
 }
 
 /**
@@ -232,7 +232,7 @@ static void get_remote_address (DS_Socket* ptr, struct addrinfo* addr)
     sprintf (port, "%d", ptr->output_port);
 
     /* Get the address info */
-    err = getaddrinfo (ptr->address, port, &hints, &info);
+    err = getaddrinfo (NULL, port, &hints, &info);
 
     /* Something went wrong */
     if (err) {
@@ -273,22 +273,16 @@ static int open_socket (DS_Socket* ptr, int is_input)
         return 0;
 
     /* Socket is already initialized, abort */
-    if (ptr->initialized == 1) {
-        printf ("Socket %p is already initialized!\n", ptr);
+    if (ptr->initialized == 1)
         return 0;
-    }
 
     /* Socket is disabled, abort */
-    if (ptr->disabled) {
-        printf ("Socket %p is disabled\n", ptr);
+    if (ptr->disabled == 1)
         return 0;
-    }
 
     /* Ensure that address is valid */
-    if (DS_StringIsEmpty (ptr->address)) {
+    if (DS_StringIsEmpty (ptr->address))
         ptr->address = sdsnew ("0.0.0.0");
-        printf ("Socket %p: address set to 0.0.0.0\n", ptr);
-    }
 
     /* Open the socket descriptor */
     int sockfd = socket (get_domain(), get_type (ptr), 0);
@@ -320,7 +314,7 @@ static int open_socket (DS_Socket* ptr, int is_input)
         }
 
         /* Allow 5 connections on the incoming queue */
-        if (listen (sockfd, 5)) {
+        if (listen (sockfd, 5) != 0) {
             error (ptr, "listen error", errno);
             return 0;
         }
@@ -333,6 +327,12 @@ static int open_socket (DS_Socket* ptr, int is_input)
 
         /* Save the descriptor to the socket structure */
         ptr->socket_out = sockfd;
+
+        /* Connect the socket */
+        if (connect (sockfd, addr.ai_addr, addr.ai_addrlen) != 0) {
+            error (ptr, "connection error", errno);
+            return 0;
+        }
     }
 
     return 1;
@@ -363,7 +363,7 @@ void Sockets_Init()
 {
 #ifdef WIN32
     if (WSAStartup (MAKEWORD (2, 2), &socket_data) != 0) {
-        printf ("Cannot initialize WSA, error code: %d", WSAGetLastError());
+        fprintf (stderr, "Cannot initialize WSA, error: %d", WSAGetLastError());
         exit (EXIT_FAILURE);
     }
 #endif
@@ -383,6 +383,8 @@ void DS_SocketOpen (DS_Socket* ptr)
     /* Initialize socket in another thread */
     if (ptr->initialized != 1) {
         ptr->accepted = 0;
+        ptr->initialized = 0;
+
         pthread_t thread;
         pthread_create (&thread, NULL, &initialize_socket, (void*) ptr);
     }
@@ -396,10 +398,15 @@ void DS_SocketOpen (DS_Socket* ptr)
 void DS_SocketClose (DS_Socket* ptr)
 {
     if (ptr) {
-        ptr->initialized = 0;
         close_socket (ptr->socket_in);
         close_socket (ptr->socket_out);
         close_socket (ptr->socket_tmp);
+
+        ptr->accepted = 0;
+        ptr->socket_in = 0;
+        ptr->socket_out = 0;
+        ptr->socket_tmp = 0;
+        ptr->initialized = 0;
     }
 }
 

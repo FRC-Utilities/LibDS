@@ -34,6 +34,12 @@ static int running = 1;
 static void process_events();
 static void* get_user_input();
 
+#ifdef WIN32
+    #define CLEAR() system ("cls")
+#else
+    #define CLEAR() system ("clear")
+#endif
+
 /**
  * Main entry point of the application
  */
@@ -54,6 +60,7 @@ int main()
     pthread_create (&thread, NULL, &get_user_input, NULL);
 
     /* Run the application's event loop (unrelated to DS) */
+    CLEAR();
     while (running) {
         process_events();   /* Check for DS events */
         update_interface(); /* Re-draw the user interface */
@@ -65,6 +72,9 @@ int main()
     DS_Close();
     close_interface();
     close_joysticks();
+
+    /* Clear screen */
+    CLEAR();
 
     /* Exit the application */
     return EXIT_SUCCESS;

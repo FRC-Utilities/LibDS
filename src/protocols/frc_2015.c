@@ -775,6 +775,7 @@ DS_Protocol* DS_GetProtocolFRC_2015()
 
         /* Define netconsole socket properties */
         DS_Socket netconsole_socket;
+        netconsole_socket.address = "";
         netconsole_socket.disabled = 0;
         netconsole_socket.broadcast = 1;
         netconsole_socket.input_port = 6666;

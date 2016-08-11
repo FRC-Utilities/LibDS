@@ -32,7 +32,10 @@
  */
 int DS_StringIsEmpty (const sds string)
 {
-    return ((string[0] == '\0') || (!string)) || (sdscmp (string, " ") == 0);
+    if (string != NULL)
+        return sdslen (string) < 1;
+
+    return 0;
 }
 
 /**
