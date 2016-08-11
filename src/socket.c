@@ -25,6 +25,7 @@
 #include "DS_Socket.h"
 
 #include <sds.h>
+#include <pthread.h>
 #include <stdio.h>
 #include <string.h>
 
@@ -54,6 +55,7 @@ static void close_socket (int descriptor)
 #ifdef WIN32
     closesocket (descriptor);
 #else
+    shutdown (descriptor, 2);
     close (descriptor);
 #endif
 }
@@ -69,6 +71,30 @@ static int get_type (DS_Socket* ptr)
         return SOCK_STREAM;
 
     return SOCK_DGRAM;
+}
+
+/**
+ * Standard socket error report function
+ *
+ * \param ptr pointer to a \c DS_Socket structure
+ * \param message the message to show
+ * \param error the error code
+ */
+static void error (DS_Socket* ptr, const sds message, int error)
+{
+    printf ("Socket %p (%s): %s %d\n", ptr, ptr->address, message, error);
+}
+
+/**
+ * Standard socket error report function
+ *
+ * \param ptr pointer to a \c DS_Socket structure
+ * \param message the message to show
+ * \param error the error string
+ */
+static void error_str (DS_Socket* ptr, const sds message, const char* error)
+{
+    printf ("Socket %p (%s): %s %s\n", ptr, ptr->address, message, error);
 }
 
 /**
@@ -103,7 +129,7 @@ static int set_socket_flags (DS_Socket* ptr, int sock)
                                  &name, sizeof (name));
 
     if (reuse_port != 0) {
-        printf ("Socket %p: error %d while setting SO_REUSEPORT\n", ptr, errno);
+        error (ptr, "cannot set SO_REUSEPORT", errno);
         return 0;
     }
 
@@ -114,7 +140,7 @@ static int set_socket_flags (DS_Socket* ptr, int sock)
                                     &name, sizeof (name));
 
         if (broadcast != 0) {
-            printf ("Socket %p error %d while settings SO_BROADCAST\n", ptr, errno);
+            error (ptr, "cannot set SO_BROADCAST", errno);
             return 0;
         }
     }
@@ -158,7 +184,9 @@ static void accept_connection (DS_Socket* ptr)
     if (!ptr)
         return;
 
-    if (ptr->initialized && !ptr->accepted) {
+    if ((ptr->initialized == 1) && (ptr->accepted != 1)) {
+        ptr->accepted = 0;
+
         if (ptr->type == DS_SOCKET_TCP) {
             struct sockaddr addr;
             socklen_t addr_size = sizeof (addr);
@@ -189,7 +217,7 @@ static void accept_connection (DS_Socket* ptr)
  */
 static void get_remote_address (DS_Socket* ptr, struct addrinfo* addr)
 {
-    int error;
+    int err;
     int sockfd;
     struct addrinfo hints, *info;
     memset (&hints, 0, sizeof hints);
@@ -204,11 +232,11 @@ static void get_remote_address (DS_Socket* ptr, struct addrinfo* addr)
     sprintf (port, "%d", ptr->output_port);
 
     /* Get the address info */
-    error = getaddrinfo (NULL, port, &hints, &info);
+    err = getaddrinfo (ptr->address, port, &hints, &info);
 
     /* Something went wrong */
-    if (error) {
-        printf ("Socket %p: remote address error %s\n", ptr, gai_strerror (error));
+    if (err) {
+        error_str (ptr, "remote address error", gai_strerror (err));
         return;
     }
 
@@ -245,9 +273,21 @@ static int open_socket (DS_Socket* ptr, int is_input)
         return 0;
 
     /* Socket is already initialized, abort */
-    if (ptr->initialized) {
+    if (ptr->initialized == 1) {
         printf ("Socket %p is already initialized!\n", ptr);
         return 0;
+    }
+
+    /* Socket is disabled, abort */
+    if (ptr->disabled) {
+        printf ("Socket %p is disabled\n", ptr);
+        return 0;
+    }
+
+    /* Ensure that address is valid */
+    if (DS_StringIsEmpty (ptr->address)) {
+        ptr->address = sdsnew ("0.0.0.0");
+        printf ("Socket %p: address set to 0.0.0.0\n", ptr);
     }
 
     /* Open the socket descriptor */
@@ -255,13 +295,13 @@ static int open_socket (DS_Socket* ptr, int is_input)
 
     /* Check that the socket is valid */
     if (sockfd < 0) {
-        printf ("Socket %p: open error %d\n", ptr, errno);
+        error (ptr, "open error", errno);
         return 0;
     }
 
     /* Set socket options */
-    if (!set_socket_flags (ptr, sockfd)) {
-        printf ("Socket %p: error settings socket flags\n", ptr);
+    if (set_socket_flags (ptr, sockfd) == 0) {
+        error (ptr, "cannot set flags", -1);
         return 0;
     }
 
@@ -275,13 +315,13 @@ static int open_socket (DS_Socket* ptr, int is_input)
 
         /* Bind the socket */
         if (bind (sockfd, addr.ai_addr, addr.ai_addrlen) != 0) {
-            printf ("Socket %p: bind error %d\n", ptr, errno);
+            error (ptr, "bind error", errno);
             return 0;
         }
 
         /* Allow 5 connections on the incoming queue */
         if (listen (sockfd, 5)) {
-            printf ("Socket %p: listen error %d\n", ptr, errno);
+            error (ptr, "listen error", errno);
             return 0;
         }
     }
@@ -296,6 +336,24 @@ static int open_socket (DS_Socket* ptr, int is_input)
     }
 
     return 1;
+}
+
+/**
+ * Creates and configures the given socket
+ *
+ * \param ptr the pointer to a \c DS_Socket structure
+ */
+static void* initialize_socket (void* ptr)
+{
+    DS_Socket* sock = (DS_Socket*) ptr;
+
+    if (sock) {
+        int in = open_socket (sock, 1);
+        int ot = open_socket (sock, 0);
+        sock->initialized = (in && ot);
+    }
+
+    return NULL;
 }
 
 /**
@@ -316,23 +374,18 @@ void Sockets_Init()
  *
  * \param ptr a pointer to a \c DS_Socket structure
  */
-int DS_SocketOpen (DS_Socket* ptr)
+void DS_SocketOpen (DS_Socket* ptr)
 {
     /* Pointer is NULL */
     if (!ptr)
-        return 0;
+        return;
 
-    /* Socket is already initialized */
-    else if (ptr->initialized)
-        return 0;
-
-    /* Initialize input & output sockets */
-    int in = open_socket (ptr, 1);
-    int ot = open_socket (ptr, 0);
-
-    /* Update the socket variables */
-    ptr->initialized = 1;
-    return in && ot;
+    /* Initialize socket in another thread */
+    if (ptr->initialized != 1) {
+        ptr->accepted = 0;
+        pthread_t thread;
+        pthread_create (&thread, NULL, &initialize_socket, (void*) ptr);
+    }
 }
 
 /**
@@ -346,6 +399,7 @@ void DS_SocketClose (DS_Socket* ptr)
         ptr->initialized = 0;
         close_socket (ptr->socket_in);
         close_socket (ptr->socket_out);
+        close_socket (ptr->socket_tmp);
     }
 }
 
@@ -362,7 +416,7 @@ int DS_SocketSend (DS_Socket* ptr, sds buf)
     if (!ptr || DS_StringIsEmpty (buf))
         return 0;
 
-    if (!ptr->initialized || ptr->disabled)
+    if ((ptr->disabled == 1) || (ptr->initialized != 1))
         return 0;
 
     return send (ptr->socket_out, buf, sdslen (buf), 0);
@@ -381,9 +435,13 @@ int DS_SocketRead (DS_Socket* ptr, sds buf)
     if (!ptr)
         return 0;
 
-    if (ptr->disabled)
+    if ((ptr->disabled == 1) || (ptr->initialized != 1))
         return 0;
 
     accept_connection (ptr);
-    return recv (ptr->socket_tmp, buf, 1024, 0);
+
+    if (ptr->accepted == 1)
+        return recv (ptr->socket_tmp, buf, 1024, 0);
+
+    return 0;
 }

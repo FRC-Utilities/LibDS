@@ -46,7 +46,7 @@ typedef struct _socket {
 } DS_Socket;
 
 extern void Sockets_Init();
-extern int DS_SocketOpen (DS_Socket* ptr);
+extern void DS_SocketOpen (DS_Socket* ptr);
 extern void DS_SocketClose (DS_Socket* ptr);
 extern int DS_SocketSend (DS_Socket* ptr, sds buf);
 extern int DS_SocketRead (DS_Socket* ptr, sds buf);
