@@ -24,6 +24,8 @@
 #include "DS_Socket.h"
 #include "DS_Protocol.h"
 
+#include <stdlib.h>
+
 /**
  * Holds a pointer to the current protocol in use
  */

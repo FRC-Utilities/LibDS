@@ -48,7 +48,6 @@ typedef enum {
 typedef enum {
     DS_SOCKET_UDP,
     DS_SOCKET_TCP,
-    DS_SOCKET_INVALID
 } DS_SocketType;
 
 #ifdef __cplusplus

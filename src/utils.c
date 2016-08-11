@@ -33,7 +33,7 @@
 int DS_StringIsEmpty (const sds string)
 {
     if (string)
-        return (string [0] == 0);
+        return (string == "\0");
 
     return 0;
 }

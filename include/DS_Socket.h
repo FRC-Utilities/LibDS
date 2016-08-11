@@ -29,31 +29,20 @@ extern "C" {
 #endif
 
 #include <sds.h>
-#include <stdint.h>
-#include <stdlib.h>
-
-#ifdef WIN32
-#include <winsock2.h>
-#include <ws2tcpip.h>
-#else
-#include <netdb.h>
-#include <sys/types.h>
-#include <netinet/in.h>
-#include <sys/socket.h>
-#endif
-
 #include "DS_Types.h"
 
 typedef struct _socket {
-    sds address;
-    int disabled;
-    int initialized;
+    sds address;     /**< User-friendly address */
+    int disabled;    /**< Socket enabled? */
+    int accepted;    /**< Has server received something? */
+    int broadcast;   /**< Broadcast enabled? */
+    int socket_in;   /**< Input socket ID */
+    int socket_out;  /**< Output socket ID */
+    int socket_tmp;  /**< Specialized server socket ID */
+    int input_port;  /**< The server/input port */
+    int output_port; /**< The client/output port */
+    int initialized; /**< Set to \c 1 if socket is initialized */
     DS_SocketType type;
-    uintptr_t input_socket;
-    uintptr_t output_socket;
-    struct sockaddr_in sockaddr;
-    unsigned short int input_port;
-    unsigned short int output_port;
 } DS_Socket;
 
 extern void Sockets_Init();

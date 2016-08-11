@@ -22,120 +22,280 @@
  */
 
 #include "DS_Utils.h"
-#include "DS_Config.h"
 #include "DS_Socket.h"
+
 
 #include <sds.h>
 #include <stdio.h>
 #include <string.h>
-#include <pthread.h>
+
+#ifdef WIN32
+    #include <winsock2.h>
+    #include <ws2tcpip.h>
+#else
+    #include <errno.h>
+    #include <netdb.h>
+    #include <unistd.h>
+    #include <sys/types.h>
+    #include <netinet/in.h>
+    #include <sys/socket.h>
+#endif
 
 #ifdef WIN32
     static WSADATA socket_data;
-#else
-    #define INVALID_SOCKET (uintptr_t) -1
 #endif
 
 /**
- * Returns \c 1 if the given \a address is an IPv6 address, otherwise, this
- * function shall return \c 0
+ * Closes the given \a socket using OS-specific functions
+ *
+ * \param descriptor the socket descriptor to close
  */
-static int is_ipv6 (sds address)
+static void close_socket (int descriptor)
 {
-    int ipv6 = 0;
-    struct addrinfo hint, *res = NULL;
-    memset (&hint, 0, sizeof hint);
+#ifdef WIN32
+    closesocket (sock);
+#else
+    close (descriptor);
+#endif
+}
 
-    hint.ai_family = PF_UNSPEC;
-    hint.ai_flags = AI_NUMERICHOST;
+/**
+ * Returns the socket type that should be used for the given socket
+ *
+ * \param ptr a pointer to a \c DS_Socket structure
+ */
+static int get_type (DS_Socket* ptr)
+{
+    if (ptr->type == DS_SOCKET_TCP)
+        return SOCK_STREAM;
 
-    if (getaddrinfo (address, NULL, &hint, &res) == 0) {
-        ipv6 = res->ai_family == AF_INET6;
-        freeaddrinfo (res);
+    return SOCK_DGRAM;
+}
+
+/**
+ * Returns the default socket domain/family used by the
+ * native implementation.
+ *
+ * We prefer to use IPv6, since its backwards compatible with IPv4
+ * and simplifies the code by eliminating the need of using different
+ * structures and functions to support IPv4
+ */
+static int get_domain()
+{
+    return AF_INET6;
+}
+
+/**
+ * Sets the \c SO_REUSEPORT and \c SO_BROADCAST flags to the socket
+ *
+ * \param ptr a pointer to a \c DS_Socket structure
+ * \param socket the socked file descriptor
+ *
+ * \note \c SO_BROADCAST is only set if the \c DS_Socket requires it
+ *
+ * \returns \c 1 on success, \c 0 on failure
+ */
+static int set_socket_flags (DS_Socket* ptr, int sock)
+{
+    int name = 1;
+    int reuse_port = setsockopt (sock,
+                                 SOL_SOCKET,
+                                 SO_REUSEPORT,
+                                 &name, sizeof (name));
+
+    if (reuse_port != 0) {
+        printf ("Socket %p: error %d while setting SO_REUSEPORT\n", ptr, errno);
+        return 0;
     }
 
-    return ipv6;
+    if (ptr->broadcast && (ptr->type == DS_SOCKET_UDP)) {
+        int broadcast = setsockopt (sock,
+                                    SOL_SOCKET,
+                                    SO_BROADCAST,
+                                    &name, sizeof (name));
+
+        if (broadcast != 0) {
+            printf ("Socket %p error %d while settings SO_BROADCAST\n", ptr, errno);
+            return 0;
+        }
+    }
+
+    return 1;
 }
 
 /**
- * Obtains the host address for the given socket
+ * Fills in information from the local address and the input port
+ *
+ * \param ptr a pointer to \c DS_Socket structure, used to get the
+ *        server port number
+ * \param addr the address in which we should put the obtained data
  */
-static void* put_host_addr (void* ptr)
+static void get_local_address (DS_Socket* ptr, struct addrinfo* addr)
 {
-    DS_Socket* sock = (DS_Socket*) ptr;
-    (void) sock;
+    struct addrinfo hints;
+    memset (&hints, 0, sizeof (hints));
 
-    /* FIXME: This code crashes the application under POSIX */
+    /* Set hints */
+    hints.ai_flags = AI_PASSIVE;
+    hints.ai_family = get_domain();
+    hints.ai_socktype = get_type (ptr);
 
-    /*
-    char** addresses = *gethostbyname (sock->address)->h_addr_list;
-    sock->sockaddr.sin_addr = *(struct in_addr*) addresses;
-    */
+    /* Get port string */
+    char* port = malloc (sizeof (char) * 5);
+    sprintf (port, "%d", ptr->input_port);
 
-    return NULL;
+    /* Get address information */
+    getaddrinfo (NULL, port, &hints, &addr);
+
+    /* De-allocate memory for the port string */
+    free (port);
 }
 
 /**
- * Configres the socket address of the given socket structure
+ * Allows the given socket to acccept any incoming connections
  */
-static void put_addr_data (DS_Socket* ptr, int input)
+static void accept_connection (DS_Socket* ptr)
 {
     if (!ptr)
         return;
 
-    /* Add port and address family */
-    ptr->sockaddr.sin_port = input ? ptr->input_port : ptr->output_port;
-    ptr->sockaddr.sin_family = is_ipv6 (ptr->address) ? AF_INET6 : AF_INET;
+    if (ptr->initialized && !ptr->accepted) {
+        if (ptr->type == DS_SOCKET_TCP) {
+            struct sockaddr addr;
+            socklen_t addr_size = sizeof (addr);
+            int res = accept (ptr->socket_in, &addr, &addr_size);
 
-    /* Obtain the host address from another thread */
-    pthread_t thread;
-    pthread_create (&thread, NULL, &put_host_addr, (void*) ptr);
+            if (res > 0) {
+                ptr->accepted = 1;
+                ptr->socket_tmp = res;
+            }
+        }
+
+        else {
+            ptr->accepted = 1;
+            ptr->socket_tmp = ptr->socket_in;
+        }
+    }
 }
 
 /**
- * Initializes the socket descriptors of the given socket structure
+ * Returns the remote address information for the given \c DS_Socket
+ *
+ * \todo For the moment, this function will bind to the local address
+ *       for testing purposes. Change this when the sockets module is
+ *       fully functional
+ * \param ptr a pointer to \c DS_Socket structure, used to get the
+ *        client port number
+ * \param addr the address in which we should put the obtained data
+ */
+static void get_remote_address (DS_Socket* ptr, struct addrinfo* addr)
+{
+    int error;
+    int sockfd;
+    struct addrinfo hints, *info;
+    memset (&hints, 0, sizeof hints);
+
+    /* Set hints */
+    hints.ai_flags = AI_PASSIVE;
+    hints.ai_family = get_domain();
+    hints.ai_socktype = get_type (ptr);
+
+    /* Get port string */
+    char* port = malloc (sizeof (char) * 5);
+    sprintf (port, "%d", ptr->output_port);
+
+    /* Get the address info */
+    error = getaddrinfo (NULL, port, &hints, &info);
+
+    /* Something went wrong */
+    if (error) {
+        printf ("Socket %p: remote address error %s\n", ptr, gai_strerror (error));
+        return;
+    }
+
+    /* Loop the found addresses until one responds to connection */
+    for (addr = info; addr != NULL; addr = addr->ai_next) {
+        if ((sockfd = socket (addr->ai_family, addr->ai_socktype,
+                              addr->ai_protocol)) == -1)
+            continue;
+
+        if (connect (sockfd, addr->ai_addr, addr->ai_addrlen) == -1) {
+            close_socket (sockfd);
+            continue;
+        }
+
+        break;
+    }
+
+    /* De-allocate memory */
+    free (port);
+    freeaddrinfo (info);
+}
+
+/**
+ * Initializes the sockets for the given structure
+ *
+ * \param ptr a pointer to a \c DS_Socket structure
+ * \param is_input used to know if we should use the input or
+ *        output port specified by the \c DS_Socket
  */
 static int open_socket (DS_Socket* ptr, int is_input)
 {
-    /* Get socket properties */
-    int af = (is_ipv6 (ptr->address)) ? AF_INET6 : AF_INET;
-    int tp = (ptr->type == DS_SOCKET_TCP) ? SOCK_STREAM : SOCK_DGRAM;
-    int pt = (ptr->type == DS_SOCKET_TCP) ? IPPROTO_TCP : IPPROTO_UDP;
+    /* Check if pointer is valid */
+    if (!ptr)
+        return 0;
 
-    /* Initialize the socket */
-    uintptr_t sock_id = socket (af, tp, pt);
-    if (is_input)
-        ptr->input_socket = sock_id;
-    else
-        ptr->output_socket = sock_id;
-
-    /* Check if the socket is valid */
-    if (sock_id == INVALID_SOCKET) {
-        printf ("Cannot open socket %p", ptr);
+    /* Socket is already initialized, abort */
+    if (ptr->initialized) {
+        printf ("Socket %p is already initialized!\n", ptr);
         return 0;
     }
 
-    /* Add host information and obtain generic address */
-    put_addr_data (ptr, is_input);
-    struct sockaddr* addr = (struct sockaddr*) &ptr->sockaddr;
+    /* Open the socket descriptor */
+    int sockfd = socket (get_domain(), get_type (ptr), 0);
 
-    /* Bind if this is the input socket */
+    /* Check that the socket is valid */
+    if (sockfd < 0) {
+        printf ("Socket %p: open error %d\n", ptr, errno);
+        return 0;
+    }
+
+    /* Set socket options */
+    if (!set_socket_flags (ptr, sockfd)) {
+        printf ("Socket %p: error settings socket flags\n", ptr);
+        return 0;
+    }
+
+    /* Configure the server/input socket */
     if (is_input) {
-        if (bind (sock_id, addr, sizeof (ptr->sockaddr)) != 0) {
-            printf ("Cannot bind socket %p\n", ptr);
+        struct addrinfo addr;
+        get_local_address (ptr, &addr);
+
+        /* Save the descriptor to the socket structure */
+        ptr->socket_in = sockfd;
+
+        /* Bind the socket */
+        if (bind (sockfd, addr.ai_addr, addr.ai_addrlen) != 0) {
+            printf ("Socket %p: bind error %d\n", ptr, errno);
+            return 0;
+        }
+
+        /* Allow 5 connections on the incoming queue */
+        if (listen (sockfd, 5)) {
+            printf ("Socket %p: listen error %d\n", ptr, errno);
             return 0;
         }
     }
 
-    /* Connect if this is the output socket */
+    /* Configure the client/output socket */
     else {
-        if (connect (sock_id, addr, sizeof (ptr->sockaddr)) != 0) {
-            printf ("Cannot connect socket %p\n", ptr);
-            return 0;
-        }
+        struct addrinfo addr;
+        get_remote_address (ptr, &addr);
+
+        /* Save the descriptor to the socket structure */
+        ptr->socket_out = sockfd;
     }
 
-    /* Socket is valid, return 1 */
     return 1;
 }
 
@@ -154,6 +314,8 @@ void Sockets_Init()
 
 /**
  * Initializes the data of the given socket structure
+ *
+ * \param ptr a pointer to a \c DS_Socket structure
  */
 int DS_SocketOpen (DS_Socket* ptr)
 {
@@ -162,89 +324,67 @@ int DS_SocketOpen (DS_Socket* ptr)
         return 0;
 
     /* Socket is already initialized */
-    else if (ptr->initialized || ptr->disabled)
+    else if (ptr->initialized)
         return 0;
 
     /* Initialize input & output sockets */
+    int in = open_socket (ptr, 1);
+    int ot = open_socket (ptr, 0);
+
+    /* Update the socket variables */
     ptr->initialized = 1;
-    return open_socket (ptr, 1) && open_socket (ptr, 0);
+    return in && ot;
 }
 
 /**
- * Closes the given socket structure
+ * Closes the given socket
+ *
+ * \param ptr a pointer to a \c DS_Socket structure
  */
 void DS_SocketClose (DS_Socket* ptr)
 {
-    /* Pointer is NULL */
-    if (!ptr)
-        return;
-
-    /* Close the sockets */
-    if (ptr->initialized) {
+    if (ptr) {
         ptr->initialized = 0;
-
-#ifdef WIN32
-        closesocket (ptr->input_socket);
-        closesocket (ptr->output_socket);
-#else
-        shutdown (ptr->input_socket, SHUT_RDWR);
-        shutdown (ptr->output_socket, SHUT_RDWR);
-#endif
+        close_socket (ptr->socket_in);
+        close_socket (ptr->socket_out);
     }
 }
 
 /**
  * Sends the given \a buf using the information stored in the socket
- * structure \a ptr
  *
- * \note If either \a ptr or \a data are NULL, the function will do nothing and
- *       return \c 0.
- *       If the process is successfull, then the function shall return \c 1
+ * \param ptr a pointer to a \c DS_Socket structure
+ * \param buf the buffer with the data to send
+ *
+ * \returns the number of bytes sent
  */
 int DS_SocketSend (DS_Socket* ptr, sds buf)
 {
-    /* Pointers are invalid */
-    if (!ptr || !buf)
+    if (!ptr || DS_StringIsEmpty (buf))
         return 0;
 
-    /* Socket is disabled or not initialized, abort */
-    if (ptr->disabled || !ptr->initialized)
+    if (!ptr->initialized || ptr->disabled)
         return 0;
 
-    /* Get generick socket address */
-    struct sockaddr* addr = (struct sockaddr*) &ptr->sockaddr;
-
-    /* Send the data */
-    int bytes_written = sendto (ptr->output_socket,
-                                buf, sdslen (buf), 0,
-                                addr, sizeof (ptr->sockaddr));
-
-    /* Return 1 if the bytes written where more than 0 */
-    return bytes_written > 0;
+    return send (ptr->socket_out, buf, sdslen (buf), 0);
 }
 
 /**
  * Copies the received data from the socket into the \a buf parameter
+ *
+ * \param ptr a pointer to a \c DS_Socket structure
+ * \param buf the buffer in which we write received data
+ *
+ * \returns the number of bytes received
  */
 int DS_SocketRead (DS_Socket* ptr, sds buf)
 {
-    /* Pointer is NULL */
-    if (ptr)
+    if (!ptr)
         return 0;
 
-    /* Empty the buffer */
-    sdsfree (buf);
-    buf = sdsempty();
-
-    /* Socket is disabled or not initialized, abort */
-    if (ptr->disabled || !ptr->initialized)
+    if (ptr->disabled)
         return 0;
 
-    /* Get generick socket address */
-    struct sockaddr* addr = (struct sockaddr*) &ptr->sockaddr;
-
-    /* Read the data */
-    return  recvfrom (ptr->input_socket, buf, 8, 0, addr, 0) > 0;
+    accept_connection (ptr);
+    return recv (ptr->socket_tmp, buf, 1024, 0);
 }
-
-

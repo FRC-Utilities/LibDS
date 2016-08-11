@@ -21,6 +21,8 @@
  */
 
 #include <LibDS.h>
+
+#include <ctype.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <pthread.h>
@@ -131,7 +133,7 @@ static void process_events()
 static void* get_user_input()
 {
     while (running) {
-        switch (getchar()) {
+        switch (tolower (getchar())) {
         case 'q':
             running = 0;
             break;

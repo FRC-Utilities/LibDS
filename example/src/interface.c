@@ -31,7 +31,7 @@
 /*
  * Define basic label states
  */
-#define NO_DATA  "--.--"
+#define INVALID  "--.--"
 #define ENABLED  "Enabled"
 #define DISABLED "Disabled"
 
@@ -81,11 +81,11 @@ static void init_strings()
     rcode_check_str = set_checked (rcode_check_str, 0);
     stick_check_str = set_checked (stick_check_str, 0);
 
-    can_str = sdsnew (NO_DATA);
-    cpu_str = sdsnew (NO_DATA);
-    ram_str = sdsnew (NO_DATA);
-    disk_str = sdsnew (NO_DATA);
-    voltage_str = sdsnew (NO_DATA);
+    can_str = sdsnew (INVALID);
+    cpu_str = sdsnew (INVALID);
+    ram_str = sdsnew (INVALID);
+    disk_str = sdsnew (INVALID);
+    voltage_str = sdsnew (INVALID);
     enabled_str = sdsnew (DISABLED);
     rstatus_str = sdsnew (DS_GetStatusString());
     console_str = sdsnew ("[INFO] Welcome to the ConsoleDS!");
