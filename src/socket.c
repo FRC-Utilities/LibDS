@@ -24,7 +24,6 @@
 #include "DS_Utils.h"
 #include "DS_Socket.h"
 
-
 #include <sds.h>
 #include <stdio.h>
 #include <string.h>
@@ -53,7 +52,7 @@
 static void close_socket (int descriptor)
 {
 #ifdef WIN32
-    closesocket (sock);
+    closesocket (descriptor);
 #else
     close (descriptor);
 #endif
