@@ -27,9 +27,13 @@
 
 #include <sds.h>
 #include <stdio.h>
+#include <string.h>
+#include <pthread.h>
 
 #ifdef WIN32
     static WSADATA socket_data;
+#else
+    #define INVALID_SOCKET (uintptr_t) -1
 #endif
 
 /**
@@ -54,16 +58,38 @@ static int is_ipv6 (sds address)
 }
 
 /**
- * Configres the given \a host to be able to bind to the given \a address
+ * Obtains the host address for the given socket
  */
-static void put_host_info (DS_Socket* ptr, int input)
+static void* put_host_addr (void* ptr)
+{
+    DS_Socket* sock = (DS_Socket*) ptr;
+    (void) sock;
+
+    /* FIXME: This code crashes the application under POSIX */
+
+    /*
+    char** addresses = *gethostbyname (sock->address)->h_addr_list;
+    sock->sockaddr.sin_addr = *(struct in_addr*) addresses;
+    */
+
+    return NULL;
+}
+
+/**
+ * Configres the socket address of the given socket structure
+ */
+static void put_addr_data (DS_Socket* ptr, int input)
 {
     if (!ptr)
         return;
 
+    /* Add port and address family */
     ptr->sockaddr.sin_port = input ? ptr->input_port : ptr->output_port;
     ptr->sockaddr.sin_family = is_ipv6 (ptr->address) ? AF_INET6 : AF_INET;
-    ptr->sockaddr.sin_addr = * (struct in_addr*) gethostbyname (ptr->address)->h_addr_list;
+
+    /* Obtain the host address from another thread */
+    pthread_t thread;
+    pthread_create (&thread, NULL, &put_host_addr, (void*) ptr);
 }
 
 /**
@@ -90,7 +116,7 @@ static int open_socket (DS_Socket* ptr, int is_input)
     }
 
     /* Add host information and obtain generic address */
-    put_host_info (ptr, is_input);
+    put_addr_data (ptr, is_input);
     struct sockaddr* addr = (struct sockaddr*) &ptr->sockaddr;
 
     /* Bind if this is the input socket */
@@ -161,8 +187,8 @@ void DS_SocketClose (DS_Socket* ptr)
         closesocket (ptr->input_socket);
         closesocket (ptr->output_socket);
 #else
-        close (ptr->input_socket);
-        close (ptr->output_socket);
+        shutdown (ptr->input_socket, SHUT_RDWR);
+        shutdown (ptr->output_socket, SHUT_RDWR);
 #endif
     }
 }
