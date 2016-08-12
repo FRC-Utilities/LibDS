@@ -28,20 +28,33 @@
 extern "C" {
 #endif
 
-#include <sds.h>
 #include "DS_Types.h"
 
+#include <sds.h>
+#ifdef WIN32
+#include <winsock2.h>
+#include <ws2tcpip.h>
+#else
+#include <errno.h>
+#include <netdb.h>
+#include <sys/types.h>
+#include <netinet/in.h>
+#include <sys/socket.h>
+#endif
+
 typedef struct _socket {
-    sds address;     /**< User-friendly address */
-    int disabled;    /**< Socket enabled? */
-    int accepted;    /**< Has server received something? */
-    int broadcast;   /**< Broadcast enabled? */
-    int socket_in;   /**< Input socket ID */
-    int socket_out;  /**< Output socket ID */
-    int socket_tmp;  /**< Specialized server socket ID */
-    int input_port;  /**< The server/input port */
-    int output_port; /**< The client/output port */
-    int initialized; /**< Set to \c 1 if socket is initialized */
+    sds address;               /**< User-friendly address */
+    int disabled;              /**< Socket enabled? */
+    int accepted;              /**< Has server received something? */
+    int broadcast;             /**< Broadcast enabled? */
+    int socket_in;             /**< Input socket ID */
+    int socket_out;            /**< Output socket ID */
+    int socket_tmp;            /**< Specialized server socket ID */
+    int input_port;            /**< The server/input port */
+    int output_port;           /**< The client/output port */
+    int initialized;           /**< Set to \c 1 if socket is initialized */
+    struct addrinfo* in_addr;  /**< The local address */
+    struct addrinfo* out_addr; /**< The remote address */
     DS_SocketType type;
 } DS_Socket;
 

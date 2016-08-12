@@ -250,7 +250,7 @@ void update_interface()
 void update_status_label()
 {
     sdsfree (rstatus_str);
-    rstatus_str = sdsnew (DS_GetStatusString());
+    rstatus_str = sdsdup (DS_GetStatusString());
 }
 
 /**
@@ -259,8 +259,7 @@ void update_status_label()
 void set_can (const int can)
 {
     sdsfree (can_str);
-    can_str = sdsempty();
-    can_str = sdscatfmt (can_str, "%i %%", can);
+    can_str = sdscatfmt (sdsempty(), "%i %%", can);
 }
 
 /**
@@ -269,8 +268,7 @@ void set_can (const int can)
 void set_cpu (const int cpu)
 {
     sdsfree (cpu_str);
-    cpu_str = sdsempty();
-    cpu_str = sdscatfmt (cpu_str, "%i %%", cpu);
+    cpu_str = sdscatfmt (sdsempty(), "%i %%", cpu);
 }
 
 /**
@@ -279,8 +277,7 @@ void set_cpu (const int cpu)
 void set_ram (const int ram)
 {
     sdsfree (ram_str);
-    ram_str = sdsempty();
-    ram_str = sdscatfmt (ram_str, "%i %%", ram);
+    ram_str = sdscatfmt (sdsempty(), "%i %%", ram);
 }
 
 /**
@@ -289,8 +286,7 @@ void set_ram (const int ram)
 void set_disk (const int disk)
 {
     sdsfree (disk_str);
-    disk_str = sdsempty();
-    disk_str = sdscatfmt (disk_str, "%i %%", disk);
+    disk_str = sdscatfmt (sdsempty(), "%i %%", disk);
 }
 
 /**
@@ -324,8 +320,7 @@ void set_robot_comms (const int comms)
 void set_voltage (const double voltage)
 {
     sdsfree (voltage_str);
-    voltage_str = sdsempty();
-    voltage_str = sdscatprintf (voltage_str, "%f V", voltage);
+    voltage_str = sdscatprintf (sdsempty(), "%f V", voltage);
 }
 
 /**

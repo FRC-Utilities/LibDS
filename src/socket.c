@@ -24,22 +24,10 @@
 #include "DS_Utils.h"
 #include "DS_Socket.h"
 
-#include <sds.h>
-#include <pthread.h>
 #include <stdio.h>
+#include <unistd.h>
 #include <string.h>
-
-#ifdef WIN32
-    #include <winsock2.h>
-    #include <ws2tcpip.h>
-#else
-    #include <errno.h>
-    #include <netdb.h>
-    #include <unistd.h>
-    #include <sys/types.h>
-    #include <netinet/in.h>
-    #include <sys/socket.h>
-#endif
+#include <pthread.h>
 
 #ifdef WIN32
     static WSADATA socket_data;
@@ -70,8 +58,10 @@ static void close_socket (int descriptor)
  */
 static int get_type (DS_Socket* ptr)
 {
-    if (ptr->type == DS_SOCKET_TCP)
-        return SOCK_STREAM;
+    if (ptr) {
+        if (ptr->type == DS_SOCKET_TCP)
+            return SOCK_STREAM;
+    }
 
     return SOCK_DGRAM;
 }
@@ -131,6 +121,10 @@ static int get_domain()
  */
 static int set_socket_flags (DS_Socket* ptr, int sock)
 {
+    /* Check for NULL pointers */
+    if (!ptr)
+        return 0;
+
     /* Windows uses char instead of int in setsockopt() */
 #ifdef WIN32
     char name = 1;
@@ -169,15 +163,19 @@ static int set_socket_flags (DS_Socket* ptr, int sock)
 }
 
 /**
- * Fills in information from the local address and the input port
+ * Returns information from the local address
  *
  * \param ptr a pointer to \c DS_Socket structure, used to get the
  *        server port number
- * \param addr the address in which we should put the obtained data
  */
-static void get_local_address (DS_Socket* ptr, struct addrinfo* addr)
+static struct addrinfo* get_local_address (DS_Socket* ptr)
 {
-    struct addrinfo hints;
+    /* Check for NULL pointers */
+    if (!ptr)
+        return NULL;
+
+    /* Initialize the hints */
+    struct addrinfo hints, *addr;
     memset (&hints, 0, sizeof (hints));
 
     /* Set hints */
@@ -196,11 +194,14 @@ static void get_local_address (DS_Socket* ptr, struct addrinfo* addr)
     if (err) {
         free (port);
         error_str (ptr, "local address error", gai_strerror (err));
-        return;
+        return NULL;
     }
 
     /* De-allocate memory */
     free (port);
+
+    /* Return the address */
+    return addr;
 }
 
 /**
@@ -240,13 +241,17 @@ static void accept_connection (DS_Socket* ptr)
  *       fully functional
  * \param ptr a pointer to \c DS_Socket structure, used to get the
  *        client port number
- * \param addr the address in which we should put the obtained data
  */
-static void get_remote_address (DS_Socket* ptr, struct addrinfo* addr)
+static struct addrinfo* get_remote_address (DS_Socket* ptr)
 {
-    int err;
-    int sockfd;
-    struct addrinfo hints, *info;
+    /* Check for NULL pointers */
+    if (!ptr)
+        return NULL;
+
+    /* Initialize variables */
+    int err = 0;
+    int sockfd = 0;
+    struct addrinfo hints, *info, *addr;
     memset (&hints, 0, sizeof hints);
 
     /* Set hints */
@@ -259,14 +264,14 @@ static void get_remote_address (DS_Socket* ptr, struct addrinfo* addr)
     sprintf (port, "%d", ptr->output_port);
 
     /* Get the address info */
-    err = getaddrinfo (ptr->address, port, &hints, &info);
+    err = getaddrinfo (NULL, port, &hints, &info);
 
     /* Something went wrong */
     if (err) {
         free (port);
         freeaddrinfo (info);
         error_str (ptr, "remote address error", gai_strerror (err));
-        return;
+        return NULL;
     }
 
     /* Loop the found addresses until one responds to connection */
@@ -286,6 +291,9 @@ static void get_remote_address (DS_Socket* ptr, struct addrinfo* addr)
     /* De-allocate memory */
     free (port);
     freeaddrinfo (info);
+
+    /* Return the obtained data */
+    return addr;
 }
 
 /**
@@ -296,6 +304,10 @@ static void get_remote_address (DS_Socket* ptr, struct addrinfo* addr)
  */
 static int get_socket (DS_Socket* ptr, struct addrinfo* addr)
 {
+    /* Check for NULL pointers */
+    if (!ptr || !addr)
+        return -1;
+
     /* Open socket */
     int sockfd = socket (addr->ai_family,
                          addr->ai_socktype,
@@ -303,15 +315,15 @@ static int get_socket (DS_Socket* ptr, struct addrinfo* addr)
 
     /* Check that the socket is valid */
     if (sockfd < 0) {
-        fprintf (stderr, "Cannot create socket %d\n", sockfd);
         close_socket (sockfd);
+        error (ptr, "cannot create socket", sockfd);
         return -1;
     }
 
     /* Set socket options */
     if (set_socket_flags (ptr, sockfd) == 0) {
-        fprintf (stderr, "Cannot set socket flags for %d\n", sockfd);
         close_socket (sockfd);
+        error (ptr, "cannot create socket", sockfd);
         return -1;
     }
 
@@ -341,44 +353,46 @@ static int open_socket (DS_Socket* ptr, int is_input)
 
     /* Configure the server/input socket */
     if (is_input) {
-        struct addrinfo addr;
-        get_local_address (ptr, &addr);
-        ptr->socket_in = get_socket (ptr, &addr);
+        ptr->in_addr = get_local_address (ptr);
+        ptr->socket_in = get_socket (ptr, ptr->in_addr);
 
         /* Socket is invalid */
         if (ptr->socket_in < 0)
             return 0;
 
         /* Bind the socket */
-        if (bind (ptr->socket_in, addr.ai_addr, addr.ai_addrlen) != 0) {
+        if (bind (ptr->socket_in, ptr->in_addr->ai_addr, ptr->in_addr->ai_addrlen) != 0) {
             error (ptr, "bind error", GET_ERR);
             close_socket (ptr->socket_in);
             return 0;
         }
 
         /* Allow 5 connections on the incoming queue */
-        if (listen (ptr->socket_in, 5) != 0) {
-            error (ptr, "listen error", GET_ERR);
-            close_socket (ptr->socket_in);
-            return 0;
+        if (ptr->type == DS_SOCKET_TCP) {
+            if (listen (ptr->socket_in, 5) != 0) {
+                error (ptr, "listen error", GET_ERR);
+                close_socket (ptr->socket_in);
+                return 0;
+            }
         }
     }
 
     /* Configure the client/output socket */
     else {
-        struct addrinfo addr;
-        get_remote_address (ptr, &addr);
-        ptr->socket_out = get_socket (ptr, &addr);
+        ptr->out_addr = get_remote_address (ptr);
+        ptr->socket_out = get_socket (ptr, ptr->out_addr);
 
         /* Socket is invalid */
         if (ptr->socket_out < 0)
             return 0;
 
         /* Connect the socket */
-        if (connect (ptr->socket_out, addr.ai_addr, addr.ai_addrlen) != 0) {
-            error (ptr, "connection error", GET_ERR);
-            close_socket (ptr->socket_out);
-            return 0;
+        if (ptr->type == DS_SOCKET_TCP) {
+            if (connect (ptr->socket_out, ptr->out_addr->ai_addr, ptr->out_addr->ai_addrlen) != 0) {
+                error (ptr, "connection error", GET_ERR);
+                close_socket (ptr->socket_out);
+                return 0;
+            }
         }
     }
 
@@ -433,7 +447,7 @@ void Sockets_Close()
  */
 void DS_SocketOpen (DS_Socket* ptr)
 {
-    /* Pointer is NULL */
+    /* Check for NULL pointers */
     if (!ptr)
         return;
 
@@ -477,13 +491,27 @@ void DS_SocketClose (DS_Socket* ptr)
  */
 int DS_SocketSend (DS_Socket* ptr, sds buf)
 {
-    if (!ptr || DS_StringIsEmpty (buf))
+    /* Invalid pointer or data buffer */
+    if (!ptr || !buf)
         return 0;
 
+    /* Socket is disabled or uninitialized */
     if ((ptr->disabled == 1) || (ptr->initialized != 1))
         return 0;
 
-    return send (ptr->socket_out, buf, sdslen (buf), 0);
+    /* Send data using TCP */
+    if (ptr->type == DS_SOCKET_TCP)
+        return send (ptr->socket_out, buf, sdslen (buf), 0);
+
+    /* Send data using UDP */
+    else if (ptr->type == DS_SOCKET_UDP)
+        return sendto (ptr->socket_out,
+                       buf, sdslen (buf), 0,
+                       ptr->out_addr->ai_addr,
+                       ptr->out_addr->ai_addrlen);
+
+    /* Socket is not TCP nor UDP */
+    return 0;
 }
 
 /**
@@ -496,16 +524,33 @@ int DS_SocketSend (DS_Socket* ptr, sds buf)
  */
 int DS_SocketRead (DS_Socket* ptr, sds buf)
 {
+    /* Invalid pointer */
     if (!ptr)
         return 0;
 
+    /* Socket is disabled or uninitialized */
     if ((ptr->disabled == 1) || (ptr->initialized != 1))
         return 0;
 
+    /* Accept the connection (TCP, UDP is ignored) */
     accept_connection (ptr);
 
-    if (ptr->accepted == 1)
+    /* Only receive data if connection is established */
+    if (ptr->accepted != 1)
+        return 0;
+
+    /* Receive data using TCP */
+    if (ptr->type == DS_SOCKET_TCP)
         return recv (ptr->socket_tmp, buf, 1024, 0);
 
+    /* Receive data using UDP */
+    else if (ptr->type == DS_SOCKET_UDP) {
+        return recvfrom (ptr->socket_out,
+                         buf, 1024, 0,
+                         ptr->in_addr->ai_addr,
+                         &ptr->in_addr->ai_addrlen);
+    }
+
+    /* Socket is not TCP nor UDP */
     return 0;
 }
