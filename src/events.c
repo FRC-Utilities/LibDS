@@ -176,8 +176,8 @@ static void recv_data()
     sds robot_data = sdsempty();
 
     /* Read data from sockets */
-    DS_SocketRead (&protocol->fms_socket, fms_data);
-    DS_SocketRead (&protocol->radio_socket, radio_data);
+    //DS_SocketRead (&protocol->fms_socket, fms_data);
+    //DS_SocketRead (&protocol->radio_socket, radio_data);
     DS_SocketRead (&protocol->robot_socket, robot_data);
 
     /* Let the protocol interpret received data */

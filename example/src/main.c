@@ -128,7 +128,7 @@ static void process_events()
             set_disk (event.robot.disk_usage);
             break;
         case DS_STATUS_STRING_CHANGED:
-            update_status_label();
+            update_status_label (DS_GetStatusString());
             break;
         default:
             break;

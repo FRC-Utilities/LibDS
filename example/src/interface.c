@@ -22,8 +22,6 @@
 
 #include "interface.h"
 
-#include <sds.h>
-#include <LibDS.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <curses.h>
@@ -34,6 +32,8 @@
 #define INVALID  "--.--"
 #define ENABLED  "Enabled"
 #define DISABLED "Disabled"
+
+#define min(a,b) ((a) < (b) ? a : b)
 
 /*
  * Define windows
@@ -87,7 +87,7 @@ static void init_strings()
     disk_str = sdsnew (INVALID);
     voltage_str = sdsnew (INVALID);
     enabled_str = sdsnew (DISABLED);
-    rstatus_str = sdsnew (DS_GetStatusString());
+    rstatus_str = sdsnew ("");
     console_str = sdsnew ("[INFO] Welcome to the ConsoleDS!");
 }
 
@@ -125,7 +125,7 @@ static void draw_windows()
     /* Set window sizing */
     int top_height = 3;
     int bottom_height = 3;
-    int side_width = DS_Min (COLS / 4, 40);
+    int side_width = min (COLS / 4, 40);
     int central_height = LINES - (top_height + bottom_height);
 
     /* Create top windows */
@@ -244,16 +244,6 @@ void update_interface()
 }
 
 /**
- * Updates the status label to display the current state
- * of the robot and the LibDS
- */
-void update_status_label()
-{
-    sdsfree (rstatus_str);
-    rstatus_str = sdsdup (DS_GetStatusString());
-}
-
-/**
  * Updates the value displayed in the CAN field
  */
 void set_can (const int can)
@@ -322,6 +312,17 @@ void set_voltage (const double voltage)
     sdsfree (voltage_str);
     voltage_str = sdscatprintf (sdsempty(), "%f V", voltage);
 }
+
+/**
+ * Updates the status label to display the current state
+ * of the robot and the LibDS
+ */
+void update_status_label (const sds string)
+{
+    sdsfree (rstatus_str);
+    rstatus_str = sdsdup (string);
+}
+
 
 /**
  * Updates the state of the joysticks checkbox

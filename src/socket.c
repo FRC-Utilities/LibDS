@@ -106,7 +106,7 @@ static void error_str (DS_Socket* ptr, const sds msg, const char* error)
  */
 static int get_domain()
 {
-    return AF_INET6;
+    return AF_INET;
 }
 
 /**
@@ -145,7 +145,7 @@ static int set_socket_flags (DS_Socket* ptr, int sock)
     }
 
     /* Socket is UDP and broadcast flag is set */
-    if (ptr->broadcast && (ptr->type == DS_SOCKET_UDP)) {
+    if ((ptr->broadcast == 1) && (ptr->type == DS_SOCKET_UDP)) {
         int broadcast = setsockopt (sock,
                                     SOL_SOCKET,
                                     SO_BROADCAST,
@@ -248,11 +248,9 @@ static struct addrinfo* get_remote_address (DS_Socket* ptr)
     if (!ptr)
         return NULL;
 
-    /* Initialize variables */
-    int err = 0;
-    int sockfd = 0;
-    struct addrinfo hints, *info, *addr;
-    memset (&hints, 0, sizeof hints);
+    /* Initialize the hints */
+    struct addrinfo hints, *addr;
+    memset (&hints, 0, sizeof (hints));
 
     /* Set hints */
     hints.ai_flags = AI_PASSIVE;
@@ -264,35 +262,19 @@ static struct addrinfo* get_remote_address (DS_Socket* ptr)
     sprintf (port, "%d", ptr->output_port);
 
     /* Get the address info */
-    err = getaddrinfo (NULL, port, &hints, &info);
+    int err = getaddrinfo (ptr->address, port, &hints, &addr);
 
     /* Something went wrong */
     if (err) {
         free (port);
-        freeaddrinfo (info);
         error_str (ptr, "remote address error", gai_strerror (err));
         return NULL;
     }
 
-    /* Loop the found addresses until one responds to connection */
-    for (addr = info; addr != NULL; addr = addr->ai_next) {
-        if ((sockfd = socket (addr->ai_family, addr->ai_socktype,
-                              addr->ai_protocol)) == -1)
-            continue;
-
-        if (connect (sockfd, addr->ai_addr, addr->ai_addrlen) == -1) {
-            close_socket (sockfd);
-            continue;
-        }
-
-        break;
-    }
-
     /* De-allocate memory */
     free (port);
-    freeaddrinfo (info);
 
-    /* Return the obtained data */
+    /* Return the address */
     return addr;
 }
 
@@ -352,16 +334,21 @@ static int open_socket (DS_Socket* ptr, int is_input)
         ptr->address = sdsnew ("0.0.0.0");
 
     /* Configure the server/input socket */
-    if (is_input) {
-        ptr->in_addr = get_local_address (ptr);
-        ptr->socket_in = get_socket (ptr, ptr->in_addr);
+    if (is_input == 1) {
+        ptr->in_addr = *get_local_address (ptr);
+        ptr->socket_in = get_socket (ptr, &ptr->in_addr);
 
         /* Socket is invalid */
         if (ptr->socket_in < 0)
             return 0;
 
         /* Bind the socket */
-        if (bind (ptr->socket_in, ptr->in_addr->ai_addr, ptr->in_addr->ai_addrlen) != 0) {
+        int bind_out = bind (ptr->socket_in,
+                             ptr->in_addr.ai_addr,
+                             ptr->in_addr.ai_addrlen);
+
+        /* Check if binding was successfull */
+        if (bind_out != 0) {
             error (ptr, "bind error", GET_ERR);
             close_socket (ptr->socket_in);
             return 0;
@@ -379,8 +366,8 @@ static int open_socket (DS_Socket* ptr, int is_input)
 
     /* Configure the client/output socket */
     else {
-        ptr->out_addr = get_remote_address (ptr);
-        ptr->socket_out = get_socket (ptr, ptr->out_addr);
+        ptr->out_addr = *get_remote_address (ptr);
+        ptr->socket_out = get_socket (ptr, &ptr->out_addr);
 
         /* Socket is invalid */
         if (ptr->socket_out < 0)
@@ -388,7 +375,12 @@ static int open_socket (DS_Socket* ptr, int is_input)
 
         /* Connect the socket */
         if (ptr->type == DS_SOCKET_TCP) {
-            if (connect (ptr->socket_out, ptr->out_addr->ai_addr, ptr->out_addr->ai_addrlen) != 0) {
+            int connect_out = connect (ptr->socket_out,
+                                       ptr->out_addr.ai_addr,
+                                       ptr->out_addr.ai_addrlen);
+
+            /* Check if connection was successfull */
+            if (connect_out != 0) {
                 error (ptr, "connection error", GET_ERR);
                 close_socket (ptr->socket_out);
                 return 0;
@@ -411,7 +403,7 @@ static void* initialize_socket (void* ptr)
     if (sock) {
         int in = open_socket (sock, 1);
         int ot = open_socket (sock, 0);
-        sock->initialized = (in && ot);
+        sock->initialized = ((in == 1) && (ot == 1));
     }
 
     return NULL;
@@ -495,6 +487,10 @@ int DS_SocketSend (DS_Socket* ptr, sds buf)
     if (!ptr || !buf)
         return 0;
 
+    /* Buffer is empty */
+    if (DS_StringIsEmpty (buf))
+        return 0;
+
     /* Socket is disabled or uninitialized */
     if ((ptr->disabled == 1) || (ptr->initialized != 1))
         return 0;
@@ -504,11 +500,12 @@ int DS_SocketSend (DS_Socket* ptr, sds buf)
         return send (ptr->socket_out, buf, sdslen (buf), 0);
 
     /* Send data using UDP */
-    else if (ptr->type == DS_SOCKET_UDP)
+    else if (ptr->type == DS_SOCKET_UDP) {
         return sendto (ptr->socket_out,
                        buf, sdslen (buf), 0,
-                       ptr->out_addr->ai_addr,
-                       ptr->out_addr->ai_addrlen);
+                       ptr->out_addr.ai_addr,
+                       ptr->out_addr.ai_addrlen);
+    }
 
     /* Socket is not TCP nor UDP */
     return 0;
@@ -545,10 +542,10 @@ int DS_SocketRead (DS_Socket* ptr, sds buf)
 
     /* Receive data using UDP */
     else if (ptr->type == DS_SOCKET_UDP) {
-        return recvfrom (ptr->socket_out,
+        return recvfrom (ptr->socket_in,
                          buf, 1024, 0,
-                         ptr->in_addr->ai_addr,
-                         &ptr->in_addr->ai_addrlen);
+                         ptr->in_addr.ai_addr,
+                         (int*) &ptr->in_addr.ai_addrlen);
     }
 
     /* Socket is not TCP nor UDP */
