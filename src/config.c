@@ -45,11 +45,6 @@ static DS_Position robot_position = DS_POSITION_1;
 static DS_Alliance robot_alliance = DS_ALLIANCE_RED;
 static DS_ControlMode control_mode = DS_CONTROL_TELEOPERATED;
 
-/*
- * Initialize the default netconsole message
- */
-static sds netconsole_data;
-
 /**
  * Ensures that the given \a input number is either \c 0 or \c 1.
  */
@@ -200,14 +195,6 @@ DS_Position CFG_GetPosition()
 }
 
 /**
- * Returns the current NetConsole messages to send
- */
-sds CFG_GetNetConsoleData()
-{
-    return netconsole_data;
-}
-
-/**
  * Returns \c 1 if the robot is emergency stopped, otherwise, it returns \c 0
  */
 int CFG_GetEmergencyStopped()
@@ -300,17 +287,6 @@ void CFG_SetRobotEnabled (const int enabled)
 
         create_robot_event (DS_STATUS_STRING_CHANGED);
     }
-}
-
-/**
- * Updates the NetConsole message to send
- */
-void CFG_SetNetConsoleData (const sds data)
-{
-    if (!netconsole_data)
-        netconsole_data = sdsempty();
-
-    sdscpy (netconsole_data, data);
 }
 
 /**

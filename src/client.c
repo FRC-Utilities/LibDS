@@ -448,5 +448,6 @@ void DS_SetCustomRobotAddress (sds address)
  */
 void DS_SendNetConsoleMessage (sds message)
 {
-    CFG_SetNetConsoleData (message);
+    if (DS_CurrentProtocol())
+        DS_SocketSend (&DS_CurrentProtocol()->netconsole_socket, message);
 }

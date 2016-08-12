@@ -26,6 +26,8 @@
 #include <stdlib.h>
 #include <curses.h>
 
+#include <DS_Client.h>
+
 /*
  * Define basic label states
  */
@@ -87,7 +89,7 @@ static void init_strings()
     disk_str = sdsnew (INVALID);
     voltage_str = sdsnew (INVALID);
     enabled_str = sdsnew (DISABLED);
-    rstatus_str = sdsnew ("");
+    rstatus_str = sdsnew (DS_GetStatusString());
     console_str = sdsnew ("[INFO] Welcome to the ConsoleDS!");
 }
 

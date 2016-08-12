@@ -531,7 +531,6 @@ DS_Protocol* DS_GetProtocolFRC_2014()
         robot_socket.input_port = 1150;
         robot_socket.output_port = 1110;
         robot_socket.type = DS_SOCKET_UDP;
-        robot_socket.address = robot_address();
 
         /* Define netconsole socket properties */
         DS_Socket netconsole_socket;

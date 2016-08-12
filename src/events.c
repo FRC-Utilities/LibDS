@@ -41,7 +41,6 @@
 static DS_Timer fms_send_timer;
 static DS_Timer radio_send_timer;
 static DS_Timer robot_send_timer;
-static DS_Timer netconsole_send_timer;
 
 /*
  * Define the receiver watchdogs.
@@ -120,16 +119,6 @@ static void send_robot_data()
 }
 
 /**
- * Sends a message to the NetConsole (if any message)
- */
-static void send_netconsole_data()
-{
-    sds data = CFG_GetNetConsoleData();
-    DS_SocketSend (&protocol->netconsole_socket, data);
-    sdsfree (data);
-}
-
-/**
  * Sends data over the network using the functions of the current protocol.
  * If there is no protocol running, then this function will do nothing.
  */
@@ -156,12 +145,6 @@ static void send_data()
         send_robot_data();
         DS_TimerReset (&robot_send_timer);
     }
-
-    /* Send NetConsole data */
-    if (netconsole_send_timer.expired) {
-        send_netconsole_data();
-        DS_TimerReset (&netconsole_send_timer);
-    }
 }
 
 /**
@@ -175,21 +158,32 @@ static void recv_data()
         sds fms_data = sdsempty();
         sds radio_data = sdsempty();
         sds robot_data = sdsempty();
+        sds netconsole_data = sdsempty();
 
         /* Read data from sockets */
         //DS_SocketRead (&protocol->fms_socket, fms_data);
         //DS_SocketRead (&protocol->radio_socket, radio_data);
         //DS_SocketRead (&protocol->robot_socket, robot_data);
+        //DS_SocketRead (&protocol->netconsole_socket, netconsole_data);
 
         /* Let the protocol interpret received data */
         fms_read = protocol->read_fms_packet (fms_data);
         radio_read = protocol->read_radio_packet (radio_data);
         robot_read = protocol->read_robot_packet (robot_data);
 
+        /* Add NetConsole message to event system */
+        if (!DS_StringIsEmpty (netconsole_data)) {
+            DS_Event event;
+            event.netconsole.type = DS_NETCONSOLE_NEW_MESSAGE;
+            event.netconsole.message = sdscpy (sdsempty(), netconsole_data);
+            DS_AddEvent (&event);
+        }
+
         /* Free the data pointers */
         sdsfree (fms_data);
         sdsfree (radio_data);
         sdsfree (robot_data);
+        sdsfree (netconsole_data);
     }
 
     DS_Sleep (5);
@@ -295,10 +289,6 @@ void Events_Init()
         DS_TimerInit (&fms_recv_timer, 0, 250);
         DS_TimerInit (&radio_recv_timer, 0, 250);
         DS_TimerInit (&robot_recv_timer, 0, 250);
-
-        /* Initialize NetConsole timer */
-        DS_TimerInit (&netconsole_send_timer, 250, 50);
-        DS_TimerStart (&netconsole_send_timer);
 
         /* Allow the event loop to run */
         running = 1;
