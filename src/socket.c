@@ -52,21 +52,6 @@ static void close_socket (int descriptor)
 }
 
 /**
- * Returns the socket type that should be used for the given socket
- *
- * \param ptr a pointer to a \c DS_Socket structure
- */
-static int get_type (DS_Socket* ptr)
-{
-    if (ptr) {
-        if (ptr->type == DS_SOCKET_TCP)
-            return SOCK_STREAM;
-    }
-
-    return SOCK_DGRAM;
-}
-
-/**
  * Standard socket error report function
  *
  * \param ptr pointer to a \c DS_Socket structure
@@ -86,8 +71,6 @@ static void error (DS_Socket* ptr, const sds msg, int error)
  *
  * \param ptr a pointer to a \c DS_Socket structure
  * \param socket the socked file descriptor
- *
- * \note \c SO_BROADCAST is only set if the \c DS_Socket requires it
  *
  * \returns \c 1 on success, \c 0 on failure
  */
@@ -154,7 +137,7 @@ static struct addrinfo* get_address (DS_Socket* ptr, int port, int local)
     /* Set hints */
     hints.ai_flags = AI_PASSIVE;
     hints.ai_family = AF_UNSPEC;
-    hints.ai_socktype = get_type (ptr);
+    hints.ai_socktype = (ptr->type == DS_SOCKET_TCP) ? SOCK_STREAM : SOCK_DGRAM;
 
     /* Get port string */
     sds port_str = sdscatfmt (sdsempty(), "%i", port);
@@ -177,28 +160,6 @@ static struct addrinfo* get_address (DS_Socket* ptr, int port, int local)
 
     /* Return the address */
     return addr;
-}
-
-/**
- * Returns information from the local address
- *
- * \param ptr a pointer to \c DS_Socket structure, used to get the
- *        server port number
- */
-static struct addrinfo* get_local_address (DS_Socket* ptr)
-{
-    return get_address (ptr, ptr->input_port, 1);
-}
-
-/**
- * Returns the remote address information for the given \c DS_Socket
- *
- * \param ptr a pointer to \c DS_Socket structure, used to get the
- *        client port number
- */
-static struct addrinfo* get_remote_address (DS_Socket* ptr)
-{
-    return get_address (ptr, ptr->output_port, 0);
 }
 
 /**
@@ -287,7 +248,7 @@ static int open_socket (DS_Socket* ptr, int is_input)
 
     /* Configure the server/input socket */
     if (is_input == 1) {
-        ptr->in_addr = *get_local_address (ptr);
+        ptr->in_addr = *get_address (ptr, ptr->input_port, 1);
         ptr->socket_in = get_socket (ptr, &ptr->in_addr);
 
         /* Socket is invalid */
@@ -318,7 +279,7 @@ static int open_socket (DS_Socket* ptr, int is_input)
 
     /* Configure the client/output socket */
     else {
-        ptr->out_addr = *get_remote_address (ptr);
+        ptr->out_addr = *get_address (ptr, ptr->output_port, 0);
         ptr->socket_out = get_socket (ptr, &ptr->out_addr);
 
         /* Socket is invalid */
@@ -459,7 +420,7 @@ int DS_SocketSend (DS_Socket* ptr, sds buf)
                        ptr->out_addr.ai_addrlen);
     }
 
-    /* Socket is not TCP nor UDP */
+    /* Socket is neither TCP or UDP */
     return 0;
 }
 
@@ -494,13 +455,17 @@ int DS_SocketRead (DS_Socket* ptr, sds buf)
 
     /* Receive data using UDP */
     else if (ptr->type == DS_SOCKET_UDP) {
+#ifdef WIN32
+        int len = (int) ptr->in_addr.ai_addrlen;
+#else
+        socklen_t len = ptr->in_addr.ai_addrlen;
+#endif
         return recvfrom (ptr->socket_in,
                          buf, 8, 0,
-                         ptr->in_addr.ai_addr,
-                         (int*) &ptr->in_addr.ai_addrlen);
+                         ptr->in_addr.ai_addr, &len);
     }
 
-    /* Socket is not TCP nor UDP */
+    /* Socket is neither TCP or UDP */
     return 0;
 }
 
