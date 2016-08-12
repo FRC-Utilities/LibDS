@@ -59,7 +59,6 @@ static void close_socket (int descriptor)
 #ifdef WIN32
     closesocket (descriptor);
 #else
-    shutdown (descriptor, 2);
     close (descriptor);
 #endif
 }
@@ -196,7 +195,7 @@ static void get_local_address (DS_Socket* ptr, struct addrinfo* addr)
     /* Something went wrong */
     if (err) {
         free (port);
-        error_str (NULL, "local address error", gai_strerror (err));
+        error_str (ptr, "local address error", gai_strerror (err));
         return;
     }
 
