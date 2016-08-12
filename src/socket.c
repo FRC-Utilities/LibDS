@@ -44,11 +44,13 @@
  */
 static void close_socket (int descriptor)
 {
+    if (descriptor > 0) {
 #ifdef WIN32
-    closesocket (descriptor);
+        closesocket (descriptor);
 #else
-    close (descriptor);
+        close (descriptor);
 #endif
+    }
 }
 
 /**
@@ -63,7 +65,7 @@ static void error (DS_Socket* ptr, const sds msg, int error)
     if (!ptr)
         return;
 
-    fprintf (stderr, "Socket %p (%s): %s %d\n", ptr, ptr->address, msg, error);
+    printf ("Socket %p (%s): %s %d\n", ptr, ptr->address, msg, error);
 }
 
 /**
@@ -111,6 +113,18 @@ static int set_socket_flags (DS_Socket* ptr, int sock)
             error (ptr, "cannot set SO_BROADCAST", GET_ERR);
             return 0;
         }
+    }
+
+    /* Enable loopback */
+    int loopback = setsockopt (sock,
+                               SOL_SOCKET,
+                               SO_USELOOPBACK,
+                               &name, sizeof (name));
+
+    /* Set SO_USELOOPBACK failed */
+    if (loopback != 0) {
+        error (ptr, "cannot set SO_USELOOPBACK", GET_ERR);
+        return 0;
     }
 
     /* Success! */

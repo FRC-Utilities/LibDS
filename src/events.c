@@ -41,6 +41,7 @@
 static DS_Timer fms_send_timer;
 static DS_Timer radio_send_timer;
 static DS_Timer robot_send_timer;
+static DS_Timer netconsole_send_timer;
 
 /*
  * Define the receiver watchdogs.
@@ -157,7 +158,10 @@ static void send_data()
     }
 
     /* Send NetConsole data */
-    send_netconsole_data();
+    if (netconsole_send_timer.expired) {
+        send_netconsole_data();
+        DS_TimerReset (&netconsole_send_timer);
+    }
 }
 
 /**
@@ -291,6 +295,10 @@ void Events_Init()
         DS_TimerInit (&fms_recv_timer, 0, 250);
         DS_TimerInit (&radio_recv_timer, 0, 250);
         DS_TimerInit (&robot_recv_timer, 0, 250);
+
+        /* Initialize NetConsole timer */
+        DS_TimerInit (&netconsole_send_timer, 250, 50);
+        DS_TimerStart (&netconsole_send_timer);
 
         /* Allow the event loop to run */
         running = 1;
