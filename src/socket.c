@@ -43,6 +43,10 @@
 
 #ifdef WIN32
     static WSADATA socket_data;
+    #define GET_ERR WSAGetLastError()
+    #define SO_REUSEPORT SO_REUSEADDR
+#else
+    #define GET_ERR errno
 #endif
 
 /**
@@ -82,6 +86,9 @@ static int get_type (DS_Socket* ptr)
  */
 static void error (DS_Socket* ptr, const sds msg, int error)
 {
+    if (!ptr)
+        return;
+
     fprintf (stderr, "Socket %p (%s): %s %d\n", ptr, ptr->address, msg, error);
 }
 
@@ -94,6 +101,9 @@ static void error (DS_Socket* ptr, const sds msg, int error)
  */
 static void error_str (DS_Socket* ptr, const sds msg, const char* error)
 {
+    if (!ptr)
+        return;
+
     fprintf (stderr, "Socket %p (%s): %s %s\n", ptr, ptr->address, msg, error);
 }
 
@@ -122,29 +132,40 @@ static int get_domain()
  */
 static int set_socket_flags (DS_Socket* ptr, int sock)
 {
+    /* Windows uses char instead of int in setsockopt() */
+#ifdef WIN32
+    char name = 1;
+#else
     int name = 1;
+#endif
+
+    /* Reuse the address and port */
     int reuse_port = setsockopt (sock,
                                  SOL_SOCKET,
                                  SO_REUSEPORT,
                                  &name, sizeof (name));
 
+    /* Setting the SO_REUSEPORT failed */
     if (reuse_port != 0) {
-        error (ptr, "cannot set SO_REUSEPORT", errno);
+        error (ptr, "cannot set SO_REUSEPORT", GET_ERR);
         return 0;
     }
 
+    /* Socket is UDP and broadcast flag is set */
     if (ptr->broadcast && (ptr->type == DS_SOCKET_UDP)) {
         int broadcast = setsockopt (sock,
                                     SOL_SOCKET,
                                     SO_BROADCAST,
                                     &name, sizeof (name));
 
+        /* Cannot set the broadcast option */
         if (broadcast != 0) {
-            error (ptr, "cannot set SO_BROADCAST", errno);
+            error (ptr, "cannot set SO_BROADCAST", GET_ERR);
             return 0;
         }
     }
 
+    /* Success! */
     return 1;
 }
 
@@ -169,10 +190,17 @@ static void get_local_address (DS_Socket* ptr, struct addrinfo* addr)
     char* port = malloc (sizeof (char) * 5);
     sprintf (port, "%d", ptr->input_port);
 
-    /* Get address information */
-    getaddrinfo (NULL, port, &hints, &addr);
+    /* Get the address info */
+    int err = getaddrinfo (NULL, port, &hints, &addr);
 
-    /* De-allocate memory for the port string */
+    /* Something went wrong */
+    if (err) {
+        free (port);
+        error_str (NULL, "local address error", gai_strerror (err));
+        return;
+    }
+
+    /* De-allocate memory */
     free (port);
 }
 
@@ -232,10 +260,12 @@ static void get_remote_address (DS_Socket* ptr, struct addrinfo* addr)
     sprintf (port, "%d", ptr->output_port);
 
     /* Get the address info */
-    err = getaddrinfo (NULL, port, &hints, &info);
+    err = getaddrinfo (ptr->address, port, &hints, &info);
 
     /* Something went wrong */
     if (err) {
+        free (port);
+        freeaddrinfo (info);
         error_str (ptr, "remote address error", gai_strerror (err));
         return;
     }
@@ -260,6 +290,36 @@ static void get_remote_address (DS_Socket* ptr, struct addrinfo* addr)
 }
 
 /**
+ * Creates a new socket with the given address info
+ *
+ * \param ptr the pointer to a \c DS_Socket structure
+ * \param addr the address info to use to create the socket
+ */
+static int get_socket (DS_Socket* ptr, struct addrinfo* addr)
+{
+    /* Open socket */
+    int sockfd = socket (addr->ai_family,
+                         addr->ai_socktype,
+                         addr->ai_protocol);
+
+    /* Check that the socket is valid */
+    if (sockfd < 0) {
+        fprintf (stderr, "Cannot create socket %d\n", sockfd);
+        close_socket (sockfd);
+        return -1;
+    }
+
+    /* Set socket options */
+    if (set_socket_flags (ptr, sockfd) == 0) {
+        fprintf (stderr, "Cannot set socket flags for %d\n", sockfd);
+        close_socket (sockfd);
+        return -1;
+    }
+
+    return sockfd;
+}
+
+/**
  * Initializes the sockets for the given structure
  *
  * \param ptr a pointer to a \c DS_Socket structure
@@ -272,50 +332,35 @@ static int open_socket (DS_Socket* ptr, int is_input)
     if (!ptr)
         return 0;
 
-    /* Socket is already initialized, abort */
-    if (ptr->initialized == 1)
-        return 0;
-
-    /* Socket is disabled, abort */
-    if (ptr->disabled == 1)
+    /* Socket is already initialized or disabled, abort */
+    if (ptr->initialized == 1 || ptr->disabled == 1)
         return 0;
 
     /* Ensure that address is valid */
     if (DS_StringIsEmpty (ptr->address))
         ptr->address = sdsnew ("0.0.0.0");
 
-    /* Open the socket descriptor */
-    int sockfd = socket (get_domain(), get_type (ptr), 0);
-
-    /* Check that the socket is valid */
-    if (sockfd < 0) {
-        error (ptr, "open error", errno);
-        return 0;
-    }
-
-    /* Set socket options */
-    if (set_socket_flags (ptr, sockfd) == 0) {
-        error (ptr, "cannot set flags", -1);
-        return 0;
-    }
-
     /* Configure the server/input socket */
     if (is_input) {
         struct addrinfo addr;
         get_local_address (ptr, &addr);
+        ptr->socket_in = get_socket (ptr, &addr);
 
-        /* Save the descriptor to the socket structure */
-        ptr->socket_in = sockfd;
+        /* Socket is invalid */
+        if (ptr->socket_in < 0)
+            return 0;
 
         /* Bind the socket */
-        if (bind (sockfd, addr.ai_addr, addr.ai_addrlen) != 0) {
-            error (ptr, "bind error", errno);
+        if (bind (ptr->socket_in, addr.ai_addr, addr.ai_addrlen) != 0) {
+            error (ptr, "bind error", GET_ERR);
+            close_socket (ptr->socket_in);
             return 0;
         }
 
         /* Allow 5 connections on the incoming queue */
-        if (listen (sockfd, 5) != 0) {
-            error (ptr, "listen error", errno);
+        if (listen (ptr->socket_in, 5) != 0) {
+            error (ptr, "listen error", GET_ERR);
+            close_socket (ptr->socket_in);
             return 0;
         }
     }
@@ -324,13 +369,16 @@ static int open_socket (DS_Socket* ptr, int is_input)
     else {
         struct addrinfo addr;
         get_remote_address (ptr, &addr);
+        ptr->socket_out = get_socket (ptr, &addr);
 
-        /* Save the descriptor to the socket structure */
-        ptr->socket_out = sockfd;
+        /* Socket is invalid */
+        if (ptr->socket_out < 0)
+            return 0;
 
         /* Connect the socket */
-        if (connect (sockfd, addr.ai_addr, addr.ai_addrlen) != 0) {
-            error (ptr, "connection error", errno);
+        if (connect (ptr->socket_out, addr.ai_addr, addr.ai_addrlen) != 0) {
+            error (ptr, "connection error", GET_ERR);
+            close_socket (ptr->socket_out);
             return 0;
         }
     }
@@ -366,6 +414,16 @@ void Sockets_Init()
         fprintf (stderr, "Cannot initialize WSA, error: %d", WSAGetLastError());
         exit (EXIT_FAILURE);
     }
+#endif
+}
+
+/**
+ * Cleans up the Windows Socket API
+ */
+void Sockets_Close()
+{
+#ifdef WIN32
+    WSACleanup();
 #endif
 }
 
