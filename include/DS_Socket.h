@@ -65,6 +65,7 @@ extern void DS_SocketOpen (DS_Socket* ptr);
 extern void DS_SocketClose (DS_Socket* ptr);
 extern int DS_SocketSend (DS_Socket* ptr, sds buf);
 extern int DS_SocketRead (DS_Socket* ptr, sds buf);
+extern void DS_SocketChangeAddress (DS_Socket* ptr, sds address);
 
 #ifdef __cplusplus
 }

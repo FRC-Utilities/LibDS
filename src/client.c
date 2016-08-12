@@ -29,10 +29,10 @@
 #include <stdio.h>
 #include <string.h>
 
-static sds status_string = NULL;
-static sds custom_fms_address = NULL;
-static sds custom_radio_address = NULL;
-static sds custom_robot_address = NULL;
+static sds status_string;
+static sds custom_fms_address;
+static sds custom_radio_address;
+static sds custom_robot_address;
 
 /**
  * Allocates memory for the members of the client module
@@ -402,7 +402,12 @@ void DS_SetCustomFMSAddress (sds address)
 {
     if (address) {
         sdsfree (custom_fms_address);
-        custom_fms_address = sdsdup (address);
+        custom_fms_address = sdscpy (sdsempty(), address);
+
+        if (DS_CurrentProtocol()) {
+            DS_SocketChangeAddress (&DS_CurrentProtocol()->fms_socket,
+                                    DS_GetAppliedFMSAddress());
+        }
     }
 }
 
@@ -413,7 +418,12 @@ void DS_SetCustomRadioAddress (sds address)
 {
     if (address) {
         sdsfree (custom_radio_address);
-        custom_radio_address = sdsdup (address);
+        custom_radio_address = sdscpy (sdsempty(), address);
+
+        if (DS_CurrentProtocol()) {
+            DS_SocketChangeAddress (&DS_CurrentProtocol()->radio_socket,
+                                    DS_GetAppliedRadioAddress());
+        }
     }
 }
 
@@ -424,7 +434,12 @@ void DS_SetCustomRobotAddress (sds address)
 {
     if (address) {
         sdsfree (custom_robot_address);
-        custom_robot_address = sdsdup (address);
+        custom_robot_address = sdscpy (sdsempty(), address);
+
+        if (DS_CurrentProtocol()) {
+            DS_SocketChangeAddress (&DS_CurrentProtocol()->robot_socket,
+                                    DS_GetAppliedRobotAddress());
+        }
     }
 }
 

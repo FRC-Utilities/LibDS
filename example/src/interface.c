@@ -320,7 +320,7 @@ void set_voltage (const double voltage)
 void update_status_label (const sds string)
 {
     sdsfree (rstatus_str);
-    rstatus_str = sdsdup (string);
+    rstatus_str = sdscpy (sdsempty(), string);
 }
 
 

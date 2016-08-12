@@ -82,34 +82,6 @@ static void error (DS_Socket* ptr, const sds msg, int error)
 }
 
 /**
- * Standard socket error report function
- *
- * \param ptr pointer to a \c DS_Socket structure
- * \param msg the message to show
- * \param error the error string
- */
-static void error_str (DS_Socket* ptr, const sds msg, const char* error)
-{
-    if (!ptr)
-        return;
-
-    fprintf (stderr, "Socket %p (%s): %s %s\n", ptr, ptr->address, msg, error);
-}
-
-/**
- * Returns the default socket domain/family used by the
- * native implementation.
- *
- * We prefer to use IPv6, since its backwards compatible with IPv4
- * and simplifies the code by eliminating the need of using different
- * structures and functions to support IPv4
- */
-static int get_domain()
-{
-    return AF_INET;
-}
-
-/**
  * Sets the \c SO_REUSEPORT and \c SO_BROADCAST flags to the socket
  *
  * \param ptr a pointer to a \c DS_Socket structure
@@ -163,12 +135,13 @@ static int set_socket_flags (DS_Socket* ptr, int sock)
 }
 
 /**
- * Returns information from the local address
+ * Obtains information for the given socket structure and port
  *
- * \param ptr a pointer to \c DS_Socket structure, used to get the
- *        server port number
+ * \param ptr pointer to a \c DS_Socket structure
+ * \param port the port to register with the address information
+ * \param local if set to \c 1, the node-name will be empty (localhost)
  */
-static struct addrinfo* get_local_address (DS_Socket* ptr)
+static struct addrinfo* get_address (DS_Socket* ptr, int port, int local)
 {
     /* Check for NULL pointers */
     if (!ptr)
@@ -180,28 +153,52 @@ static struct addrinfo* get_local_address (DS_Socket* ptr)
 
     /* Set hints */
     hints.ai_flags = AI_PASSIVE;
-    hints.ai_family = get_domain();
+    hints.ai_family = AF_UNSPEC;
     hints.ai_socktype = get_type (ptr);
 
     /* Get port string */
-    char* port = malloc (sizeof (char) * 5);
-    sprintf (port, "%d", ptr->input_port);
+    sds port_str = sdscatfmt (sdsempty(), "%i", port);
 
-    /* Get the address info */
-    int err = getaddrinfo (NULL, port, &hints, &addr);
+    /* Get the local address info */
+    if (local == 1)
+        getaddrinfo (NULL, port_str, &hints, &addr);
 
-    /* Something went wrong */
-    if (err) {
-        free (port);
-        error_str (ptr, "local address error", gai_strerror (err));
-        return NULL;
+    /* Get remote address info */
+    else {
+        int err = getaddrinfo (ptr->address, port_str, &hints, &addr);
+
+        /* Lookup failed, bind to localhost */
+        if (err != 0)
+            getaddrinfo (NULL, port_str, &hints, &addr);
     }
 
     /* De-allocate memory */
-    free (port);
+    sdsfree (port_str);
 
     /* Return the address */
     return addr;
+}
+
+/**
+ * Returns information from the local address
+ *
+ * \param ptr a pointer to \c DS_Socket structure, used to get the
+ *        server port number
+ */
+static struct addrinfo* get_local_address (DS_Socket* ptr)
+{
+    return get_address (ptr, ptr->input_port, 1);
+}
+
+/**
+ * Returns the remote address information for the given \c DS_Socket
+ *
+ * \param ptr a pointer to \c DS_Socket structure, used to get the
+ *        client port number
+ */
+static struct addrinfo* get_remote_address (DS_Socket* ptr)
+{
+    return get_address (ptr, ptr->output_port, 0);
 }
 
 /**
@@ -231,51 +228,6 @@ static void accept_connection (DS_Socket* ptr)
             ptr->socket_tmp = ptr->socket_in;
         }
     }
-}
-
-/**
- * Returns the remote address information for the given \c DS_Socket
- *
- * \todo For the moment, this function will bind to the local address
- *       for testing purposes. Change this when the sockets module is
- *       fully functional
- * \param ptr a pointer to \c DS_Socket structure, used to get the
- *        client port number
- */
-static struct addrinfo* get_remote_address (DS_Socket* ptr)
-{
-    /* Check for NULL pointers */
-    if (!ptr)
-        return NULL;
-
-    /* Initialize the hints */
-    struct addrinfo hints, *addr;
-    memset (&hints, 0, sizeof (hints));
-
-    /* Set hints */
-    hints.ai_flags = AI_PASSIVE;
-    hints.ai_family = get_domain();
-    hints.ai_socktype = get_type (ptr);
-
-    /* Get port string */
-    char* port = malloc (sizeof (char) * 5);
-    sprintf (port, "%d", ptr->output_port);
-
-    /* Get the address info */
-    int err = getaddrinfo (ptr->address, port, &hints, &addr);
-
-    /* Something went wrong */
-    if (err) {
-        free (port);
-        error_str (ptr, "remote address error", gai_strerror (err));
-        return NULL;
-    }
-
-    /* De-allocate memory */
-    free (port);
-
-    /* Return the address */
-    return addr;
 }
 
 /**
@@ -543,11 +495,34 @@ int DS_SocketRead (DS_Socket* ptr, sds buf)
     /* Receive data using UDP */
     else if (ptr->type == DS_SOCKET_UDP) {
         return recvfrom (ptr->socket_in,
-                         buf, 1024, 0,
+                         buf, 8, 0,
                          ptr->in_addr.ai_addr,
                          (int*) &ptr->in_addr.ai_addrlen);
     }
 
     /* Socket is not TCP nor UDP */
     return 0;
+}
+
+/**
+ * Changes the \a address of the given socket structre
+ *
+ * \param ptr pointer to a \c DS_Socket structure
+ * \param address the new address to apply to the socket
+ */
+void DS_SocketChangeAddress (DS_Socket* ptr, sds address)
+{
+    /* Check if pointers are NULL */
+    if (!ptr || !address)
+        return;
+
+    /* Close the socket */
+    DS_SocketClose (ptr);
+
+    /* Change socket properties */
+    sdsfree (ptr->address);
+    ptr->address = sdscpy (sdsempty(), address);
+
+    /* Re-open socket */
+    DS_SocketOpen (ptr);
 }

@@ -166,29 +166,29 @@ static void send_data()
  */
 static void recv_data()
 {
-    /* Check if protocol is valid */
-    if (!protocol)
-        return;
+    if (protocol) {
+        /* Create the data pointers */
+        sds fms_data = sdsempty();
+        sds radio_data = sdsempty();
+        sds robot_data = sdsempty();
 
-    /* Create the data pointers */
-    sds fms_data = sdsempty();
-    sds radio_data = sdsempty();
-    sds robot_data = sdsempty();
+        /* Read data from sockets */
+        //DS_SocketRead (&protocol->fms_socket, fms_data);
+        //DS_SocketRead (&protocol->radio_socket, radio_data);
+        //DS_SocketRead (&protocol->robot_socket, robot_data);
 
-    /* Read data from sockets */
-    //DS_SocketRead (&protocol->fms_socket, fms_data);
-    //DS_SocketRead (&protocol->radio_socket, radio_data);
-    DS_SocketRead (&protocol->robot_socket, robot_data);
+        /* Let the protocol interpret received data */
+        fms_read = protocol->read_fms_packet (fms_data);
+        radio_read = protocol->read_radio_packet (radio_data);
+        robot_read = protocol->read_robot_packet (robot_data);
 
-    /* Let the protocol interpret received data */
-    fms_read = protocol->read_fms_packet (fms_data);
-    radio_read = protocol->read_radio_packet (radio_data);
-    robot_read = protocol->read_robot_packet (robot_data);
+        /* Free the data pointers */
+        sdsfree (fms_data);
+        sdsfree (radio_data);
+        sdsfree (robot_data);
+    }
 
-    /* Free the data pointers */
-    sdsfree (fms_data);
-    sdsfree (radio_data);
-    sdsfree (robot_data);
+    DS_Sleep (5);
 }
 
 /**
@@ -295,7 +295,7 @@ void Events_Init()
         /* Allow the event loop to run */
         running = 1;
 
-        /* Configure the thread */
+        /* Configure the event thread */
         pthread_t thread;
         int error = pthread_create (&thread, NULL, &run_event_loop, NULL);
 

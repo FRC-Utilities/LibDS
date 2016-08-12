@@ -21,8 +21,10 @@
  * DEALINGS IN THE SOFTWARE.
  */
 
+#include "DS_Client.h"
 #include "DS_Events.h"
 #include "DS_Config.h"
+#include "DS_Protocol.h"
 
 /*
  * These variables hold the state(s) of the LibDS and its modules
@@ -93,6 +95,22 @@ static void create_robot_event (const DS_EventType type)
     event.robot.connected = CFG_GetRobotCommunications();
 
     DS_AddEvent (&event);
+}
+
+/**
+ * Re-applies the network addresses of the FMS, radio and robot.
+ * This function is called when the team number is changed
+ */
+static void reconfigure_addresses()
+{
+    if (DS_CurrentProtocol()) {
+        DS_SocketChangeAddress (&DS_CurrentProtocol()->fms_socket,
+                                DS_GetAppliedFMSAddress());
+        DS_SocketChangeAddress (&DS_CurrentProtocol()->radio_socket,
+                                DS_GetAppliedRadioAddress());
+        DS_SocketChangeAddress (&DS_CurrentProtocol()->robot_socket,
+                                DS_GetAppliedRobotAddress());
+    }
 }
 
 /**
@@ -259,8 +277,10 @@ void CFG_SetRobotCode (const int code)
  */
 void CFG_SetTeamNumber (const int number)
 {
-    if (team != number)
+    if (team != number) {
         team = number;
+        reconfigure_addresses();
+    }
 }
 
 /**

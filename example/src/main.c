@@ -54,6 +54,7 @@ int main()
 
     /* Load the 2016 protocol */
     DS_ConfigureProtocol (DS_GetProtocolFRC_2016());
+    DS_SetCustomRobotAddress ("127.0.0.1");
 
     /* Get user input from a different thread */
     pthread_t thread;

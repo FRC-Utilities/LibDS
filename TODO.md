@@ -11,6 +11,7 @@
 - [x] Implement joystick encoding in 2015 protocol
 - [ ] Add milliseconds in the 2015 date/time data packet
 - [x] Add protocol handler functions that free the generated (and obtained) data after being used
-- [ ] Implement cross-platform socket handling (using `DS_Socket` to define socket data)
+- [x] Be able to send data with DS_Sockets
+- [ ] Non-blocking data receiving with DS_Sockets
 - [x] Implement joystick handling functions
-- [ ] Implement the NetConsole (also using `DS_Socket` for the job)
+- [x] Implement the NetConsole (also using `DS_Socket` for the job)
