@@ -228,7 +228,7 @@ void close_interface()
     refresh();
     close_strings();
 
-#ifdef WIN32
+#if defined _WIN32
     system ("cls");
 #else
     system ("clear");

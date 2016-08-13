@@ -29,7 +29,6 @@
 #include "DS_Events.h"
 #include "DS_Protocol.h"
 
-#include <math.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -161,10 +160,10 @@ static void recv_data()
         sds netconsole_data = sdsempty();
 
         /* Read data from sockets */
-        //DS_SocketRead (&protocol->fms_socket, fms_data);
-        //DS_SocketRead (&protocol->radio_socket, radio_data);
-        //DS_SocketRead (&protocol->robot_socket, robot_data);
-        //DS_SocketRead (&protocol->netconsole_socket, netconsole_data);
+        DS_SocketRead (&protocol->fms_socket, fms_data);
+        DS_SocketRead (&protocol->radio_socket, radio_data);
+        DS_SocketRead (&protocol->robot_socket, robot_data);
+        DS_SocketRead (&protocol->netconsole_socket, netconsole_data);
 
         /* Let the protocol interpret received data */
         fms_read = protocol->read_fms_packet (fms_data);
@@ -185,8 +184,6 @@ static void recv_data()
         sdsfree (robot_data);
         sdsfree (netconsole_data);
     }
-
-    DS_Sleep (5);
 }
 
 /**
@@ -306,7 +303,7 @@ void Events_Init()
 
         /* Quit if the thread fails to start */
         if (error) {
-            fprintf (stderr, "Cannot create event thread (%d)", error);
+            fprintf (stderr, "Cannot initialize event thread", error);
             exit (error);
         }
     }

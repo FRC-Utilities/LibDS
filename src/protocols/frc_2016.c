@@ -50,7 +50,6 @@ extern DS_Protocol* DS_GetProtocolFRC_2016()
     if (!protocol) {
         protocol = DS_GetProtocolFRC_2015();
         protocol->robot_address = &robot_address;
-        protocol->robot_socket.address = robot_address();
     }
 
     return protocol;

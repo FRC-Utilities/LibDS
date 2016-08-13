@@ -32,39 +32,30 @@ extern "C" {
 
 #include <sds.h>
 
-#ifdef WIN32
-#include <winsock2.h>
-#include <ws2tcpip.h>
-#else
-#include <errno.h>
-#include <netdb.h>
-#include <sys/types.h>
-#include <netinet/in.h>
-#include <sys/socket.h>
-#endif
+struct __socket_info;
+typedef struct __socket_info* DS_SocketInfo;
 
-typedef struct _socket {
-    sds address;              /**< User-friendly address */
-    int disabled;             /**< Socket enabled? */
-    int accepted;             /**< Has server received something? */
-    int broadcast;            /**< Broadcast enabled? */
-    int socket_in;            /**< Input socket ID */
-    int socket_out;           /**< Output socket ID */
-    int socket_tmp;           /**< Specialized server socket ID */
-    int input_port;           /**< The server/input port */
-    int output_port;          /**< The client/output port */
-    int initialized;          /**< Set to \c 1 if socket is initialized */
-    struct addrinfo in_addr;  /**< The local address */
-    struct addrinfo out_addr; /**< The remote address */
+typedef struct {
+    sds address;
+    int disabled;
+    int broadcast;
+    int input_port;
+    int output_port;
     DS_SocketType type;
+    DS_SocketInfo info;
 } DS_Socket;
 
+/* Module functions */
 extern void Sockets_Init();
 extern void Sockets_Close();
+
+/* Socket initializer and destructor functions */
 extern void DS_SocketOpen (DS_Socket* ptr);
 extern void DS_SocketClose (DS_Socket* ptr);
-extern int DS_SocketSend (DS_Socket* ptr, sds buf);
-extern int DS_SocketRead (DS_Socket* ptr, sds buf);
+
+/* I/O functions */
+extern int DS_SocketSend (DS_Socket* ptr, sds data);
+extern int DS_SocketRead (DS_Socket* ptr, sds data);
 extern void DS_SocketChangeAddress (DS_Socket* ptr, sds address);
 
 #ifdef __cplusplus

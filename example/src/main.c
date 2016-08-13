@@ -34,7 +34,7 @@ static int running = 1;
 static void process_events();
 static void* get_user_input();
 
-#ifdef WIN32
+#if defined _WIN32
     #define CLEAR() system ("cls")
 #else
     #define CLEAR() system ("clear")
@@ -54,7 +54,7 @@ int main()
 
     /* Load the 2016 protocol */
     DS_ConfigureProtocol (DS_GetProtocolFRC_2016());
-    DS_SetCustomRobotAddress ("127.0.0.1");
+    DS_SetCustomRobotAddress ("192.168.1.72");
 
     /* Get user input from a different thread */
     pthread_t thread;

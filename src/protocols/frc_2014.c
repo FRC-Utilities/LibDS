@@ -302,7 +302,7 @@ static sds create_radio_packet()
 static sds create_robot_packet()
 {
     /* Create a 1024-byte long packet */
-    sds data = sdsnewlen (NULL, 2014);
+    sds data = sdsnewlen (NULL, 1024);
 
     /* Add packet index */
     data [0] = (sent_robot_packets & 0xff00) >> 8;
