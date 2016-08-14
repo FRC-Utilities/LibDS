@@ -160,7 +160,7 @@ sds sdsdup (const sds s)
 /* Free an sds string. No operation is performed if 's' is NULL. */
 void sdsfree (sds s)
 {
-    if (s == NULL) return;
+    if (!s) return;
     s_free ((char*)s - sdsHdrSize (s[-1]));
 }
 

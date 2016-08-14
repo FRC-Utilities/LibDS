@@ -32,10 +32,14 @@
  */
 int DS_StringIsEmpty (const sds string)
 {
-    if (string != NULL)
-        return sdslen (string) < 1;
+    if (string != NULL) {
+        if (sdslen (string) <= 0)
+            return 1;
+        else
+            return 0;
+    }
 
-    return 0;
+    return 1;
 }
 
 /**

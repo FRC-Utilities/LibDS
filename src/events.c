@@ -93,7 +93,7 @@ static int get_interval (const int original)
 static void send_fms_data()
 {
     sds data = protocol->create_fms_packet();
-    DS_SocketSend (&protocol->fms_socket, data);
+    //DS_SocketSend (&protocol->fms_socket, data);
     sdsfree (data);
 }
 
@@ -103,7 +103,7 @@ static void send_fms_data()
 static void send_radio_data()
 {
     sds data = protocol->create_radio_packet();
-    DS_SocketSend (&protocol->radio_socket, data);
+    //DS_SocketSend (&protocol->radio_socket, data);
     sdsfree (data);
 }
 
@@ -174,7 +174,7 @@ static void recv_data()
         if (!DS_StringIsEmpty (netconsole_data)) {
             DS_Event event;
             event.netconsole.type = DS_NETCONSOLE_NEW_MESSAGE;
-            event.netconsole.message = sdscpy (sdsempty(), netconsole_data);
+            event.netconsole.message = sdsnew (netconsole_data);
             DS_AddEvent (&event);
         }
 
@@ -303,7 +303,7 @@ void Events_Init()
 
         /* Quit if the thread fails to start */
         if (error) {
-            fprintf (stderr, "Cannot initialize event thread", error);
+            fprintf (stderr, "Cannot initialize event thread");
             exit (error);
         }
     }

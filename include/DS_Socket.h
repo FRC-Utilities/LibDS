@@ -28,12 +28,10 @@
 extern "C" {
 #endif
 
+#include <sds.h>
 #include "DS_Types.h"
 
-#include <sds.h>
-
-struct __socket_info;
-typedef struct __socket_info* DS_SocketInfo;
+struct DS_SocketInfo;
 
 typedef struct {
     sds address;
@@ -42,8 +40,11 @@ typedef struct {
     int input_port;
     int output_port;
     DS_SocketType type;
-    DS_SocketInfo info;
+    struct DS_SocketInfo* info;
 } DS_Socket;
+
+/* For socket initialization */
+extern DS_Socket DS_SocketEmpty();
 
 /* Module functions */
 extern void Sockets_Init();

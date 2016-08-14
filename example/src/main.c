@@ -54,7 +54,7 @@ int main()
 
     /* Load the 2016 protocol */
     DS_ConfigureProtocol (DS_GetProtocolFRC_2016());
-    DS_SetCustomRobotAddress ("192.168.1.72");
+    DS_SetCustomRobotAddress ("127.0.0.1");
 
     /* Get user input from a different thread */
     pthread_t thread;
@@ -144,7 +144,7 @@ static void process_events()
 static void* get_user_input()
 {
     while (running) {
-        switch (tolower (getchar())) {
+        switch (tolower (getch())) {
         case 'q':
             running = 0;
             break;

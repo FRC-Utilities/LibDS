@@ -514,7 +514,7 @@ DS_Protocol* DS_GetProtocolFRC_2014()
         protocol->max_button_count = 10;
 
         /* Define FMS socket properties */
-        DS_Socket fms_socket;
+        DS_Socket fms_socket = DS_SocketEmpty();
         fms_socket.disabled = 0;
         fms_socket.address = "";
         fms_socket.input_port = 1120;
@@ -522,18 +522,18 @@ DS_Protocol* DS_GetProtocolFRC_2014()
         fms_socket.type = DS_SOCKET_UDP;
 
         /* Define radio socket properties */
-        DS_Socket radio_socket;
+        DS_Socket radio_socket = DS_SocketEmpty();
         radio_socket.disabled = 1;
 
         /* Define robot socket properties */
-        DS_Socket robot_socket;
+        DS_Socket robot_socket = DS_SocketEmpty();
         robot_socket.disabled = 0;
         robot_socket.input_port = 1150;
         robot_socket.output_port = 1110;
         robot_socket.type = DS_SOCKET_UDP;
 
         /* Define netconsole socket properties */
-        DS_Socket netconsole_socket;
+        DS_Socket netconsole_socket = DS_SocketEmpty();
         netconsole_socket.disabled = 1;
 
         /* Assign socket objects */

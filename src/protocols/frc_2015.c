@@ -287,7 +287,7 @@ static sds add_timezone_data (sds packet)
 #if defined _WIN32
     sds tz = "CST";
 #else
-    sds tz = sdscpy (sdsempty(), timeinfo->tm_zone);
+    sds tz = sdsnew (timeinfo->tm_zone);
 #endif
 
     /* Encode date/time in datagram */
@@ -754,25 +754,25 @@ DS_Protocol* DS_GetProtocolFRC_2015()
         protocol->max_button_count = 10;
 
         /* Define FMS socket properties */
-        DS_Socket fms_socket;
+        DS_Socket fms_socket = DS_SocketEmpty();
         fms_socket.disabled = 0;
         fms_socket.input_port = 1120;
         fms_socket.output_port = 1160;
         fms_socket.type = DS_SOCKET_UDP;
 
         /* Define radio socket properties */
-        DS_Socket radio_socket;
+        DS_Socket radio_socket = DS_SocketEmpty();
         radio_socket.disabled = 1;
 
         /* Define robot socket properties */
-        DS_Socket robot_socket;
+        DS_Socket robot_socket = DS_SocketEmpty();
         robot_socket.disabled = 0;
         robot_socket.input_port = 1150;
         robot_socket.output_port = 1110;
         robot_socket.type = DS_SOCKET_UDP;
 
         /* Define netconsole socket properties */
-        DS_Socket netconsole_socket;
+        DS_Socket netconsole_socket = DS_SocketEmpty();
         netconsole_socket.disabled = 0;
         netconsole_socket.broadcast = 1;
         netconsole_socket.input_port = 6666;
