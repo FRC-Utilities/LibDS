@@ -130,19 +130,13 @@ static struct addrinfo* get_address_info (DS_Socket* ptr, int server)
         getaddrinfo (NULL, port_str, &hints, &res);
 
     /* Use 0.0.0.0 is needed */
-    else if (DS_StringIsEmpty (ptr->address)) {
-        //sdsfree (ptr->address);
-        //ptr->address = sdsnew ("0.0.0.0");
+    else if (DS_StringIsEmpty (ptr->address))
         getaddrinfo ("0.0.0.0", port_str, &hints, &res);
-    }
 
-    /* Get remote address */
+    /* Get remote address (and fallback to 0.0.0.0 in case of error) */
     else {
-        int err = getaddrinfo (ptr->address, port_str, &hints, &res);
-
-        /* Cannot get remote address, use local host */
-        if (err)
-            getaddrinfo (NULL, port_str, &hints, &res);
+        if (getaddrinfo (ptr->address, port_str, &hints, &res) != 0)
+            getaddrinfo ("0.0.0.0", port_str, &hints, &res);
     }
 
     /* De-allocate port string */
@@ -296,7 +290,6 @@ static int configure_socket (DS_Socket* ptr, int server)
  */
 static void* initialize (void* ptr)
 {
-    /* Cast the pointer to a socket structure */
     DS_Socket* sock = (DS_Socket*) ptr;
     if (sock) {
         /* Do not allow the module to use this socket yet */
@@ -362,7 +355,7 @@ void Sockets_Init()
     }
 #endif
 
-    DS_ArrayInit (&sockets, sizeof (DS_Socket) * 10);
+    DS_ArrayInit (&sockets, sizeof (DS_Socket) * 5);
 }
 
 /**
@@ -377,12 +370,8 @@ void Sockets_Close()
 
     /* Close all sockets */
     int i = 0;
-    for (i = 0; i < (int) sockets.used; ++i) {
-        DS_Socket* sock = (DS_Socket*) sockets.data [i];
-
-        if (sock)
-            DS_SocketClose (sock);
-    }
+    for (i = 0; i < (int) sockets.used; ++i)
+        DS_SocketClose ((DS_Socket*) sockets.data [i]);
 
     /* Free socket array */
     DS_ArrayFree (&sockets);
