@@ -34,7 +34,8 @@ void DS_ArrayFree (DS_Array* array)
         return;
 
     /* De-allocate array data */
-    free (array->data);
+    if (array->data)
+        free (array->data);
 
     /* Update array properties */
     array->used = 0;

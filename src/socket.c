@@ -481,10 +481,6 @@ int DS_SocketRead (DS_Socket* ptr, sds data)
     if (ptr->info->server_initialized != 1 || ptr->disabled == 1)
         return -1;
 
-    /* Empty the buffer */
-    sdsfree (data);
-    data = sdsempty();
-
     /* Return length of received data */
     return (int) sdslen (data);
 }
