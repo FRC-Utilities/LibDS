@@ -51,7 +51,6 @@
     #define GET_ERR errno
 #endif
 
-static int running = 0;
 static DS_Array sockets;
 
 struct DS_SocketInfo {
@@ -59,12 +58,8 @@ struct DS_SocketInfo {
     int socket_out;
     int socket_tmp;
     int initialized;
-    sds send_buffer;
-    sds recv_buffer;
     int server_initialized;
     int client_initialized;
-    int recv_buffer_locked;
-    int send_buffer_locked;
     struct addrinfo in_addr;
     struct addrinfo out_addr;
 };
@@ -309,10 +304,6 @@ static void* initialize (void* ptr)
         sock->info->client_initialized = 0;
         sock->info->server_initialized = 0;
 
-        /* Empty the sender and receiver buffers */
-        sock->info->recv_buffer = sdsempty();
-        sock->info->send_buffer = sdsempty();
-
         /* Clear the address if required */
         if (sock->broadcast)
             sock->address = sdsempty();
@@ -334,88 +325,6 @@ static void* initialize (void* ptr)
 }
 
 /**
- * Sends the data stored in the given socket
- */
-static void send_data (DS_Socket* ptr)
-{
-    /* Invalid pointer or data buffer */
-    if (!ptr)
-        return;
-
-    /* No output data */
-    else if (DS_StringIsEmpty (ptr->info->send_buffer))
-        return;
-
-    /* Client is writting data to socket */
-    else if (ptr->info->send_buffer_locked == 1)
-        return;
-
-    /* Socket is disabled or uninitialized */
-    else if ((ptr->disabled == 1) || (ptr->info->client_initialized != 1))
-        return;
-
-    /* Send data using TCP */
-    if (ptr->type == DS_SOCKET_TCP)
-        send (ptr->info->socket_out,
-              ptr->info->send_buffer,
-              sdslen (ptr->info->send_buffer), 0);
-
-    /* Send data using UDP */
-    else if (ptr->type == DS_SOCKET_UDP) {
-        sendto (ptr->info->socket_out,
-                ptr->info->send_buffer,
-                sdslen (ptr->info->send_buffer), 0,
-                ptr->info->out_addr.ai_addr,
-                ptr->info->out_addr.ai_addrlen);
-    }
-
-    /* Clear the buffer */
-    sdsfree (ptr->info->send_buffer);
-    ptr->info->send_buffer = sdsempty();
-}
-
-/**
- * Reads received socket data into the socket structure's buffer
- */
-static void read_data (DS_Socket* ptr)
-{
-    if (!ptr)
-        return;
-}
-
-/**
- * Runs all client operations (sending packets)
- */
-static void* client_loop()
-{
-    int sock;
-    while (running) {
-        for (sock = 0; sock < (int) sockets.used; ++sock)
-            send_data ((DS_Socket*) sockets.data [sock]);
-
-        DS_Sleep (5);
-    }
-
-    return NULL;
-}
-
-/**
- * Runs all server operations (receiving packets, accepting connections, etc)
- */
-static void* server_loop()
-{
-    int sock;
-    while (running) {
-        for (sock = 0; sock < (int) sockets.used; ++sock)
-            read_data ((DS_Socket*) sockets.data [sock]);
-
-        DS_Sleep (5);
-    }
-
-    return NULL;
-}
-
-/**
  * Returns an empty socket for safe initialization
  */
 DS_Socket DS_SocketEmpty()
@@ -423,15 +332,12 @@ DS_Socket DS_SocketEmpty()
     DS_Socket socket;
     struct DS_SocketInfo* info = malloc (sizeof (struct DS_SocketInfo));
 
-    info->send_buffer = "";
-    info->recv_buffer = "";
     info->socket_in = -1;
     info->socket_out = -1;
     info->socket_tmp = -1;
     info->initialized = 0;
     info->server_initialized = 0;
     info->client_initialized = 0;
-    info->send_buffer_locked = 0;
 
     socket.address = "";
     socket.disabled = 0;
@@ -456,21 +362,7 @@ void Sockets_Init()
     }
 #endif
 
-    /* Initialize socket array */
     DS_ArrayInit (&sockets, sizeof (DS_Socket) * 10);
-
-    /* Start event loops */
-    running = 1;
-    pthread_t client_thread;
-    pthread_t server_thread;
-    int client_err = pthread_create (&client_thread, NULL, &client_loop, NULL);
-    int server_err = pthread_create (&server_thread, NULL, &server_loop, NULL);
-
-    /* Quit if client or server threads fail to start */
-    if (client_err || server_err) {
-        fprintf (stderr, "Cannot initialize sockets module\n");
-        exit (EXIT_FAILURE);
-    }
 }
 
 /**
@@ -482,9 +374,6 @@ void Sockets_Close()
 #if defined _WIN32
     WSACleanup();
 #endif
-
-    /* Stop the event loops */
-    running = 0;
 
     /* Close all sockets */
     int i = 0;
@@ -533,9 +422,15 @@ void DS_SocketClose (DS_Socket* ptr)
         return;
 
     /* Close socket descriptors */
-    close_socket (ptr->info->socket_in);
-    close_socket (ptr->info->socket_out);
-    close_socket (ptr->info->socket_tmp);
+    if (ptr->info) {
+        close_socket (ptr->info->socket_in);
+        close_socket (ptr->info->socket_out);
+        close_socket (ptr->info->socket_tmp);
+
+        ptr->info->initialized = 0;
+        ptr->info->client_initialized = 0;
+        ptr->info->server_initialized = 0;
+    }
 }
 
 /**
@@ -544,21 +439,30 @@ void DS_SocketClose (DS_Socket* ptr)
  * \param data the data buffer to send
  * \param ptr pointer to the socket to use to send the given \a data
  *
- * \returns 1 on success, 0 on failure
+ * \returns number of bytes written on success, -1 on failure
  */
 int DS_SocketSend (DS_Socket* ptr, sds data)
 {
+    /* Invalid pointer and/or empty data buffer */
     if (!ptr || DS_StringIsEmpty (data))
-        return 0;
+        return -1;
 
+    /* Socket is disabled or uninitialized */
     if (ptr->info->client_initialized != 1 || ptr->disabled == 1)
-        return 0;
+        return -1;
 
-    ptr->info->send_buffer_locked = 1;
-    ptr->info->send_buffer = sdsdup (data);
-    ptr->info->send_buffer_locked = 0;
+    /* Send data using TCP */
+    if (ptr->type == DS_SOCKET_TCP)
+        return send (ptr->info->socket_out, data, sdslen (data), 0);
 
-    return 1;
+    /* Send data using UDP */
+    else if (ptr->type == DS_SOCKET_UDP) {
+        return sendto (ptr->info->socket_out, data, sdslen (data), 0,
+                       ptr->info->out_addr.ai_addr,
+                       ptr->info->out_addr.ai_addrlen);
+    }
+
+    return -1;
 }
 
 /**
@@ -567,23 +471,24 @@ int DS_SocketSend (DS_Socket* ptr, sds data)
  * \param ptr the socket to read data from
  * \param data the buffer in which to write received data
  *
- * \returns 1 if received data is not empty, otherwise,
- *          this function shall return 0
+ * \returns number of received bytes on success, -1 on failure
  */
 int DS_SocketRead (DS_Socket* ptr, sds data)
 {
+    /* Invalid pointer */
     if (!ptr)
-        return 0;
+        return -1;
 
+    /* Socket is disabled or uninitialized */
     if (ptr->info->server_initialized != 1 || ptr->disabled == 1)
-        return 0;
+        return -1;
 
-    if (ptr->info->recv_buffer) {
-        data = sdscpy (sdsempty(), ptr->info->recv_buffer);
-        sdsfree (ptr->info->recv_buffer);
-    }
+    /* Empty the buffer */
+    sdsfree (data);
+    data = sdsempty();
 
-    return !DS_StringIsEmpty (data);
+    /* Return length of received data */
+    return (int) sdslen (data);
 }
 
 /**
