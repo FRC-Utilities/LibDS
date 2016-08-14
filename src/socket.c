@@ -137,8 +137,10 @@ static struct addrinfo* get_address_info (DS_Socket* ptr, int server)
         getaddrinfo (NULL, port_str, &hints, &res);
 
     /* Remote address is empty, use 0.0.0.0 */
-    else if (DS_StringIsEmpty (ptr->address))
+    else if (DS_StringIsEmpty (ptr->address)) {
+        ptr->address = "0.0.0.0";
         getaddrinfo ("0.0.0.0", port_str, &hints, &res);
+    }
 
     /* Get remote address (and fallback to 0.0.0.0 in case of error) */
     else {
@@ -305,7 +307,7 @@ static void* initialize (void* ptr)
         sock->info->server_initialized = 0;
 
         /* Clear the address if required */
-        if (sock->broadcast)
+        if (sock->broadcast || DS_StringIsEmpty (sock->address))
             sock->address = sdsempty();
 
         /* Initialize and configure the client and server sockets */
@@ -502,8 +504,11 @@ void DS_SocketChangeAddress (DS_Socket* ptr, sds address)
     /* Close socket */
     DS_SocketClose (ptr);
 
+    /* Free the address (if it exists) */
+    if (!DS_StringIsEmpty (ptr->address))
+        sdsfree (ptr->address);
+
     /* Re-assign address */
-    sdsfree (ptr->address);
     ptr->address = sdscpy (sdsempty(), address);
 
     /* Open socket */
