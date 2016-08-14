@@ -29,9 +29,10 @@
 void DS_Init()
 {
     Client_Init();
+    Events_Init();
     Sockets_Init();
     Joysticks_Init();
-    Events_Init();
+    Protocols_Init();
 }
 
 /**
@@ -41,7 +42,7 @@ void DS_Close()
 {
     Events_Close();
     Client_Close();
-    Protocol_Close();
+    Protocols_Close();
     Joysticks_Close();
     Sockets_Close();
 }

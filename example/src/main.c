@@ -21,14 +21,15 @@
  */
 
 #include <LibDS.h>
+#include <curses.h>
 
 #include <ctype.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <pthread.h>
 
-#include "interface.h"
 #include "joystick.h"
+#include "interface.h"
 
 static int running = 1;
 static void process_events();

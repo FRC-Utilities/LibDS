@@ -65,10 +65,11 @@ typedef struct _protocol {
     DS_Socket netconsole_socket;
 } DS_Protocol;
 
-extern DS_Protocol* DS_CurrentProtocol();
-
-extern void Protocol_Close();
+extern void Protocols_Init();
+extern void Protocols_Close();
 extern void DS_ConfigureProtocol (DS_Protocol* ptr);
+
+extern DS_Protocol* DS_CurrentProtocol();
 
 #ifdef __cplusplus
 }

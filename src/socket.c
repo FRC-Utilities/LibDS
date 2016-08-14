@@ -51,8 +51,15 @@
     #define GET_ERR errno
 #endif
 
+/**
+ * Holds the sockets in a dynamic array (for automatic closing)
+ */
 static DS_Array sockets;
 
+/**
+ * Holds all the private (erm, dirty) variables that the sockets module needs
+ * to operate with the data provided by a \c DS_Socket structure
+ */
 struct DS_SocketInfo {
     int socket_in;
     int socket_out;
