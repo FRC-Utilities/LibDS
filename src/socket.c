@@ -504,10 +504,6 @@ void DS_SocketChangeAddress (DS_Socket* ptr, sds address)
     /* Close socket */
     DS_SocketClose (ptr);
 
-    /* Free the address (if it exists) */
-    if (!DS_StringIsEmpty (ptr->address))
-        sdsfree (ptr->address);
-
     /* Re-assign address */
     ptr->address = sdscpy (sdsempty(), address);
 
