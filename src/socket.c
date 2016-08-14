@@ -136,7 +136,7 @@ static struct addrinfo* get_address_info (DS_Socket* ptr, int server)
     if (server)
         getaddrinfo (NULL, port_str, &hints, &res);
 
-    /* Use 0.0.0.0 is needed */
+    /* Remote address is empty, use 0.0.0.0 */
     else if (DS_StringIsEmpty (ptr->address))
         getaddrinfo ("0.0.0.0", port_str, &hints, &res);
 
