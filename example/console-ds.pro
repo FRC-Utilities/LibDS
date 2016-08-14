@@ -15,6 +15,11 @@ DEFINES -= UNICODE QT_LARGEFILE_SUPPORT
 
 TARGET = console-ds
 
+!win32* {
+    target.path = /usr/bin
+    INSTALLS += target
+}
+
 #-------------------------------------------------------------------------------
 # Link with ncurses/pdcurses
 #-------------------------------------------------------------------------------
