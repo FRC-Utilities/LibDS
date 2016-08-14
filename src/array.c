@@ -22,6 +22,7 @@
  */
 
 #include "DS_Array.h"
+#include "DS_Utils.h"
 
 /**
  * Deallocates the memory used to store the \a array data and resets the
@@ -34,8 +35,7 @@ void DS_ArrayFree (DS_Array* array)
         return;
 
     /* De-allocate array data */
-    if (array->data)
-        free (array->data);
+    DS_FREE (array->data);
 
     /* Update array properties */
     array->used = 0;

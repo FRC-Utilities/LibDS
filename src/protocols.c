@@ -71,7 +71,7 @@ static void send_fms_data()
 {
     sds data = protocol->create_fms_packet();
     DS_SocketSend (&protocol->fms_socket, data);
-    sdsfree (data);
+    DS_FREESTR (data);
 }
 
 /**
@@ -81,7 +81,7 @@ static void send_radio_data()
 {
     sds data = protocol->create_radio_packet();
     DS_SocketSend (&protocol->radio_socket, data);
-    sdsfree (data);
+    DS_FREESTR (data);
 }
 
 /**
@@ -91,7 +91,7 @@ static void send_robot_data()
 {
     sds data = protocol->create_robot_packet();
     DS_SocketSend (&protocol->robot_socket, data);
-    sdsfree (data);
+    DS_FREESTR (data);
 }
 
 /**
@@ -159,10 +159,10 @@ static void recv_data()
     }
 
     /* Free the received data */
-    sdsfree (fms_data);
-    sdsfree (radio_data);
-    sdsfree (robot_data);
-    sdsfree (netconsole_data);
+    DS_FREESTR (fms_data);
+    DS_FREESTR (radio_data);
+    DS_FREESTR (robot_data);
+    DS_FREESTR (netconsole_data);
 }
 
 /**
@@ -282,7 +282,7 @@ static void close_protocol()
     DS_TimerStop (&robot_recv_timer);
 
     /* Delete the protocol */
-    free (protocol);
+    DS_FREE (protocol);
 }
 
 /**

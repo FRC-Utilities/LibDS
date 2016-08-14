@@ -26,6 +26,7 @@
 #include <stdlib.h>
 #include <curses.h>
 
+#include <DS_Utils.h>
 #include <DS_Client.h>
 
 /*
@@ -34,8 +35,6 @@
 #define INVALID  "--.--"
 #define ENABLED  "Enabled"
 #define DISABLED "Disabled"
-
-#define min(a,b) ((a) < (b) ? a : b)
 
 /*
  * Define windows
@@ -69,7 +68,7 @@ static sds robot_check_str;
  */
 static sds set_checked (sds label, int checked)
 {
-    sdsfree (label);
+    DS_FREESTR (label);
     label = sdsnew (checked > 0 ? "[*]" : "[ ]");
     return label;
 }
@@ -98,17 +97,17 @@ static void init_strings()
  */
 static void close_strings()
 {
-    sdsfree (can_str);
-    sdsfree (cpu_str);
-    sdsfree (ram_str);
-    sdsfree (disk_str);
-    sdsfree (rstatus_str);
-    sdsfree (enabled_str);
-    sdsfree (voltage_str);
-    sdsfree (console_str);
-    sdsfree (stick_check_str);
-    sdsfree (rcode_check_str);
-    sdsfree (robot_check_str);
+    DS_FREESTR (can_str);
+    DS_FREESTR (cpu_str);
+    DS_FREESTR (ram_str);
+    DS_FREESTR (disk_str);
+    DS_FREESTR (rstatus_str);
+    DS_FREESTR (enabled_str);
+    DS_FREESTR (voltage_str);
+    DS_FREESTR (console_str);
+    DS_FREESTR (stick_check_str);
+    DS_FREESTR (rcode_check_str);
+    DS_FREESTR (robot_check_str);
 }
 
 /**
@@ -127,7 +126,7 @@ static void draw_windows()
     /* Set window sizing */
     int top_height = 3;
     int bottom_height = 3;
-    int side_width = min (COLS / 4, 40);
+    int side_width = DS_Min (COLS / 4, 40);
     int central_height = LINES - (top_height + bottom_height);
 
     /* Create top windows */
@@ -205,6 +204,12 @@ static void refresh_windows()
  */
 void init_interface()
 {
+#if defined _WIN32
+    system ("cls");
+#else
+    system ("clear");
+#endif
+
     init_strings();
     window = initscr();
 
@@ -250,7 +255,7 @@ void update_interface()
  */
 void set_can (const int can)
 {
-    sdsfree (can_str);
+    DS_FREESTR (can_str);
     can_str = sdscatfmt (sdsempty(), "%i %%", can);
 }
 
@@ -259,7 +264,7 @@ void set_can (const int can)
  */
 void set_cpu (const int cpu)
 {
-    sdsfree (cpu_str);
+    DS_FREESTR (cpu_str);
     cpu_str = sdscatfmt (sdsempty(), "%i %%", cpu);
 }
 
@@ -268,7 +273,7 @@ void set_cpu (const int cpu)
  */
 void set_ram (const int ram)
 {
-    sdsfree (ram_str);
+    DS_FREESTR (ram_str);
     ram_str = sdscatfmt (sdsempty(), "%i %%", ram);
 }
 
@@ -277,7 +282,7 @@ void set_ram (const int ram)
  */
 void set_disk (const int disk)
 {
-    sdsfree (disk_str);
+    DS_FREESTR (disk_str);
     disk_str = sdscatfmt (sdsempty(), "%i %%", disk);
 }
 
@@ -286,7 +291,7 @@ void set_disk (const int disk)
  */
 void set_enabled (const int enabled)
 {
-    sdsfree (enabled_str);
+    DS_FREESTR (enabled_str);
     enabled_str = sdsnew (enabled ? ENABLED : DISABLED);
 }
 
@@ -311,7 +316,7 @@ void set_robot_comms (const int comms)
  */
 void set_voltage (const double voltage)
 {
-    sdsfree (voltage_str);
+    DS_FREESTR (voltage_str);
     voltage_str = sdscatprintf (sdsempty(), "%f V", voltage);
 }
 
@@ -321,7 +326,7 @@ void set_voltage (const double voltage)
  */
 void update_status_label (const sds string)
 {
-    sdsfree (rstatus_str);
+    DS_FREESTR (rstatus_str);
     rstatus_str = sdscpy (sdsempty(), string);
 }
 

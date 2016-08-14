@@ -21,7 +21,9 @@
  * DEALINGS IN THE SOFTWARE.
  */
 
+#include "DS_Utils.h"
 #include "DS_Queue.h"
+
 #include <string.h>
 
 /**
@@ -56,7 +58,7 @@ void DS_QueueFree (DS_Queue* queue)
         return;
 
     /* De-allocate the queue data */
-    free (queue->buffer);
+    DS_FREE (queue->buffer);
 
     /* Reset the queue's properties */
     queue->count = 0;

@@ -313,8 +313,8 @@ static sds add_timezone_data (sds packet)
     packet = sdscatsds (packet, data);
 
     /* Free allocated memory */
-    sdsfree (tz);
-    sdsfree (data);
+    DS_FREESTR (tz);
+    DS_FREESTR (data);
 
     /* Return the new reference */
     return packet;
@@ -386,7 +386,7 @@ static sds add_joystick_data (sds packet)
 
     /* Append generated data to packet */
     packet = sdscatsds (packet, data);
-    sdsfree (data);
+    DS_FREESTR (data);
 
     /* Return the new reference */
     return packet;

@@ -149,7 +149,7 @@ static struct addrinfo* get_address_info (DS_Socket* ptr, int server)
     }
 
     /* De-allocate port string */
-    sdsfree (port_str);
+    DS_FREESTR (port_str);
 
     /* Return obtained address info */
     return res;
@@ -500,7 +500,7 @@ void DS_SocketChangeAddress (DS_Socket* ptr, sds address)
     /* Close socket */
     DS_SocketClose (ptr);
 
-    /* Re-assign address */
+    /* Re-assign addressss */
     ptr->address = sdscpy (sdsempty(), address);
 
     /* Open socket */

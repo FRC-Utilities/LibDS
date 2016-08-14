@@ -50,10 +50,10 @@ void Client_Init()
  */
 void Client_Close()
 {
-    sdsfree (status_string);
-    sdsfree (custom_fms_address);
-    sdsfree (custom_radio_address);
-    sdsfree (custom_robot_address);
+    DS_FREESTR (status_string);
+    DS_FREESTR (custom_fms_address);
+    DS_FREESTR (custom_radio_address);
+    DS_FREESTR (custom_robot_address);
 }
 
 /**
@@ -173,7 +173,7 @@ sds DS_GetAppliedRobotAddress()
  */
 sds DS_GetStatusString()
 {
-    sdsfree (status_string);
+    DS_FREESTR (status_string);
 
     if (!DS_GetRobotCommunications())
         status_string = sdsnew ("No Robot Communications");
@@ -199,7 +199,7 @@ sds DS_GetStatusString()
 
         sds enabled = sdsnew (DS_GetRobotEnabled() ? "Enabled" : "Disabled");
         status_string = sdscatfmt (status_string, " %s", enabled);
-        sdsfree (enabled);
+        DS_FREESTR (enabled);
     }
 
     return status_string;
@@ -401,7 +401,7 @@ void DS_SetControlMode (const DS_ControlMode mode)
 void DS_SetCustomFMSAddress (sds address)
 {
     if (address) {
-        sdsfree (custom_fms_address);
+        DS_FREESTR (custom_fms_address);
         custom_fms_address = sdscpy (sdsempty(), address);
 
         if (DS_CurrentProtocol()) {
@@ -417,7 +417,7 @@ void DS_SetCustomFMSAddress (sds address)
 void DS_SetCustomRadioAddress (sds address)
 {
     if (address) {
-        sdsfree (custom_radio_address);
+        DS_FREESTR (custom_radio_address);
         custom_radio_address = sdscpy (sdsempty(), address);
 
         if (DS_CurrentProtocol()) {
@@ -433,7 +433,7 @@ void DS_SetCustomRadioAddress (sds address)
 void DS_SetCustomRobotAddress (sds address)
 {
     if (address) {
-        sdsfree (custom_robot_address);
+        DS_FREESTR (custom_robot_address);
         custom_robot_address = sdscpy (sdsempty(), address);
 
         if (DS_CurrentProtocol()) {
