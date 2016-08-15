@@ -65,7 +65,7 @@ static DS_Array sockets;
  */
 static void close_socket (int descriptor)
 {
-    if (descriptor > 0) {
+    if (descriptor > 0 && descriptor != SOCK_ERROR) {
 #ifdef WIN32
         closesocket (descriptor);
 #else
@@ -201,6 +201,69 @@ static int create_socket (DS_Socket* ptr, struct addrinfo* addr)
 }
 
 /**
+ * Runs the server socket process
+ */
+static void* run_server (void* ptr)
+{
+    /* Pointer is NULL, abort */
+    if (!ptr)
+        return NULL;
+
+    /* Cast generic pointer to socket */
+    DS_Socket* sock = (DS_Socket*) ptr;
+
+    /* Listen for incoming connections */
+    if (sock->type == DS_SOCKET_TCP) {
+        int listen_err = listen (sock->info.socket_in, 5);
+
+        /* Check if there was an error while configuring the socket */
+        if (listen_err) {
+            error (sock, "cannot configure listener socket", GET_ERR);
+            close_socket (sock->info.socket_in);
+            return NULL;
+        }
+
+        /* Accept connection from client */
+        struct addrinfo addr;
+        sock->info.socket_tmp = accept (sock->info.socket_in,
+                                        addr.ai_addr, &addr.ai_addrlen);
+    }
+
+    /* Main loop */
+    while (sock->info.server_initialized != 0) {
+        /* Clear temp. buffer */
+        DS_FREESTR (sock->info.tmpbuffer);
+        sock->info.tmpbuffer = sdsempty();
+
+        /* Set buffer pointer & size */
+        int bytes = 0;
+        size_t size = 1024;
+
+        /* Read using TCP */
+        if (sock->type == DS_SOCKET_TCP)
+            bytes = recv (sock->info.socket_tmp, sock->info.tmpbuffer, size, 0);
+
+        /* Read using UDP */
+        else
+            bytes = recvfrom (sock->info.socket_in,
+                              sock->info.tmpbuffer, size, 0,
+                              sock->info.out_addr->ai_addr,
+                              &sock->info.out_addr->ai_addrlen);
+
+        /* Close connection if required */
+        if (sock->type == DS_SOCKET_TCP && bytes == 0)
+            close_socket (sock->info.socket_tmp);
+
+        /* Copy temp. buffer to normal buffer */
+        if (bytes > 0)
+            sock->info.buffer = sdscatsds (sock->info.buffer,
+                                           sock->info.tmpbuffer);
+    }
+
+    return NULL;
+}
+
+/**
  * Creates and configures a new socket descriptor for the given structure
  *
  * \param ptr pointer to \c DS_Socket structure
@@ -238,16 +301,12 @@ static int configure_socket (DS_Socket* ptr, int server)
             return 0;
         }
 
-        /* Allow the socket to accept TCP connections */
-        if (ptr->type == DS_SOCKET_TCP) {
-            int listen_err = listen (ptr->info.socket_in, 5);
+        /* Allow the server to run */
+        ptr->info.server_initialized = 1;
 
-            /* Check if there was an error while configuring the socket */
-            if (listen_err) {
-                error (ptr, "cannot configure TCP listener socket", GET_ERR);
-                return 0;
-            }
-        }
+        /* Start the server process in another thread */
+        pthread_t thread;
+        pthread_create (&thread, NULL, &run_server, (void*) ptr);
     }
 
     /* Configure the client socket */
@@ -322,17 +381,20 @@ DS_Socket DS_SocketEmpty()
     DS_SocketInfo info;
 
     info.initialized = 0;
+    info.buffer = sdsempty();
+    info.tmpbuffer = sdsempty();
     info.server_initialized = 0;
     info.client_initialized = 0;
     info.socket_in = SOCK_ERROR;
     info.socket_out = SOCK_ERROR;
+    info.socket_tmp = SOCK_ERROR;
 
     socket.info = info;
-    socket.address = "";
     socket.disabled = 0;
     socket.broadcast = 0;
     socket.input_port = 0;
     socket.output_port = 0;
+    socket.address = sdsempty();
     socket.type = DS_SOCKET_TCP;
 
     return socket;
@@ -408,6 +470,7 @@ void DS_SocketClose (DS_Socket* ptr)
     /* Close socket descriptors */
     close_socket (ptr->info.socket_in);
     close_socket (ptr->info.socket_out);
+    close_socket (ptr->info.socket_tmp);
 
     /* Reset the info structure */
     ptr->info.initialized = 0;
@@ -465,6 +528,13 @@ int DS_SocketRead (DS_Socket* ptr, sds data)
     if (ptr->info.server_initialized != 1 || ptr->disabled == 1)
         return SOCK_ERROR;
 
+    /* Copy buffer to data */
+    data = sdscpy (data, ptr->info.buffer);
+
+    /* Clear the buffer */
+    DS_FREESTR (ptr->info.buffer);
+    ptr->info.buffer = sdsempty();
+
     /* Return length of received data */
     return (int) sdslen (data);
 }
@@ -485,6 +555,7 @@ void DS_SocketChangeAddress (DS_Socket* ptr, sds address)
     DS_SocketClose (ptr);
 
     /* Re-assign address */
+    DS_FREESTR (ptr->address);
     ptr->address = sdscpy (sdsempty(), address);
 
     /* Open socket */

@@ -67,6 +67,15 @@ static int fms_read = 0;
 static int radio_read = 0;
 static int robot_read = 0;
 
+/*
+ * Holds the received data
+ */
+static sds fms_data = NULL;
+static sds radio_data = NULL;
+static sds robot_data = NULL;
+static sds netconsole_data = NULL;
+
+
 /**
  * Sends a new packet to the FMS
  */
@@ -127,6 +136,22 @@ static void send_data()
 }
 
 /**
+ * Clears the strings that hold the incoming data packets
+ */
+static void clear_recv_data()
+{
+    DS_FREESTR (fms_data);
+    DS_FREESTR (radio_data);
+    DS_FREESTR (robot_data);
+    DS_FREESTR (netconsole_data);
+
+    fms_data = sdsempty();
+    radio_data = sdsempty();
+    robot_data = sdsempty();
+    netconsole_data = sdsempty();
+}
+
+/**
  * Reads the received data using the functions provided by the current protocol.
  * If there is no protocol running, then this function will do nothing.
  */
@@ -136,11 +161,8 @@ static void recv_data()
     if (!protocol)
         return;
 
-    /* Create the data pointers */
-    sds fms_data = sdsempty();
-    sds radio_data = sdsempty();
-    sds robot_data = sdsempty();
-    sds netconsole_data = sdsempty();
+    /* Reset the data pointers */
+    clear_recv_data();
 
     /* Read data from sockets */
     DS_SocketRead (&protocol->fms_socket, fms_data);
@@ -161,11 +183,8 @@ static void recv_data()
         DS_AddEvent (&event);
     }
 
-    /* Free the received data */
-    DS_FREESTR (fms_data);
-    DS_FREESTR (radio_data);
-    DS_FREESTR (robot_data);
-    DS_FREESTR (netconsole_data);
+    /* Reset the data pointers */
+    clear_recv_data();
 }
 
 /**

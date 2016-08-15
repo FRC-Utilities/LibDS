@@ -38,8 +38,11 @@ struct addrinfo;
  * to operate with the data provided by a \c DS_Socket structure
  */
 typedef struct {
+    sds buffer;                /**< Cleared when user reads socket data */
+    sds tmpbuffer;             /**< Overwritten with each new packet */
     int socket_in;             /**< Server socket file descriptor */
     int socket_out;            /**< Client socket file descriptor */
+    int socket_tmp;            /**< TCP server socket */
     int initialized;           /**< Set to 0 if no socket is ready yet */
     int server_initialized;    /**< If set to 1, server socket is ready */
     int client_initialized;    /**< If set to 1, client socket is ready */
