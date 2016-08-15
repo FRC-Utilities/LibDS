@@ -121,18 +121,16 @@ static struct addrinfo* get_address_info (DS_Socket* ptr, int server)
 
     /* Get local address */
     if (server)
-        getaddrinfo (NULL, port_str, &hints, &res);
+        getaddrinfo (INADDR_ANY, port_str, &hints, &res);
 
-    /* Remote address is empty, use 0.0.0.0 */
-    else if (DS_StringIsEmpty (ptr->address)) {
-        ptr->address = "0.0.0.0";
-        getaddrinfo ("0.0.0.0", port_str, &hints, &res);
-    }
+    /* Remote address is empty, use INADDR_ANY */
+    else if (DS_StringIsEmpty (ptr->address))
+        getaddrinfo (INADDR_ANY, port_str, &hints, &res);
 
-    /* Get remote address (and fallback to 0.0.0.0 in case of error) */
+    /* Get remote address (and fallback to INADDR_ANY in case of error) */
     else {
         if (getaddrinfo (ptr->address, port_str, &hints, &res) != 0)
-            getaddrinfo ("0.0.0.0", port_str, &hints, &res);
+            getaddrinfo (INADDR_ANY, port_str, &hints, &res);
     }
 
     /* De-allocate port string */
@@ -226,13 +224,16 @@ static void* run_server (void* ptr)
         /* Accept connection from client */
         struct addrinfo addr;
         sock->info.socket_tmp = accept (sock->info.socket_in,
-                                        addr.ai_addr, &addr.ai_addrlen);
+                                        addr.ai_addr, (int*) &addr.ai_addrlen);
     }
 
     /* Main loop */
-    while (sock->info.server_initialized != 0) {
-        /* Clear temp. buffer */
-        DS_FREESTR (sock->info.tmpbuffer);
+    while (sock->info.server_initialized && sock->info.initialized) {
+        /* Socket is disabled, abort */
+        if (sock->disabled)
+            break;
+
+        /* Clear the buffer */
         sock->info.tmpbuffer = sdsempty();
 
         /* Set buffer pointer & size */
@@ -247,17 +248,23 @@ static void* run_server (void* ptr)
         else
             bytes = recvfrom (sock->info.socket_in,
                               sock->info.tmpbuffer, size, 0,
-                              sock->info.out_addr->ai_addr,
-                              &sock->info.out_addr->ai_addrlen);
+                              sock->info.in_addr->ai_addr,
+                              (int*) &sock->info.in_addr->ai_addrlen);
 
         /* Close connection if required */
         if (sock->type == DS_SOCKET_TCP && bytes == 0)
             close_socket (sock->info.socket_tmp);
 
+        printf ("%d\n", bytes);
+        printf ("%s\n", sock->info.tmpbuffer);
+
         /* Copy temp. buffer to normal buffer */
-        if (bytes > 0)
+        if (bytes > 0) {
             sock->info.buffer = sdscatsds (sock->info.buffer,
                                            sock->info.tmpbuffer);
+
+            DS_FREESTR (sock->info.tmpbuffer);
+        }
     }
 
     return NULL;

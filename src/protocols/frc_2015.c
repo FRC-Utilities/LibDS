@@ -659,7 +659,7 @@ static int read_robot_packet (const sds data)
     CFG_SetRobotVoltage (decode_voltage (upper, lower));
 
     /* This is an extended packet, read its extra data */
-    if (DS_SizeOf (data) > 9)
+    if (sdslen (data) > 9)
         read_extended (data, 8);
 
     /* Packet read, feed the watchdog some meat */

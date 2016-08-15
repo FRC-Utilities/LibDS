@@ -32,7 +32,6 @@ extern "C" {
 #include <stdlib.h>
 #include <stdint.h>
 
-#define DS_SizeOf(data) (sizeof (data) / sizeof (*data))
 #define DS_Max(a,b) ((a) > (b) ? a : b)
 #define DS_Min(a,b) ((a) < (b) ? a : b)
 
