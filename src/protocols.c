@@ -33,6 +33,9 @@
 #include <string.h>
 #include <pthread.h>
 
+#define SEND_PRECISION 1  /* Update the sender timers every millisecond */
+#define RECV_PRECISION 50 /* Update the watchdogs every 50 milliseconds */
+
 /*
  * Holds a pointer to the current protocol in use
  */
@@ -233,14 +236,14 @@ DS_Protocol* DS_CurrentProtocol()
 void Protocols_Init()
 {
     /* Initialize sender timers */
-    DS_TimerInit (&fms_send_timer, 0, 5);
-    DS_TimerInit (&radio_send_timer, 0, 5);
-    DS_TimerInit (&robot_send_timer, 0, 5);
+    DS_TimerInit (&fms_send_timer,   0, SEND_PRECISION);
+    DS_TimerInit (&radio_send_timer, 0, SEND_PRECISION);
+    DS_TimerInit (&robot_send_timer, 0, SEND_PRECISION);
 
     /* Initialize watchdog timers */
-    DS_TimerInit (&fms_recv_timer, 0, 250);
-    DS_TimerInit (&radio_recv_timer, 0, 250);
-    DS_TimerInit (&robot_recv_timer, 0, 250);
+    DS_TimerInit (&fms_recv_timer,   0, RECV_PRECISION);
+    DS_TimerInit (&radio_recv_timer, 0, RECV_PRECISION);
+    DS_TimerInit (&robot_recv_timer, 0, RECV_PRECISION);
 
     /* Allow the event loop to run */
     running = 1;

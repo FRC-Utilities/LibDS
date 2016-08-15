@@ -40,6 +40,7 @@ void DS_Init()
  */
 void DS_Close()
 {
+    Timers_Close();
     Events_Close();
     Client_Close();
     Protocols_Close();

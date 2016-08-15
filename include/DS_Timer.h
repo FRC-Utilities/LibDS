@@ -40,6 +40,7 @@ typedef struct _timer {
     int initialized; /**< Set to \c 1 if the timer has been initialized */
 } DS_Timer;
 
+extern void Timers_Close();
 extern void DS_Sleep (const int millisecs);
 extern void DS_TimerStop (DS_Timer* timer);
 extern void DS_TimerStart (DS_Timer* timer);

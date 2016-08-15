@@ -31,16 +31,34 @@ extern "C" {
 #include <sds.h>
 #include "DS_Types.h"
 
-struct DS_SocketInfo;
+struct addrinfo;
 
+/**
+ * Holds all the private (erm, dirty) variables that the sockets module needs
+ * to operate with the data provided by a \c DS_Socket structure
+ */
 typedef struct {
-    sds address;
-    int disabled;
-    int broadcast;
-    int input_port;
-    int output_port;
-    DS_SocketType type;
-    struct DS_SocketInfo* info;
+    int socket_in;             /**< Server socket file descriptor */
+    int socket_out;            /**< Client socket file descriptor */
+    int initialized;           /**< Set to 0 if no socket is ready yet */
+    int server_initialized;    /**< If set to 1, server socket is ready */
+    int client_initialized;    /**< If set to 1, client socket is ready */
+    struct addrinfo* in_addr;  /**< Server/local address information */
+    struct addrinfo* out_addr; /**< Client/remote address information */
+} DS_SocketInfo;
+
+/**
+ * Holds all the 'public' variables of a socket, these variables can be used
+ * both the the networking module and the rest of the application.
+ */
+typedef struct {
+    sds address;        /**< Holds the remote address */
+    int disabled;       /**< Disables/enables the socket */
+    int broadcast;      /**< Enables/disables broadcasting */
+    int input_port;     /**< Sets the server/sender port */
+    int output_port;    /**< Sets the client/sender port */
+    DS_SocketType type; /**< Socket type (UDP or TCP) */
+    DS_SocketInfo info; /**< Holds private socket information */
 } DS_Socket;
 
 /* For socket initialization */

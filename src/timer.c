@@ -32,6 +32,8 @@
     #include <unistd.h>
 #endif
 
+static int running = 1;
+
 /**
  * Updates the properties of the given \a timer
  * This function is called in a separate thread for each timer that
@@ -44,7 +46,7 @@ static void* update_timer (void* ptr)
 
     DS_Timer* timer = (DS_Timer*) ptr;
 
-    while (1) {
+    while (running == 1) {
         if (timer->enabled && timer->time > 0 && !timer->expired) {
             timer->elapsed += timer->precision;
 
@@ -56,6 +58,14 @@ static void* update_timer (void* ptr)
     }
 
     return NULL;
+}
+
+/**
+ * Breaks all the timer loops
+ */
+void Timers_Close()
+{
+    running = 0;
 }
 
 /**
