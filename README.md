@@ -11,11 +11,16 @@ This is a re-implementation of LibDS in plain C (with SDS for dynamic string han
 
 You may find a lot of mistakes here, be it design choices or just stupid mistakes. If you spot something, I would be very grateful if you could tell me about it (or make a pull request).
 
-### Example Project
+### Example Projects
 
-![Image](example/etc/screenshot.png)
+![Image](examples/ConsoleDS/etc/screenshot.png)
 
-I have made a simple command-line Driver Station with SDL and ncurses/pdcurses to demostrate the uses of LibDS. You can check it [here](example/).
+I have created two example projects to demonstrate the uses of LibDS:
+
+- A command-line DS with SDL and ncurses/pdcurses
+- A graphical UI DS with Qt4/Qt5 and C++
+
+You can browse the code of the examples [here](examples/)!
 
 ### Quick Introduction
 
