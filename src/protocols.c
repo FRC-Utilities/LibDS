@@ -331,9 +331,16 @@ void DS_ConfigureProtocol (DS_Protocol* ptr)
     if (!ptr)
         return;
 
-    /* Re-assign the protocol */
+    /* Close previous protocol */
     close_protocol();
-    protocol = ptr;
+
+    /* Re-assign the protocol */
+    protocol = malloc (sizeof (DS_Protocol));
+    memcpy (protocol, ptr, sizeof (DS_Protocol));
+
+    /* Change input pointer */
+    DS_FREE (ptr);
+    ptr = protocol;
 
     /* Update sockets */
     DS_SocketOpen (&protocol->fms_socket);

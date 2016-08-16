@@ -26,11 +26,7 @@
 #include "DS_DefaultProtocols.h"
 
 #include <stdio.h>
-
-/*
- * Pointer to the protocol
- */
-static DS_Protocol* protocol = NULL;
+#include <string.h>
 
 /**
  * The 2016 FRC control system is very similar to the FRC 2015 control system,
@@ -47,10 +43,8 @@ static sds robot_address()
  */
 extern DS_Protocol* DS_GetProtocolFRC_2016()
 {
-    if (!protocol) {
-        protocol = DS_GetProtocolFRC_2015();
-        protocol->robot_address = &robot_address;
-    }
+    DS_Protocol* protocol = DS_GetProtocolFRC_2015();
+    protocol->robot_address = &robot_address;
 
     return protocol;
 }

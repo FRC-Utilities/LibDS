@@ -79,11 +79,6 @@ static unsigned int sent_robot_packets = 0;
 static int reboot = 0;
 static int restart_code = 0;
 
-/*
- * Pointers
- */
-static DS_Protocol* protocol = NULL;
-
 /**
  * Obtains the voltage double from the given \a upper and \a lower bytes
  */
@@ -714,77 +709,76 @@ static void restart_robot_code()
  */
 DS_Protocol* DS_GetProtocolFRC_2015()
 {
-    if (!protocol) {
-        /* Initialize pointers */
-        protocol = (DS_Protocol*) malloc (sizeof (DS_Protocol));
+    /* Initialize pointers */
+    DS_Protocol* protocol = malloc (sizeof (DS_Protocol));
 
-        /* Set address functions */
-        protocol->fms_address = &fms_address;
-        protocol->radio_address = &radio_address;
-        protocol->robot_address = &robot_address;
+    /* Set address functions */
+    protocol->fms_address = &fms_address;
+    protocol->radio_address = &radio_address;
+    protocol->robot_address = &robot_address;
 
-        /* Set packet generator functions */
-        protocol->create_fms_packet = &create_fms_packet;
-        protocol->create_radio_packet = &create_radio_packet;
-        protocol->create_robot_packet = &create_robot_packet;
+    /* Set packet generator functions */
+    protocol->create_fms_packet = &create_fms_packet;
+    protocol->create_radio_packet = &create_radio_packet;
+    protocol->create_robot_packet = &create_robot_packet;
 
-        /* Set packet interpretation functions */
-        protocol->read_fms_packet = &read_fms_packet;
-        protocol->read_radio_packet = &read_radio_packet;
-        protocol->read_robot_packet = &read_robot_packet;
+    /* Set packet interpretation functions */
+    protocol->read_fms_packet = &read_fms_packet;
+    protocol->read_radio_packet = &read_radio_packet;
+    protocol->read_robot_packet = &read_robot_packet;
 
-        /* Set reset functions */
-        protocol->reset_fms = &reset_fms;
-        protocol->reset_radio = &reset_radio;
-        protocol->reset_robot = &reset_robot;
+    /* Set reset functions */
+    protocol->reset_fms = &reset_fms;
+    protocol->reset_radio = &reset_radio;
+    protocol->reset_robot = &reset_robot;
 
-        /* Set misc. functions */
-        protocol->reboot_robot = &reboot_robot;
-        protocol->restart_robot_code = &restart_robot_code;
+    /* Set misc. functions */
+    protocol->reboot_robot = &reboot_robot;
+    protocol->restart_robot_code = &restart_robot_code;
 
-        /* Set packet intervals */
-        protocol->fms_interval = 500;
-        protocol->radio_interval = 0;
-        protocol->robot_interval = 20;
+    /* Set packet intervals */
+    protocol->fms_interval = 500;
+    protocol->radio_interval = 0;
+    protocol->robot_interval = 20;
 
-        /* Set joystick properties */
-        protocol->max_joysticks = 6;
-        protocol->max_axis_count = 6;
-        protocol->max_hat_count = 1;
-        protocol->max_button_count = 10;
+    /* Set joystick properties */
+    protocol->max_joysticks = 6;
+    protocol->max_hat_count = 1;
+    protocol->max_axis_count = 6;
+    protocol->max_button_count = 10;
 
-        /* Define FMS socket properties */
-        DS_Socket fms_socket = DS_SocketEmpty();
-        fms_socket.disabled = 0;
-        fms_socket.input_port = 1120;
-        fms_socket.output_port = 1160;
-        fms_socket.type = DS_SOCKET_UDP;
+    /* Define FMS socket properties */
+    DS_Socket fms_socket = DS_SocketEmpty();
+    fms_socket.disabled = 0;
+    fms_socket.input_port = 1120;
+    fms_socket.output_port = 1160;
+    fms_socket.type = DS_SOCKET_UDP;
 
-        /* Define radio socket properties */
-        DS_Socket radio_socket = DS_SocketEmpty();
-        radio_socket.disabled = 1;
+    /* Define radio socket properties */
+    DS_Socket radio_socket = DS_SocketEmpty();
+    radio_socket.disabled = 1;
 
-        /* Define robot socket properties */
-        DS_Socket robot_socket = DS_SocketEmpty();
-        robot_socket.disabled = 0;
-        robot_socket.input_port = 1150;
-        robot_socket.output_port = 1110;
-        robot_socket.type = DS_SOCKET_UDP;
+    /* Define robot socket properties */
+    DS_Socket robot_socket = DS_SocketEmpty();
+    robot_socket.disabled = 0;
+    robot_socket.input_port = 1150;
+    robot_socket.output_port = 1110;
+    robot_socket.type = DS_SOCKET_UDP;
 
-        /* Define netconsole socket properties */
-        DS_Socket netconsole_socket = DS_SocketEmpty();
-        netconsole_socket.disabled = 0;
-        netconsole_socket.broadcast = 1;
-        netconsole_socket.input_port = 6666;
-        netconsole_socket.output_port = 6668;
-        netconsole_socket.type = DS_SOCKET_UDP;
+    /* Define netconsole socket properties */
+    DS_Socket netconsole_socket = DS_SocketEmpty();
+    netconsole_socket.disabled = 0;
+    netconsole_socket.broadcast = 1;
+    netconsole_socket.input_port = 6666;
+    netconsole_socket.output_port = 6668;
+    netconsole_socket.type = DS_SOCKET_UDP;
 
-        /* Assign socket objects */
-        protocol->fms_socket = fms_socket;
-        protocol->radio_socket = radio_socket;
-        protocol->robot_socket = robot_socket;
-        protocol->netconsole_socket = netconsole_socket;
-    }
+    /* Assign socket objects */
+    protocol->fms_socket = fms_socket;
+    protocol->radio_socket = radio_socket;
+    protocol->robot_socket = robot_socket;
+    protocol->netconsole_socket = netconsole_socket;
 
+    /* Return the protocol */
     return protocol;
 }

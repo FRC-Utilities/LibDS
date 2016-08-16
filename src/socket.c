@@ -34,9 +34,7 @@
 
 #if defined _WIN32
     #include <winsock2.h>
-    #include <ws2tcpip.h>
 #else
-    #include <netdb.h>
     #include <errno.h>
     #include <unistd.h>
     #include <sys/types.h>
@@ -271,13 +269,13 @@ static void* run_server (void* ptr)
 #if defined _WIN32
         bytes = recvfrom (sock->info.socket_in,
                           buffer, 1024, FIOASYNC,
-                          sock->info.in_addr->ai_addr,
-                          (int*) &sock->info.in_addr->ai_addrlen);
+                          sock->info.in_addr.ai_addr,
+                          (int*) &sock->info.in_addr.ai_addrlen);
 #else
         bytes = recvfrom (sock->info.socket_in,
                           buffer, 1024, MSG_DONTWAIT,
-                          sock->info.in_addr->ai_addr,
-                          &sock->info.in_addr->ai_addrlen);
+                          sock->info.in_addr.ai_addr,
+                          &sock->info.in_addr.ai_addrlen);
 #endif
 
         if (bytes > 0)
@@ -306,8 +304,8 @@ static int configure_socket (DS_Socket* ptr, int server)
 
     /* Configure the server socket */
     if (server) {
-        ptr->info.in_addr = get_address_info (ptr, 1);
-        ptr->info.socket_in = create_socket (ptr, ptr->info.in_addr);
+        ptr->info.in_addr = *get_address_info (ptr, 1);
+        ptr->info.socket_in = create_socket (ptr, &ptr->info.in_addr);
 
         /* Check if socket is valid */
         if (ptr->info.socket_in < 0) {
@@ -317,8 +315,8 @@ static int configure_socket (DS_Socket* ptr, int server)
 
         /* Bind the socket */
         int bind_err = bind (ptr->info.socket_in,
-                             ptr->info.in_addr->ai_addr,
-                             ptr->info.in_addr->ai_addrlen);
+                             ptr->info.in_addr.ai_addr,
+                             ptr->info.in_addr.ai_addrlen);
 
         /* Check if there was an error while binding the socket */
         if (bind_err) {
@@ -333,8 +331,8 @@ static int configure_socket (DS_Socket* ptr, int server)
 
     /* Configure the client socket */
     else {
-        ptr->info.out_addr = get_address_info (ptr, 0);
-        ptr->info.socket_out = create_socket (ptr, ptr->info.out_addr);
+        ptr->info.out_addr = *get_address_info (ptr, 0);
+        ptr->info.socket_out = create_socket (ptr, &ptr->info.out_addr);
 
         /* Check if socket is valid */
         if (ptr->info.socket_out < 0) {
@@ -345,8 +343,8 @@ static int configure_socket (DS_Socket* ptr, int server)
         if (ptr->type == DS_SOCKET_TCP) {
             /* Connect the socket (if we use TCP) */
             int connect_err = connect (ptr->info.socket_out,
-                                       ptr->info.out_addr->ai_addr,
-                                       ptr->info.out_addr->ai_addrlen);
+                                       ptr->info.out_addr.ai_addr,
+                                       ptr->info.out_addr.ai_addrlen);
 
             /* Check if there was an error while connecting the socket */
             if (connect_err) {
@@ -402,8 +400,6 @@ DS_Socket DS_SocketEmpty()
     DS_Socket socket;
     DS_SocketInfo info;
 
-    info.in_addr = NULL;
-    info.out_addr = NULL;
     info.initialized = 0;
     info.buffer = sdsempty();
     info.server_initialized = 0;
@@ -527,8 +523,8 @@ int DS_SocketSend (DS_Socket* ptr, sds data)
 
     /* Send the data */
     return sendto (ptr->info.socket_out, data, sdslen (data), 0,
-                   ptr->info.out_addr->ai_addr,
-                   ptr->info.out_addr->ai_addrlen);
+                   ptr->info.out_addr.ai_addr,
+                   ptr->info.out_addr.ai_addrlen);
 }
 
 /**

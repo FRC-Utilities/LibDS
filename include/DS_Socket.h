@@ -31,6 +31,12 @@ extern "C" {
 #include <sds.h>
 #include "DS_Types.h"
 
+#if defined _WIN32
+#include <ws2tcpip.h>
+#else
+#include <netdb.h>
+#endif
+
 /**
  * Holds all the private (erm, dirty) variables that the sockets module needs
  * to operate with the data provided by a \c DS_Socket structure
@@ -43,8 +49,8 @@ typedef struct {
     int initialized;           /**< Set to 0 if no socket is ready yet */
     int server_initialized;    /**< If set to 1, server socket is ready */
     int client_initialized;    /**< If set to 1, client socket is ready */
-    struct addrinfo* in_addr;  /**< Server/local address information */
-    struct addrinfo* out_addr; /**< Client/remote address information */
+    struct addrinfo in_addr;  /**< Server/local address information */
+    struct addrinfo out_addr; /**< Client/remote address information */
 } DS_SocketInfo;
 
 /**

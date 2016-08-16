@@ -60,16 +60,19 @@ static uint32_t crc32 = 0;
 static unsigned int sent_robot_packets = 0;
 
 /*
+ * Joystick properties
+ */
+static int max_axes = 6;
+static int max_hats = 0;
+static int max_buttons = 10;
+static int max_joysticks = 4;
+
+/*
  * Control code flags
  */
 static int resync = 0;
 static int reboot = 0;
 static int restart_code = 0;
-
-/*
- * Pointers
- */
-static DS_Protocol* protocol = NULL;
 
 /**
  * Gets the alliance type from the received \a byte
@@ -218,19 +221,19 @@ static void add_joystick_data (sds data, const int offset)
     /* Add data for every joystick */
     int i = 0;
     int pos = offset;
-    for (i = 0; i < protocol->max_joysticks; ++i) {
+    for (i = 0; i < max_joysticks; ++i) {
         /* Initialize the iterator */
         int j = 0;
 
         /* Add axis data */
-        for (j = 0; j < protocol->max_axis_count; ++j) {
+        for (j = 0; j < max_axes; ++j) {
             data [pos] = (uint8_t) (DS_GetJoystickAxis (i, j) * 127);
             ++pos;
         }
 
         /* Generate button data */
         uint8_t button_flags = 0;
-        for (j = 0; j < DS_GetJoystickNumButtons (i); ++j)
+        for (j = 0; (j < DS_GetJoystickNumButtons (i)) && (j < max_buttons); ++j)
             button_flags += DS_GetJoystickButton (i, j) ? pow (2, j) : 0;
 
         /* Add button data */
@@ -470,78 +473,77 @@ void restart_robot_code()
 }
 
 /**
- * Initializes and configures the FRC 2014 communication protocol.
+ * Initializes and configures the FRC 2014 communication protocol
  */
 DS_Protocol* DS_GetProtocolFRC_2014()
 {
-    if (!protocol) {
-        /* Initialize pointers */
-        protocol = (DS_Protocol*) malloc (sizeof (DS_Protocol));
+    /* Initialize pointers */
+    DS_Protocol* protocol = malloc (sizeof (DS_Protocol));
 
-        /* Set address functions */
-        protocol->fms_address = &fms_address;
-        protocol->radio_address = &radio_address;
-        protocol->robot_address = &robot_address;
+    /* Set address functions */
+    protocol->fms_address = &fms_address;
+    protocol->radio_address = &radio_address;
+    protocol->robot_address = &robot_address;
 
-        /* Set packet generator functions */
-        protocol->create_fms_packet = &create_fms_packet;
-        protocol->create_radio_packet = &create_radio_packet;
-        protocol->create_robot_packet = &create_robot_packet;
+    /* Set packet generator functions */
+    protocol->create_fms_packet = &create_fms_packet;
+    protocol->create_radio_packet = &create_radio_packet;
+    protocol->create_robot_packet = &create_robot_packet;
 
-        /* Set packet interpretation functions */
-        protocol->read_fms_packet = &read_fms_packet;
-        protocol->read_radio_packet = &read_radio_packet;
-        protocol->read_robot_packet = &read_robot_packet;
+    /* Set packet interpretation functions */
+    protocol->read_fms_packet = &read_fms_packet;
+    protocol->read_radio_packet = &read_radio_packet;
+    protocol->read_robot_packet = &read_robot_packet;
 
-        /* Set reset functions */
-        protocol->reset_fms = &reset_fms;
-        protocol->reset_radio = &reset_radio;
-        protocol->reset_robot = &reset_robot;
+    /* Set reset functions */
+    protocol->reset_fms = &reset_fms;
+    protocol->reset_radio = &reset_radio;
+    protocol->reset_robot = &reset_robot;
 
-        /* Set misc. functions */
-        protocol->reboot_robot = &reboot_robot;
-        protocol->restart_robot_code = &restart_robot_code;
+    /* Set misc. functions */
+    protocol->reboot_robot = &reboot_robot;
+    protocol->restart_robot_code = &restart_robot_code;
 
-        /* Set packet intervals */
-        protocol->fms_interval = 500;
-        protocol->radio_interval = 0;
-        protocol->robot_interval = 20;
+    /* Set packet intervals */
+    protocol->fms_interval = 500;
+    protocol->radio_interval = 0;
+    protocol->robot_interval = 20;
 
-        /* Set joystick properties */
-        protocol->max_joysticks = 4;
-        protocol->max_axis_count = 6;
-        protocol->max_hat_count = 0;
-        protocol->max_button_count = 10;
+    /* Set joystick properties */
+    protocol->max_hat_count = max_hats;
+    protocol->max_axis_count = max_axes;
+    protocol->max_joysticks = max_joysticks;
+    protocol->max_button_count = max_buttons;
 
-        /* Define FMS socket properties */
-        DS_Socket fms_socket = DS_SocketEmpty();
-        fms_socket.disabled = 0;
-        fms_socket.address = "";
-        fms_socket.input_port = 1120;
-        fms_socket.output_port = 1160;
-        fms_socket.type = DS_SOCKET_UDP;
+    /* Define FMS socket properties */
+    DS_Socket fms_socket = DS_SocketEmpty();
+    fms_socket.disabled = 0;
+    fms_socket.address = "";
+    fms_socket.input_port = 1120;
+    fms_socket.output_port = 1160;
+    fms_socket.type = DS_SOCKET_UDP;
 
-        /* Define radio socket properties */
-        DS_Socket radio_socket = DS_SocketEmpty();
-        radio_socket.disabled = 1;
+    /* Define radio socket properties */
+    DS_Socket radio_socket = DS_SocketEmpty();
+    radio_socket.disabled = 1;
 
-        /* Define robot socket properties */
-        DS_Socket robot_socket = DS_SocketEmpty();
-        robot_socket.disabled = 0;
-        robot_socket.input_port = 1150;
-        robot_socket.output_port = 1110;
-        robot_socket.type = DS_SOCKET_UDP;
+    /* Define robot socket properties */
+    DS_Socket robot_socket = DS_SocketEmpty();
+    robot_socket.disabled = 0;
+    robot_socket.input_port = 1150;
+    robot_socket.output_port = 1110;
+    robot_socket.type = DS_SOCKET_UDP;
 
-        /* Define netconsole socket properties */
-        DS_Socket netconsole_socket = DS_SocketEmpty();
-        netconsole_socket.disabled = 1;
+    /* Define netconsole socket properties */
+    DS_Socket netconsole_socket = DS_SocketEmpty();
+    netconsole_socket.disabled = 1;
 
-        /* Assign socket objects */
-        protocol->fms_socket = fms_socket;
-        protocol->radio_socket = radio_socket;
-        protocol->robot_socket = robot_socket;
-        protocol->netconsole_socket = netconsole_socket;
-    }
+    /* Assign socket objects */
+    protocol->fms_socket = fms_socket;
+    protocol->radio_socket = radio_socket;
+    protocol->robot_socket = robot_socket;
+    protocol->netconsole_socket = netconsole_socket;
 
+    /* Return the pointer */
     return protocol;
 }
