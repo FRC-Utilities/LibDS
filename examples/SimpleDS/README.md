@@ -1,20 +1,10 @@
-# ConsoleDS
+# SimpleDS
 
-A simple DS implementatation for command line interfaces with ncurses/pdcurses. Joystick support implemented with SDL.
+A simple GUI DS implementation with Qt/C++. Joystick input is emulated with the keyboard.
 
 ### Dependencies
 
-If you are using Linux, you will need to install the following packages:
-
-- `sudo apt-get install libsdl1.2-dev`
-- `sudo apt-get install ncurses-dev`
-
-If you are using Mac OSX, use [HomeBrew](http://brew.sh) to install ncurses:
-
-- `brew install ncurses`
-
-I have already included the static SDL library for OSX users.
-This project already provides the libraries for Microsoft Windows.
+The only dependency for this project is Qt itself, the project should compile with either Qt4 or Qt5.
 
 ### License
 
