@@ -31,8 +31,6 @@ extern "C" {
 #include <sds.h>
 #include "DS_Types.h"
 
-struct addrinfo;
-
 /**
  * Holds all the private (erm, dirty) variables that the sockets module needs
  * to operate with the data provided by a \c DS_Socket structure

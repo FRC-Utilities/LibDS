@@ -147,13 +147,16 @@ static struct addrinfo* get_address_info (DS_Socket* ptr, int server)
     sds port_str = sdscatfmt (sdsempty(), "%i",
                               server ? ptr->input_port : ptr->output_port);
 
-    /* Get address information */
-    getaddrinfo (server ? "localhost" : ptr->address,
-                 port_str,
-                 &hints,
-                 &res);
+    /* Get the address */
+    sds address = server ? NULL : sdsdup (ptr->address);
+    if (DS_StringIsEmpty (ptr->address) && !server)
+        address = sdsnew ("0.0.0.0");
 
-    /* De-allocate port string */
+    /* Get address information */
+    getaddrinfo (address, port_str, &hints, &res);
+
+    /* De-allocate strings */
+    DS_FREESTR (address);
     DS_FREESTR (port_str);
 
     /* Return obtained address info */
@@ -179,11 +182,18 @@ static int create_socket (DS_Socket* ptr, struct addrinfo* addr)
                          addr->ai_socktype,
                          addr->ai_protocol);
 
+    /* Check if socket is valid */
+    if (sockfd < 0) {
+        close_socket (sockfd);
+        error (ptr, "cannot create socket", GET_ERR);
+        return SOCK_ERROR;
+    }
+
     /* Windows uses char instead of int in setsockopt() */
 #if defined _WIN32
     char value = 1;
 #else
-    unsigned int value = 1;
+    int value = 1;
 #endif
 
     /* Set timeout value */
@@ -192,17 +202,10 @@ static int create_socket (DS_Socket* ptr, struct addrinfo* addr)
     tv.tv_usec = 0;
 
     /* Set a socket timeout flag */
-#if defined _WIN32
     int timeout_err = setsockopt (sockfd,
                                   SOL_SOCKET,
                                   SO_SNDTIMEO,
                                   (char*) &tv, sizeof (tv));
-#else
-    int timeout_err = setsockopt (sockfd,
-                                  SOL_SOCKET,
-                                  SO_SNDTIMEO,
-                                  &tv, sizeof (tv));
-#endif
 
     /* Setting the SO_SNDTIMEO flag failed */
     if (timeout_err != 0) {
@@ -300,13 +303,11 @@ static int configure_socket (DS_Socket* ptr, int server)
     if (!ptr)
         return 0;
 
-    /* Get the address information */
-    struct addrinfo* addr = get_address_info (ptr, server);
 
     /* Configure the server socket */
     if (server) {
-        ptr->info.in_addr = addr;
-        ptr->info.socket_in = create_socket (ptr, addr);
+        ptr->info.in_addr = get_address_info (ptr, 1);
+        ptr->info.socket_in = create_socket (ptr, ptr->info.in_addr);
 
         /* Check if socket is valid */
         if (ptr->info.socket_in < 0) {
@@ -332,8 +333,8 @@ static int configure_socket (DS_Socket* ptr, int server)
 
     /* Configure the client socket */
     else {
-        ptr->info.out_addr = addr;
-        ptr->info.socket_out = create_socket (ptr, addr);
+        ptr->info.out_addr = get_address_info (ptr, 0);
+        ptr->info.socket_out = create_socket (ptr, ptr->info.out_addr);
 
         /* Check if socket is valid */
         if (ptr->info.socket_out < 0) {

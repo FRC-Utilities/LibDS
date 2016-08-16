@@ -63,6 +63,18 @@ static sds rcode_check_str = NULL;
 static sds robot_check_str = NULL;
 
 /**
+ * Clears the console screen output
+ */
+static void clear_scr()
+{
+#if defined _WIN32
+    (void) system ("cls");
+#else
+    (void) system ("clear");
+#endif
+}
+
+/**
  * Changes the \a label to "[*]" if checked is greater than \c 0,
  * otherwise, the function will change the \a label to "[ ]"
  */
@@ -204,12 +216,7 @@ static void refresh_windows()
  */
 void init_interface()
 {
-#if defined _WIN32
-    system ("cls");
-#else
-    system ("clear");
-#endif
-
+    clear_scr();
     init_strings();
     window = initscr();
 
@@ -221,6 +228,8 @@ void init_interface()
     noecho();
     curs_set (0);
     keypad (window, 1);
+
+    clear_scr();
 }
 
 /**
@@ -233,11 +242,7 @@ void close_interface()
     refresh();
     close_strings();
 
-#if defined _WIN32
-    system ("cls");
-#else
-    system ("clear");
-#endif
+    clear_scr();
 }
 
 /**
