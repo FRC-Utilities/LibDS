@@ -39,28 +39,28 @@
 /*
  * Define windows
  */
-static WINDOW* window;
-static WINDOW* enabled_win;
-static WINDOW* console_win;
-static WINDOW* status_info;
-static WINDOW* voltage_win;
-static WINDOW* robot_status;
-static WINDOW* bottom_window;
+static WINDOW* window = NULL;
+static WINDOW* enabled_win = NULL;
+static WINDOW* console_win = NULL;
+static WINDOW* status_info = NULL;
+static WINDOW* voltage_win = NULL;
+static WINDOW* robot_status = NULL;
+static WINDOW* bottom_window = NULL;
 
 /*
  * Define window elements
  */
-static sds can_str;
-static sds cpu_str;
-static sds ram_str;
-static sds disk_str;
-static sds rstatus_str;
-static sds enabled_str;
-static sds voltage_str;
-static sds console_str;
-static sds stick_check_str;
-static sds rcode_check_str;
-static sds robot_check_str;
+static sds can_str = NULL;
+static sds cpu_str = NULL;
+static sds ram_str = NULL;
+static sds disk_str = NULL;
+static sds rstatus_str = NULL;
+static sds enabled_str = NULL;
+static sds voltage_str = NULL;
+static sds console_str = NULL;
+static sds stick_check_str = NULL;
+static sds rcode_check_str = NULL;
+static sds robot_check_str = NULL;
 
 /**
  * Changes the \a label to "[*]" if checked is greater than \c 0,

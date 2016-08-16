@@ -110,7 +110,7 @@ static int set_socket_blocking (int sockfd, int blocking)
 
 #ifdef WIN32
     unsigned long mode = (blocking ? 0 : 1);
-    return (ioctlsocket (fd, FIONBIO, &mode) == 0);
+    return (ioctlsocket (sockfd, FIONBIO, &mode) == 0);
 #else
     int flags = fcntl (sockfd, F_GETFL, 0);
 
@@ -180,10 +180,10 @@ static int create_socket (DS_Socket* ptr, struct addrinfo* addr)
                          addr->ai_protocol);
 
     /* Windows uses char instead of int in setsockopt() */
-#ifdef WIN32
-    char name = 1;
+#if defined _WIN32
+    char value = 1;
 #else
-    int name = 1;
+    unsigned int value = 1;
 #endif
 
     /* Set timeout value */
@@ -192,10 +192,17 @@ static int create_socket (DS_Socket* ptr, struct addrinfo* addr)
     tv.tv_usec = 0;
 
     /* Set a socket timeout flag */
+#if defined _WIN32
+    int timeout_err = setsockopt (sockfd,
+                                  SOL_SOCKET,
+                                  SO_SNDTIMEO,
+                                  (char*) &tv, sizeof (tv));
+#else
     int timeout_err = setsockopt (sockfd,
                                   SOL_SOCKET,
                                   SO_SNDTIMEO,
                                   &tv, sizeof (tv));
+#endif
 
     /* Setting the SO_SNDTIMEO flag failed */
     if (timeout_err != 0) {
@@ -208,7 +215,7 @@ static int create_socket (DS_Socket* ptr, struct addrinfo* addr)
     int reuse_port = setsockopt (sockfd,
                                  SOL_SOCKET,
                                  SO_REUSEPORT,
-                                 &name, sizeof (name));
+                                 &value, sizeof (value));
 
     /* Setting the SO_REUSEPORT flag failed */
     if (reuse_port != 0) {
@@ -222,7 +229,7 @@ static int create_socket (DS_Socket* ptr, struct addrinfo* addr)
         int broadcast = setsockopt (sockfd,
                                     SOL_SOCKET,
                                     SO_BROADCAST,
-                                    &name, sizeof (name));
+                                    &value, sizeof (value));
 
         /* Cannot set the broadcast option */
         if (broadcast != 0) {
@@ -255,11 +262,20 @@ static void* run_server (void* ptr)
 
     /* Run the main server loop */
     while (sock->info.initialized && sock->info.server_initialized) {
+        int bytes = 0;
         char* buffer = NULL;
-        int bytes = recvfrom (sock->info.socket_in,
-                              buffer, 1024, MSG_DONTWAIT,
-                              sock->info.in_addr->ai_addr,
-                              &sock->info.in_addr->ai_addrlen);
+
+#if defined _WIN32
+        bytes = recvfrom (sock->info.socket_in,
+                          buffer, 1024, FIOASYNC,
+                          sock->info.in_addr->ai_addr,
+                          (int*) &sock->info.in_addr->ai_addrlen);
+#else
+        bytes = recvfrom (sock->info.socket_in,
+                          buffer, 1024, MSG_DONTWAIT,
+                          sock->info.in_addr->ai_addr,
+                          &sock->info.in_addr->ai_addrlen);
+#endif
 
         if (bytes > 0)
             sock->info.buffer = sdscat (sock->info.buffer, buffer);
@@ -385,6 +401,8 @@ DS_Socket DS_SocketEmpty()
     DS_Socket socket;
     DS_SocketInfo info;
 
+    info.in_addr = NULL;
+    info.out_addr = NULL;
     info.initialized = 0;
     info.buffer = sdsempty();
     info.server_initialized = 0;
@@ -399,7 +417,7 @@ DS_Socket DS_SocketEmpty()
     socket.input_port = 0;
     socket.output_port = 0;
     socket.address = sdsempty();
-    socket.type = DS_SOCKET_TCP;
+    socket.type = DS_SOCKET_UDP;
 
     return socket;
 }
@@ -410,7 +428,7 @@ DS_Socket DS_SocketEmpty()
 void Sockets_Init()
 {
 #if defined _WIN32
-    if (WSAStartup (MAKEWORD (2, 0), &wsa_data) != 0) {
+    if (WSAStartup (WINSOCK_VERSION, &wsa_data) != 0) {
         fprintf (stderr, "Cannot initialize WinSock!\n");
         exit (EXIT_FAILURE);
     }
@@ -506,18 +524,10 @@ int DS_SocketSend (DS_Socket* ptr, sds data)
     if (ptr->info.client_initialized != 1 || ptr->disabled == 1)
         return SOCK_ERROR;
 
-    /* Send data using TCP */
-    if (ptr->type == DS_SOCKET_TCP)
-        return send (ptr->info.socket_out, data, sdslen (data), 0);
-
-    /* Send data using UDP */
-    else if (ptr->type == DS_SOCKET_UDP) {
-        return sendto (ptr->info.socket_out, data, sdslen (data), 0,
-                       ptr->info.out_addr->ai_addr,
-                       ptr->info.out_addr->ai_addrlen);
-    }
-
-    return SOCK_ERROR;
+    /* Send the data */
+    return sendto (ptr->info.socket_out, data, sdslen (data), 0,
+                   ptr->info.out_addr->ai_addr,
+                   ptr->info.out_addr->ai_addrlen);
 }
 
 /**

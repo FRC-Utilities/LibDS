@@ -75,7 +75,6 @@ static sds radio_data = NULL;
 static sds robot_data = NULL;
 static sds netconsole_data = NULL;
 
-
 /**
  * Sends a new packet to the FMS
  */
