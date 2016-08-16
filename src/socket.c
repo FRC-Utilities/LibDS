@@ -26,6 +26,7 @@
 #include "DS_Utils.h"
 #include "DS_Socket.h"
 
+#include <fcntl.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -95,6 +96,33 @@ static void error (DS_Socket* ptr, sds message, int error)
 }
 
 /**
+ * Enables or disables socket blocking
+ *
+ * \param sockfd the socket file descriptor
+ * \param blocking whenever the file should be blocking or not
+ *
+ * \returns 1 on success, 0 on failure
+ */
+static int set_socket_blocking (int sockfd, int blocking)
+{
+    if (sockfd < 0)
+        return 0;
+
+#ifdef WIN32
+    unsigned long mode = (blocking ? 0 : 1);
+    return (ioctlsocket (fd, FIONBIO, &mode) == 0);
+#else
+    int flags = fcntl (sockfd, F_GETFL, 0);
+
+    if (flags < 0)
+        return 0;
+
+    flags = blocking ? (flags & ~O_NONBLOCK) : (flags | O_NONBLOCK);
+    return (fcntl (sockfd, F_SETFL, flags) == 0);
+#endif
+}
+
+/**
  * Obtains information for the given socket structure and port
  *
  * \param ptr pointer to a \c DS_Socket structure
@@ -112,26 +140,18 @@ static struct addrinfo* get_address_info (DS_Socket* ptr, int server)
 
     /* Set hints */
     hints.ai_flags = AI_PASSIVE;
-    hints.ai_family = AF_UNSPEC;
+    hints.ai_family = AF_INET;
     hints.ai_socktype = (ptr->type == DS_SOCKET_TCP) ? SOCK_STREAM : SOCK_DGRAM;
 
     /* Get the port string */
-    int port = (server == 1) ? ptr->input_port : ptr->output_port;
-    sds port_str = sdscatfmt (sdsempty(), "%i", port);
+    sds port_str = sdscatfmt (sdsempty(), "%i",
+                              server ? ptr->input_port : ptr->output_port);
 
-    /* Get local address */
-    if (server)
-        getaddrinfo (INADDR_ANY, port_str, &hints, &res);
-
-    /* Remote address is empty, use INADDR_ANY */
-    else if (DS_StringIsEmpty (ptr->address))
-        getaddrinfo (INADDR_ANY, port_str, &hints, &res);
-
-    /* Get remote address (and fallback to INADDR_ANY in case of error) */
-    else {
-        if (getaddrinfo (ptr->address, port_str, &hints, &res) != 0)
-            getaddrinfo (INADDR_ANY, port_str, &hints, &res);
-    }
+    /* Get address information */
+    getaddrinfo (server ? "localhost" : ptr->address,
+                 port_str,
+                 &hints,
+                 &res);
 
     /* De-allocate port string */
     DS_FREESTR (port_str);
@@ -166,13 +186,31 @@ static int create_socket (DS_Socket* ptr, struct addrinfo* addr)
     int name = 1;
 #endif
 
+    /* Set timeout value */
+    struct timeval tv;
+    tv.tv_sec = 2;
+    tv.tv_usec = 0;
+
+    /* Set a socket timeout flag */
+    int timeout_err = setsockopt (sockfd,
+                                  SOL_SOCKET,
+                                  SO_SNDTIMEO,
+                                  &tv, sizeof (tv));
+
+    /* Setting the SO_SNDTIMEO flag failed */
+    if (timeout_err != 0) {
+        close_socket (sockfd);
+        error (ptr, "cannot set SO_SNDTIMEO", GET_ERR);
+        return SOCK_ERROR;
+    }
+
     /* Reuse the address and port */
     int reuse_port = setsockopt (sockfd,
                                  SOL_SOCKET,
                                  SO_REUSEPORT,
                                  &name, sizeof (name));
 
-    /* Setting the SO_REUSEPORT failed */
+    /* Setting the SO_REUSEPORT flag failed */
     if (reuse_port != 0) {
         close_socket (sockfd);
         error (ptr, "cannot set SO_REUSEPORT", GET_ERR);
@@ -199,72 +237,35 @@ static int create_socket (DS_Socket* ptr, struct addrinfo* addr)
 }
 
 /**
- * Runs the server socket process
+ * Executes the server socket loop
+ *
+ * \param ptr pointer to an initialized \c DS_Socket structure
  */
 static void* run_server (void* ptr)
 {
-    /* Pointer is NULL, abort */
+    /* Pointer is NULL */
     if (!ptr)
         return NULL;
 
-    /* Cast generic pointer to socket */
+    /* Cast the pointer to a socket */
     DS_Socket* sock = (DS_Socket*) ptr;
 
-    /* Listen for incoming connections */
-    if (sock->type == DS_SOCKET_TCP) {
-        int listen_err = listen (sock->info.socket_in, 5);
+    /* Make the socket non-blocking */
+    set_socket_blocking (sock->info.socket_in, 0);
 
-        /* Check if there was an error while configuring the socket */
-        if (listen_err) {
-            error (sock, "cannot configure listener socket", GET_ERR);
-            close_socket (sock->info.socket_in);
-            return NULL;
-        }
-
-        /* Accept connection from client */
-        struct addrinfo addr;
-        sock->info.socket_tmp = accept (sock->info.socket_in,
-                                        addr.ai_addr, (int*) &addr.ai_addrlen);
-    }
-
-    /* Main loop */
-    while (sock->info.server_initialized && sock->info.initialized) {
-        /* Socket is disabled, abort */
-        if (sock->disabled)
-            break;
-
-        /* Clear the buffer */
-        sock->info.tmpbuffer = sdsempty();
-
-        /* Set buffer pointer & size */
-        int bytes = 0;
-        size_t size = 1024;
-
-        /* Read using TCP */
-        if (sock->type == DS_SOCKET_TCP)
-            bytes = recv (sock->info.socket_tmp, sock->info.tmpbuffer, size, 0);
-
-        /* Read using UDP */
-        else
-            bytes = recvfrom (sock->info.socket_in,
-                              sock->info.tmpbuffer, size, 0,
+    /* Run the main server loop */
+    while (sock->info.initialized && sock->info.server_initialized) {
+        char* buffer = NULL;
+        int bytes = recvfrom (sock->info.socket_in,
+                              buffer, 1024, MSG_DONTWAIT,
                               sock->info.in_addr->ai_addr,
-                              (int*) &sock->info.in_addr->ai_addrlen);
+                              &sock->info.in_addr->ai_addrlen);
 
-        /* Close connection if required */
-        if (sock->type == DS_SOCKET_TCP && bytes == 0)
-            close_socket (sock->info.socket_tmp);
+        if (bytes > 0)
+            sock->info.buffer = sdscat (sock->info.buffer, buffer);
 
-        printf ("%d\n", bytes);
-        printf ("%s\n", sock->info.tmpbuffer);
-
-        /* Copy temp. buffer to normal buffer */
-        if (bytes > 0) {
-            sock->info.buffer = sdscatsds (sock->info.buffer,
-                                           sock->info.tmpbuffer);
-
-            DS_FREESTR (sock->info.tmpbuffer);
-        }
+        DS_FREE (buffer);
+        DS_Sleep (10);
     }
 
     return NULL;
@@ -308,10 +309,7 @@ static int configure_socket (DS_Socket* ptr, int server)
             return 0;
         }
 
-        /* Allow the server to run */
-        ptr->info.server_initialized = 1;
-
-        /* Start the server process in another thread */
+        /* Start server loop */
         pthread_t thread;
         pthread_create (&thread, NULL, &run_server, (void*) ptr);
     }
@@ -327,8 +325,8 @@ static int configure_socket (DS_Socket* ptr, int server)
             return 0;
         }
 
-        /* Connect the socket (if we use TCP) */
         if (ptr->type == DS_SOCKET_TCP) {
+            /* Connect the socket (if we use TCP) */
             int connect_err = connect (ptr->info.socket_out,
                                        ptr->info.out_addr->ai_addr,
                                        ptr->info.out_addr->ai_addrlen);
@@ -389,7 +387,6 @@ DS_Socket DS_SocketEmpty()
 
     info.initialized = 0;
     info.buffer = sdsempty();
-    info.tmpbuffer = sdsempty();
     info.server_initialized = 0;
     info.client_initialized = 0;
     info.socket_in = SOCK_ERROR;
@@ -477,12 +474,18 @@ void DS_SocketClose (DS_Socket* ptr)
     /* Close socket descriptors */
     close_socket (ptr->info.socket_in);
     close_socket (ptr->info.socket_out);
-    close_socket (ptr->info.socket_tmp);
+
+    /* Close TCP server descriptor */
+    if (ptr->type == DS_SOCKET_TCP)
+        close_socket (ptr->info.socket_tmp);
 
     /* Reset the info structure */
     ptr->info.initialized = 0;
     ptr->info.client_initialized = 0;
     ptr->info.server_initialized = 0;
+
+    /* Clear socket buffer */
+    DS_FREESTR (ptr->info.buffer);
 }
 
 /**
@@ -535,12 +538,11 @@ int DS_SocketRead (DS_Socket* ptr, sds data)
     if (ptr->info.server_initialized != 1 || ptr->disabled == 1)
         return SOCK_ERROR;
 
-    /* Copy buffer to data */
-    data = sdscpy (data, ptr->info.buffer);
-
-    /* Clear the buffer */
-    DS_FREESTR (ptr->info.buffer);
-    ptr->info.buffer = sdsempty();
+    /* Copy buffer to data pointer */
+    if (ptr->info.buffer != NULL) {
+        data = sdscpy (sdsempty(), ptr->info.buffer);
+        DS_FREESTR (ptr->info.buffer);
+    }
 
     /* Return length of received data */
     return (int) sdslen (data);

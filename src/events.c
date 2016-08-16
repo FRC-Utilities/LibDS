@@ -51,8 +51,7 @@ void Events_Close()
  */
 void DS_AddEvent (DS_Event* event)
 {
-    if (event)
-        DS_QueuePush (&events, (void*) event);
+    DS_QueuePush (&events, (void*) event);
 }
 
 /**

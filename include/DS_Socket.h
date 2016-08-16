@@ -39,7 +39,6 @@ struct addrinfo;
  */
 typedef struct {
     sds buffer;                /**< Cleared when user reads socket data */
-    sds tmpbuffer;             /**< Overwritten with each new packet */
     int socket_in;             /**< Server socket file descriptor */
     int socket_out;            /**< Client socket file descriptor */
     int socket_tmp;            /**< TCP server socket */

@@ -175,6 +175,11 @@ static void recv_data()
     radio_read = protocol->read_radio_packet (radio_data);
     robot_read = protocol->read_robot_packet (robot_data);
 
+    /* Update communication statuses */
+    CFG_SetFMSCommunications (fms_read);
+    CFG_SetRadioCommunications (radio_read);
+    CFG_SetRobotCommunications (robot_read);
+
     /* Add NetConsole message to event system */
     if (!DS_StringIsEmpty (netconsole_data)) {
         DS_Event event;
