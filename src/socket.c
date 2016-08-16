@@ -140,7 +140,7 @@ static struct addrinfo* get_address_info (DS_Socket* ptr, int server)
 
     /* Set hints */
     hints.ai_flags = AI_PASSIVE;
-    hints.ai_family = AF_INET;
+    hints.ai_family = AF_UNSPEC;
     hints.ai_socktype = (ptr->type == DS_SOCKET_TCP) ? SOCK_STREAM : SOCK_DGRAM;
 
     /* Get the port string */
