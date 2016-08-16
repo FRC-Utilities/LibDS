@@ -1,5 +1,4 @@
 /*
- * The Driver Station Library (LibDS)
  * Copyright (C) 2015-2016 Alex Spataru <alex_spataru@outlook>
  *
  * Permission is hereby granted, free of charge, to any person obtaining
@@ -21,39 +20,27 @@
  * DEALINGS IN THE SOFTWARE.
  */
 
-#include "LibDS.h"
+#ifndef _VIRTUAL_JOYSTICK_H
+#define _VIRTUAL_JOYSTICK_H
 
-static int init = 0;
+#include <QKeyEvent>
+#include <QApplication>
 
-/**
- * Initializes all the modules of the LibDS library
- */
-void DS_Init()
+class VirtualJoystick : public QObject
 {
-    if (init == 0) {
-        init = 1;
+    Q_OBJECT
 
-        Client_Init();
-        Events_Init();
-        Sockets_Init();
-        Joysticks_Init();
-        Protocols_Init();
-    }
-}
+public:
+    explicit VirtualJoystick();
 
-/**
- * Closes all the modules of the LibDS library
- */
-void DS_Close()
-{
-    if (init) {
-        init = 0;
+private slots:
+    void readAxes (int key, bool pressed);
+    void readPOVs (int key, bool pressed);
+    void readButtons (int key, bool pressed);
+    void processKeyEvent (QKeyEvent* event, bool pressed);
 
-        Timers_Close();
-        Events_Close();
-        Client_Close();
-        Protocols_Close();
-        Joysticks_Close();
-        Sockets_Close();
-    }
-}
+protected:
+    bool eventFilter (QObject* object, QEvent* event);
+};
+
+#endif

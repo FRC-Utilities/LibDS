@@ -261,7 +261,7 @@ void update_interface()
 void set_can (const int can)
 {
     DS_FREESTR (can_str);
-    can_str = sdscatfmt (sdsempty(), "%i %%", can);
+    can_str = sdscatprintf (sdsempty(), "%d %%", can);
 }
 
 /**
@@ -270,7 +270,7 @@ void set_can (const int can)
 void set_cpu (const int cpu)
 {
     DS_FREESTR (cpu_str);
-    cpu_str = sdscatfmt (sdsempty(), "%i %%", cpu);
+    cpu_str = sdscatprintf (sdsempty(), "%d %%", cpu);
 }
 
 /**
@@ -279,7 +279,7 @@ void set_cpu (const int cpu)
 void set_ram (const int ram)
 {
     DS_FREESTR (ram_str);
-    ram_str = sdscatfmt (sdsempty(), "%i %%", ram);
+    ram_str = sdscatprintf (sdsempty(), "%d %%", ram);
 }
 
 /**
@@ -288,7 +288,7 @@ void set_ram (const int ram)
 void set_disk (const int disk)
 {
     DS_FREESTR (disk_str);
-    disk_str = sdscatfmt (sdsempty(), "%i %%", disk);
+    disk_str = sdscatprintf (sdsempty(), "%d %%", disk);
 }
 
 /**

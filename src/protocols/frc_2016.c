@@ -39,7 +39,7 @@ static DS_Protocol* protocol = NULL;
  */
 static sds robot_address()
 {
-    return sdscatfmt (sdsempty(), "roboRIO-%i-FRC.local", CFG_GetTeamNumber());
+    return sdscatprintf (sdsempty(), "roboRIO-%d-FRC.local", CFG_GetTeamNumber());
 }
 
 /**

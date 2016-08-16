@@ -1,5 +1,4 @@
 /*
- * The Driver Station Library (LibDS)
  * Copyright (C) 2015-2016 Alex Spataru <alex_spataru@outlook>
  *
  * Permission is hereby granted, free of charge, to any person obtaining
@@ -21,39 +20,26 @@
  * DEALINGS IN THE SOFTWARE.
  */
 
-#include "LibDS.h"
+#include <LibDS.h>
 
-static int init = 0;
+#include "Window.h"
+#include "DriverStation.h"
+#include "VirtualJoystick.h"
 
-/**
- * Initializes all the modules of the LibDS library
- */
-void DS_Init()
+int main (int argc, char* argv[])
 {
-    if (init == 0) {
-        init = 1;
+    QApplication app (argc, argv);
 
-        Client_Init();
-        Events_Init();
-        Sockets_Init();
-        Joysticks_Init();
-        Protocols_Init();
-    }
-}
+    /* Initialize the Driver Station */
+    DriverStation::getInstance()->start();
 
-/**
- * Closes all the modules of the LibDS library
- */
-void DS_Close()
-{
-    if (init) {
-        init = 0;
+    /* Initialize the main window */
+    Window window;
+    window.show();
 
-        Timers_Close();
-        Events_Close();
-        Client_Close();
-        Protocols_Close();
-        Joysticks_Close();
-        Sockets_Close();
-    }
+    /* Initialize the virtual joystick */
+    VirtualJoystick joystick;
+    Q_UNUSED (joystick);
+
+    return app.exec();
 }

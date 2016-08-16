@@ -198,7 +198,7 @@ sds DS_GetStatusString()
         }
 
         sds enabled = sdsnew (DS_GetRobotEnabled() ? "Enabled" : "Disabled");
-        status_string = sdscatfmt (status_string, " %s", enabled);
+        status_string = sdscatprintf (status_string, " %s", enabled);
         DS_FREESTR (enabled);
     }
 

@@ -1,5 +1,4 @@
 /*
- * The Driver Station Library (LibDS)
  * Copyright (C) 2015-2016 Alex Spataru <alex_spataru@outlook>
  *
  * Permission is hereby granted, free of charge, to any person obtaining
@@ -21,39 +20,36 @@
  * DEALINGS IN THE SOFTWARE.
  */
 
-#include "LibDS.h"
+#ifndef _WINDOW_H
+#define _WINDOW_H
 
-static int init = 0;
+#include <QMainWindow>
+#include <QApplication>
 
-/**
- * Initializes all the modules of the LibDS library
- */
-void DS_Init()
-{
-    if (init == 0) {
-        init = 1;
+#include "ui_Window.h"
 
-        Client_Init();
-        Events_Init();
-        Sockets_Init();
-        Joysticks_Init();
-        Protocols_Init();
-    }
+namespace Ui {
+class Window;
 }
 
-/**
- * Closes all the modules of the LibDS library
- */
-void DS_Close()
-{
-    if (init) {
-        init = 0;
+class DriverStation;
 
-        Timers_Close();
-        Events_Close();
-        Client_Close();
-        Protocols_Close();
-        Joysticks_Close();
-        Sockets_Close();
-    }
-}
+class Window : public QMainWindow
+{
+    Q_OBJECT
+
+public:
+    explicit Window (QWidget* parent = 0);
+    ~Window();
+
+public slots:
+    void updateEnabled (int unused);
+    void updateControlMode (int unused);
+    void setVoltage (double voltage);
+
+private:
+    Ui::Window* ui;
+    DriverStation* ds;
+};
+
+#endif

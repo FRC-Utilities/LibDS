@@ -1,8 +1,4 @@
 INCLUDEPATH += $$PWD
 
-HEADERS += \
-    $$PWD/sds.h \
-    $$PWD/sdsalloc.h
-
-SOURCES += \
-    $$PWD/sds.c
+HEADERS += $$PWD/sds.h
+SOURCES += $$PWD/sds.c

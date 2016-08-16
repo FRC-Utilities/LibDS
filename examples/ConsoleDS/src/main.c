@@ -86,24 +86,6 @@ static void process_events()
             break;
         case DS_NETCONSOLE_NEW_MESSAGE:
             break;
-        case DS_ROBOT_ENABLED:
-            set_enabled (event.robot.enabled);
-            break;
-        case DS_ROBOT_DISABLED:
-            set_enabled (event.robot.enabled);
-            break;
-        case DS_ROBOT_CONNECTED:
-            set_robot_comms (event.robot.connected);
-            break;
-        case DS_ROBOT_CODE_LOADED:
-            set_robot_code (event.robot.code);
-            break;
-        case DS_ROBOT_DISCONNECTED:
-            set_robot_comms (event.robot.connected);
-            break;
-        case DS_ROBOT_CODE_UNLOADED:
-            set_robot_code (event.robot.code);
-            break;
         case DS_ROBOT_VOLTAGE_CHANGED:
             set_voltage (event.robot.voltage);
             break;

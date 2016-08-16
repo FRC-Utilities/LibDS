@@ -1,21 +1,6 @@
+[This is a fork of the SDS library version 1, incompatible with version 2.]
+
 Simple Dynamic Strings
-===
-
-**Notes about verison 2**: this is an updated version of SDS in an attempt
-to finally unify Redis, Disque, Hiredis, and the stand alone SDS versions.
-This version is **NOT* binary compatible** with SDS verison 1, but the API
-is 99% compatible so switching to the new lib should be trivial.
-
-Note that this version of SDS may be a slower with certain workloads, but
-uses less memory compared to V1 since header size is dynamic and depends to
-the string to alloc.
-
-Moreover it includes a few more API functions, notably `sdscatfmt` which
-is a faster version of `sdscatprintf` that can be used for the simpler
-cases in order to avoid the libc `printf` family functions performance
-penalty.
-
-How SDS strings work
 ===
 
 SDS is a string library for C designed to augment the limited libc string
@@ -40,14 +25,14 @@ Because of meta data stored before the actual returned pointer as a prefix,
 and because of every SDS string implicitly adding a null term at the end of
 the string regardless of the actual content of the string, SDS strings work
 well together with C strings and the user is free to use them interchangeably
-with other std C string functions that access the string in read-only.
+with real-only functions that access the string in read-only.
 
 SDS was a C string I developed in the past for my everyday C programming needs,
 later it was moved into Redis where it is used extensively and where it was
 modified in order to be suitable for high performance operations. Now it was
 extracted from Redis and forked as a stand alone project.
 
-Because of its many years life inside Redis, SDS provides both higher level
+Because of its many years of life inside Redis, SDS provides both higher level
 functions for easy strings manipulation in C, but also a set of low level
 functions that make it possible to write high performance code without paying
 a penalty for using an higher level string library.
@@ -228,9 +213,9 @@ Destroying strings
 void sdsfree(sds s);
 ```
 
-The destroy an SDS string there is just to call `sdsfree` with the string
-pointer. Note that even empty strings created with `sdsempty` need to be
-destroyed as well otherwise they'll result into a memory leak.
+To destroy an SDS string just call `sdsfree` with the string
+pointer. Note, however, that empty strings created with `sdsempty` need to be
+destroyed as well otherwise they'll result in a memory leak.
 
 The function `sdsfree` does not perform any operation if instead of an SDS
 string pointer, `NULL` is passed, so you don't need to check for `NULL` explicitly before calling it:
@@ -328,7 +313,7 @@ s = sdscatprintf(s,"%d+%d = %d",a,b,a+b);
 
 Often you need to create SDS string directly from `printf` format specifiers.
 Because `sdscatprintf` is actually a function that concatenates strings, all
-you need is to concatenate your string to an empty string:
+you need to do is to concatenate your string to an empty string:
 
 
 ```c
@@ -382,10 +367,10 @@ void sdsrange(sds s, int start, int end);
 
 SDS provides both the operations with the `sdstrim` and `sdsrange` functions.
 However note that both functions work differently than most functions modifying
-SDS strings since the return value is void: basically those functions always
+SDS strings since the return value is null: basically those functions always
 destructively modify the passed SDS string, never allocating a new one, because
 both trimming and ranges will never need more room: the operations can only
-remove characters from the original string.
+remove characters from the original strings.
 
 Because of this behavior, both functions are fast and don't involve reallocation.
 
@@ -464,7 +449,7 @@ buffers that are easy to manage.
 String copying
 ---
 
-The most dangerous and infamus function of the standard C library is probably
+The most dangerous and infamous function of the standard C library is probably
 `strcpy`, so perhaps it is funny how in the context of better designed dynamic
 string libraries the concept of copying strings is almost irrelevant. Usually
 what you do is to create strings with the content you want, or concatenating
@@ -503,7 +488,7 @@ SDS library, since you can simply create a new SDS string from scratch
 with the new value instead of copying the value in an existing SDS string.
 The reason is efficiency: `sdsnewlen` will always allocate a new string
 while `sdscpylen` will try to reuse the existing string if there is enough
-room to old the new content specified by the user, and will allocate a new
+room to hold the new content specified by the user, and will allocate a new
 one only if needed.
 
 Quoting strings
@@ -533,7 +518,7 @@ existing string the quoted string representation of the input string.
 sds sdscatrepr(sds s, const char *p, size_t len);
 ```
 
-The `scscatrepr` (where `repr` means *representation*) follows the usualy
+The `scscatrepr` (where `repr` means *representation*) follows the usually
 SDS string function rules accepting a char pointer and a length, so you can
 use it with SDS strings, normal C strings by using strlen() as `len` argument,
 or binary data. The following is an example usage:
@@ -541,9 +526,9 @@ or binary data. The following is an example usage:
 ```c
 sds s1 = sdsnew("abcd");
 sds s2 = sdsempty();
-s[1] = 1;
-s[2] = 2;
-s[3] = '\n';
+s1[1] = 1;
+s1[2] = 2;
+s1[3] = '\n';
 s2 = sdscatrepr(s2,s1,sdslen(s1));
 printf("%s\n", s2);
 
@@ -558,7 +543,7 @@ This is the rules `sdscatrepr` uses for conversion:
 * The function always adds initial and final double quotes characters.
 
 There is an SDS function that is able to perform the reverse conversion and is
-documented in the *Tokenization* section below.
+documented in the *Tokenization* paragraph below.
 
 Tokenization
 ---
@@ -578,7 +563,7 @@ A more common separator that consists of a single character is the comma:
 foo,bar,zap
 ```
 
-In many progrems it is useful to process a line in order to obtain the sub
+In many programs it is useful to process a line in order to obtain the sub
 strings it is composed of, so SDS provides a function that returns an
 array of SDS strings given a string and a separator.
 
@@ -612,7 +597,7 @@ output> World!
 
 The returned array is heap allocated, and the single elements of the array
 are normal SDS strings. You can free everything calling `sdsfreesplitres`
-as in the example. Alternativey you are free to release the array yourself
+as in the example. Alternatively you are free to release the array yourself
 using the `free` function and use and/or free the individual SDS strings
 as usually.
 
@@ -689,7 +674,7 @@ Error handling
 All the SDS functions that return an SDS pointer may also return `NULL` on
 out of memory, this is basically the only check you need to perform.
 
-However many modern C programs handle out of memory simply aborting the program
+However many modern C programs handle out of memory by simply aborting the program
 so you may want to do this as well by wrapping `malloc` and other related
 memory allocation calls directly.
 
@@ -703,11 +688,11 @@ usage it is better to dig more into the internals of SDS and show the
 structure implementing it:
 
 ```c
-struct sdshdr {
+typedef struct sdshdr_ {
     int len;
     int free;
     char buf[];
-};
+} sdshdr;
 ```
 
 As you can see, the structure may resemble the one of a conventional string
@@ -835,7 +820,7 @@ While this is definitely a very common programming technique I'll outline
 the basic ideas here. You create a structure like that:
 
 ```c
-struct mySharedString {
+struct mySharedStrings {
     int refcount;
     sds string;
 }
@@ -866,7 +851,7 @@ you can mount using the low level API exported, that is used inside Redis
 in order to improve performances of the networking code.
 
 Using `sdsIncrLen()` and `sdsMakeRoomFor()` it is possible to mount the
-following schema, to cat bytes coming from the kernel to the end of an
+following schema to cat bytes coming from the kernel to the end of an
 sds string without copying into an intermediate buffer:
 
 ```c
@@ -882,36 +867,11 @@ sdsIncrLen(s, nread);
 Embedding SDS into your project
 ===
 
-This is as simple as copying the following files inside your
-project:
-
-* sds.c
-* sds.h
-* sdsalloc.h
-
-The source code is small and every C99 compiler should deal with
+This is as simple as copying the `sds.c` and `sds.h` files inside your
+project. The source code is small and every C99 compiler should deal with
 it without issues.
-
-Using a different allocator for SDS
-===
-
-Internally sds.c uses the allocator defined into `sdsalloc.h`. This header
-file just defines macros for malloc, realloc and free, and by default libc
-`malloc()`, `realloc()` and `free()` are used. Just edit this file in order
-to change the name of the allocation functions.
-
-The program using SDS can call the SDS allocator in order to manipulate
-SDS pointers (usually not needed but sometimes the program may want to
-do advanced things) by using the API exported by SDS in order to call the
-allocator used. This is especially useful when the program linked to SDS
-is using a different allocator compared to what SDS is using.
-
-The API to access the allocator used by SDS is composed of three functions: `sds_malloc()`, `sds_realloc()` and `sds_free()`.
 
 Credits and license
 ===
 
-SDS was created by Salvatore Sanfilippo and is released under the BDS two clause license. See the LICENSE file in this source distribution for more information.
-
-Oran Agra improved SDS version 2 by adding dynamic sized headers in order to
-save memory for small strings and allow strings greater than 4GB.
+SDS was created by Salvatore Sanfilippo and is released under the BSD two clause license. See the LICENSE file in this source distribution for more information.

@@ -58,5 +58,5 @@ sds DS_GetStaticIP (const int net, const int team, const int host)
 {
     int te = team / 100;
     int am = team - (te * 100);
-    return sdscatfmt (sdsempty(), "%u.%u.%u.%u", net, te, am, host);
+    return sdscatprintf (sdsempty(), "%d.%d.%d.%d", net, te, am, host);
 }

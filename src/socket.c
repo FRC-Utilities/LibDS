@@ -144,8 +144,8 @@ static struct addrinfo* get_address_info (DS_Socket* ptr, int server)
     hints.ai_socktype = (ptr->type == DS_SOCKET_TCP) ? SOCK_STREAM : SOCK_DGRAM;
 
     /* Get the port string */
-    sds port_str = sdscatfmt (sdsempty(), "%i",
-                              server ? ptr->input_port : ptr->output_port);
+    sds port_str = sdscatprintf (sdsempty(), "%d",
+                                 server ? ptr->input_port : ptr->output_port);
 
     /* Get the address */
     sds address = server ? NULL : sdsdup (ptr->address);
@@ -174,7 +174,7 @@ static struct addrinfo* get_address_info (DS_Socket* ptr, int server)
 static int create_socket (DS_Socket* ptr, struct addrinfo* addr)
 {
     /* Check for NULL pointers */
-    if (!ptr)
+    if (!ptr || !addr)
         return SOCK_ERROR;
 
     /* Create the socket */
