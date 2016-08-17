@@ -28,11 +28,25 @@
 
 static bool initialized = false;
 
+/**
+ * Converts the given \c QString into a \c SDS string
+ *
+ * \param string the \c QString to convert
+ *
+ * \returns the obtained \c SDS string
+ */
 static sds qstring_to_sds (const QString& string)
 {
     return sdsnew (string.toStdString().c_str());
 }
 
+/**
+ * Converts the given \c SDS string into a \c QString
+ *
+ * \param string the \c SDS string to convert
+ *
+ * \returns the obtained \c QString
+ */
 static QString sds_to_qstring (const sds string)
 {
     if (string)
@@ -41,67 +55,131 @@ static QString sds_to_qstring (const sds string)
     return QString ("");
 }
 
+/**
+ * Thar shall be only one tavern that manages
+ * th' Driver Station interface
+ *
+ * \returns the only instance of this class
+ */
 DriverStation* DriverStation::getInstance()
 {
     static DriverStation instance;
     return &instance;
 }
 
+/**
+ * Returns the team number used by the LibDS,
+ * use the \c setTeamNumber() function to change it
+ */
 int DriverStation::teamNumber() const
 {
     return DS_GetTeamNumber();
 }
 
+/**
+ * Returns the current enabled state of the robot,
+ * you can change it with the \c setEnabled() function
+ */
 bool DriverStation::isEnabled() const
 {
     return DS_GetRobotEnabled();
 }
 
+/**
+ * Returns \c true if the robot is currently in test mode.
+ * You can change the control mode with the \c setControlMode() function
+ * or with the \c switchToAutonomous(), \c switchToTestMode() or
+ * \c switchToTeleoperated() functions
+ */
 bool DriverStation::isTestMode() const
 {
     return (controlMode() == kControlTest);
 }
 
+/**
+ * Returns \c true if it is possible to enable the robot.
+ * This function checks if:
+ *   - We have communications with the robot
+ *   - The robot code is loaded
+ *   - The robot is not emergency stopped
+ */
 bool DriverStation::canBeEnabled() const
 {
     return DS_GetCanBeEnabled();
 }
 
+/**
+ * Returns \c true if the robot code is present
+ */
 bool DriverStation::hasRobotCode() const
 {
     return DS_GetRobotCode();
 }
 
+/**
+ * Returns \c true if the robot is currently in autonomous mode.
+ * You can change the control mode with the \c setControlMode() function
+ * or with the \c switchToAutonomous(), \c switchToTestMode() or
+ * \c switchToTeleoperated() functions
+ */
 bool DriverStation::isAutonomous() const
 {
     return (controlMode() == kControlAutonomous);
 }
 
+/**
+ * Returns \c true if the robot is currently in teleop mode.
+ * You can change the control mode with the \c setControlMode() function
+ * or with the \c switchToAutonomous(), \c switchToTestMode() or
+ * \c switchToTeleoperated() functions
+ */
 bool DriverStation::isTeleoperated() const
 {
     return (controlMode() == kControlTeleoperated);
 }
 
+/**
+ * Returns \c true if the Driver Station has communications with the FMS
+ */
 bool DriverStation::connectedToFMS() const
 {
     return DS_GetFMSCommunications();
 }
 
+/**
+ * Returns \c true if the Driver Station has communications with the robot radio
+ */
 bool DriverStation::connectedToRadio() const
 {
     return DS_GetRadioCommunications();
 }
 
+/**
+ * Returns \c true if the Driver Station has communications with the robot
+ */
 bool DriverStation::connectedToRobot() const
 {
     return DS_GetRobotCommunications();
 }
 
+/**
+ * Returns \c true if the Driver Station detects that the robot is emergency
+ * stopped.
+ *
+ * You can trigger an emergency stop with the \c setEmergencyStopped() function
+ */
 bool DriverStation::emergencyStopped() const
 {
     return DS_GetEmergencyStopped();
 }
 
+/**
+ * Returns the current control mode set by the Driver Station.
+ * Possible return values are:
+ *    - \c kControlTest
+ *    - \c kControlAutonomous
+ *    - \c kControlTeleoperated
+ */
 DriverStation::Control DriverStation::controlMode() const
 {
     switch (DS_GetControlMode()) {
@@ -120,6 +198,20 @@ DriverStation::Control DriverStation::controlMode() const
     }
 }
 
+/**
+ * Returns the current team station of the DS/robot.
+ *
+ * Possible return values are:
+ *   - \c kStationRed1
+ *   - \c kStationRed2
+ *   - \c kStationRed3
+ *   - \c kStationBlue1
+ *   - \c kStationBlue2
+ *   - \c kStationBlue3
+ *
+ * You can also use the \c teamAlliance() and \c teamPosition() functions to
+ * obtain the individual alliance and position of the DS/robot.
+ */
 DriverStation::Station DriverStation::teamStation() const
 {
     if (teamAlliance() == kAllianceRed) {
@@ -157,6 +249,15 @@ DriverStation::Station DriverStation::teamStation() const
     }
 }
 
+/**
+ * Returns the current team alliance of the DS/robot.
+ *
+ * Possible return values are:
+ *   - \c kAllianceRed
+ *   - \c kAllianceBlue
+ *
+ * Related functions: \c teamPosition() and \c teamStation()
+ */
 DriverStation::Alliance DriverStation::teamAlliance() const
 {
     switch (DS_GetAlliance()) {
@@ -172,6 +273,16 @@ DriverStation::Alliance DriverStation::teamAlliance() const
     }
 }
 
+/**
+ * Returns the current position of the DS/robot.
+ *
+ * Possible return values are:
+ *   - \c kPosition1
+ *   - \c kPosition2
+ *   - \c kPosition3
+ *
+ * Related functions: \c teamAlliance() and \c teamStation()
+ */
 DriverStation::Position DriverStation::teamPosition() const
 {
     switch (DS_GetPosition()) {
@@ -190,51 +301,89 @@ DriverStation::Position DriverStation::teamPosition() const
     }
 }
 
+/**
+ * Returns the internet address that the Driver Station is using to communicate
+ * with the Field Management System.
+ */
 QString DriverStation::appliedFMSAddress() const
 {
     return sds_to_qstring (DS_GetAppliedFMSAddress());
 }
 
+/**
+ * Returns the internet address that the Driver Station is using to communicate
+ * with the robot radio.
+ */
 QString DriverStation::appliedRadioAddress() const
 {
     return sds_to_qstring (DS_GetAppliedRadioAddress());
 }
 
+/**
+ * Returns the internet address that the Driver Station is using to communicate
+ * with the robot controller.
+ */
 QString DriverStation::appliedRobotAddress() const
 {
     return sds_to_qstring (DS_GetAppliedRobotAddress());
 }
 
+/**
+ * Returns the FMS address recommended by the loaded protocol
+ */
 QString DriverStation::defaultFMSAddress() const
 {
     return sds_to_qstring (DS_GetDefaultFMSAddress());
 }
 
+/**
+ * Returns the radio address recommended by the loaded protocol
+ */
 QString DriverStation::defaultRadioAddress() const
 {
     return sds_to_qstring (DS_GetDefaultRadioAddress());
 }
 
+/**
+ * Returns the robot address recommended by the loaded protocol
+ */
 QString DriverStation::defaultRobotAddress() const
 {
     return sds_to_qstring (DS_GetDefaultRobotAddress());
 }
 
+/**
+ * Returns the user-set FMS address, use the \c setCustomFMSAddress() function
+ * to change this value.
+ */
 QString DriverStation::customFMSAddress() const
 {
     return sds_to_qstring (DS_GetCustomFMSAddress());
 }
 
+/**
+ * Returns the user-set radio address, use the \c setCustomRadioAddress()
+ * function to change this value.
+ */
 QString DriverStation::customRadioAddress() const
 {
     return sds_to_qstring (DS_GetCustomRadioAddress());
 }
 
+/**
+ * Returns the user-set robot address, use the \c setCustomRobotAddress()
+ * function to change this value.
+ */
 QString DriverStation::customRobotAddress() const
 {
     return sds_to_qstring (DS_GetCustomRobotAddress());
 }
 
+/**
+ * Returns an ordered list with the available team stations.
+ * You can use the value indexes of this list directly with the
+ * \c setTeamStation() function
+ */
 QStringList DriverStation::stations() const
 {
     QStringList list;
@@ -249,6 +398,11 @@ QStringList DriverStation::stations() const
     return list;
 }
 
+/**
+ * Returns an ordered list with the available communication protocols.
+ * You can use the value indexes of this list directly with the \c setProtocol()
+ * function.
+ */
 QStringList DriverStation::protocols() const
 {
     QStringList list;
@@ -260,6 +414,10 @@ QStringList DriverStation::protocols() const
     return list;
 }
 
+/**
+ * Initializes the LibDS system and instructs the class to close the LibDS
+ * before the Qt application is closed.
+ */
 void DriverStation::start()
 {
     if (!initialized) {
@@ -269,55 +427,89 @@ void DriverStation::start()
     }
 }
 
+/**
+ * Reboots the robot controller
+ */
 void DriverStation::rebootRobot()
 {
     DS_RebootRobot();
 }
 
+/**
+ * Removes all the registered joysticks from the Driver Station
+ */
 void DriverStation::resetJoysticks()
 {
     DS_JoysticksReset();
 }
 
+/**
+ * Restarts the robot code process in the robot controller
+ */
 void DriverStation::restartRobotCode()
 {
     DS_RestartRobotCode();
 }
 
+/**
+ * Disables the robot and switches its control mode to \c kControlTest
+ */
 void DriverStation::switchToTestMode()
 {
     setEnabled (false);
     setControlMode (kControlTest);
 }
 
+/**
+ * Disables the robot and switches its control mode to \c kControlAutonomous
+ */
 void DriverStation::switchToAutonomous()
 {
     setEnabled (false);
     setControlMode (kControlAutonomous);
 }
 
+/**
+ * Disables the robot and switches its control mode to \c kControlTeleoperated
+ */
 void DriverStation::switchToTeleoperated()
 {
     setEnabled (false);
     setControlMode (kControlTeleoperated);
 }
 
+/**
+ * Disables or enables the robot
+ */
 void DriverStation::setEnabled (const bool  enabled)
 {
     DS_SetRobotEnabled (enabled);
 }
 
+/**
+ * Changes the team \a number
+ * \note Changing the team number will trigger a refresh in the internet
+ *       addresses used to communicate with the FMS, radio and robot.
+ */
 void DriverStation::setTeamNumber (const int number)
 {
     DS_SetTeamNumber (number);
 }
 
+/**
+ * De-allocates the current protocol and loads the given \a protocol
+ *
+ * \param protocol the new communication protocol to use
+ */
 void DriverStation::setProtocol (DS_Protocol* protocol)
 {
     if (protocol)
         DS_ConfigureProtocol (protocol);
 }
 
+/**
+ * Changes the control \a mode of the robot
+ */
 void DriverStation::setControlMode (const Control mode)
 {
     switch (mode) {
@@ -336,6 +528,12 @@ void DriverStation::setControlMode (const Control mode)
     }
 }
 
+/**
+ * Loads the given \a protocol type.
+ *
+ * \note You can use this function directly with the index values given by the
+ *       \c protocols() function
+ */
 void DriverStation::setProtocol (const int protocol)
 {
     switch ((Protocol) protocol) {
@@ -353,6 +551,20 @@ void DriverStation::setProtocol (const int protocol)
     }
 }
 
+/**
+ * Changes the team alliance and position based on the given \a station
+ *
+ * Possible input values are:
+ *   - \c kStationRed1 (0)
+ *   - \c kStationRed2 (1)
+ *   - \c kStationRed3 (2)
+ *   - \c kStationBlue1 (3)
+ *   - \c kStationBlue2 (4)
+ *   - \c kStationBlue3 (5)
+ *
+ * \note You can use this function directly with the output given by the \c
+ *       \c stations() function
+ */
 void DriverStation::setTeamStation (const int station)
 {
     switch ((Station) station) {
@@ -385,6 +597,11 @@ void DriverStation::setTeamStation (const int station)
     }
 }
 
+/**
+ * Updates the team alliance, possible input values are:
+ *    - \c kAllianceRed (0)
+ *    - \c kAllianceBlue (1)
+ */
 void DriverStation::setTeamAlliance (const int alliance)
 {
     switch ((Alliance) alliance) {
@@ -397,6 +614,12 @@ void DriverStation::setTeamAlliance (const int alliance)
     }
 }
 
+/**
+ * Updates the team position, possible input values are:
+ *    - \c kPosition1 (0)
+ *    - \c kPosition2 (1)
+ *    - \c kPosition3 (2)
+ */
 void DriverStation::setTeamPosition (const int position)
 {
     switch ((Position) position) {
@@ -412,62 +635,114 @@ void DriverStation::setTeamPosition (const int position)
     }
 }
 
+/**
+ * Changes the emergency stopped state of the robot
+ */
 void DriverStation::setEmergencyStopped (const bool stopped)
 {
     DS_SetEmergencyStopped (stopped);
 }
 
-
+/**
+ * Forces the LibDS to use the given \a address to communicate with the FMS
+ */
 void DriverStation::setCustomFMSAddress (const QString& address)
 {
     if (!address.isEmpty())
         DS_SetCustomFMSAddress (qstring_to_sds (address));
 }
 
+/**
+ * Forces the LibDS to use the given \a address to communicate with the radio
+ */
 void DriverStation::setCustomRadioAddress (const QString& address)
 {
     if (!address.isEmpty())
         DS_SetCustomRadioAddress (qstring_to_sds (address));
 }
 
+/**
+ * Forces the LibDS to use the given \a address to communicate with the robot
+ */
 void DriverStation::setCustomRobotAddress (const QString& address)
 {
     if (!address.isEmpty())
         DS_SetCustomRobotAddress (qstring_to_sds (address));
 }
 
+/**
+ * Broadcasts/sends the given \a message to the NetConsole network
+ */
 void DriverStation::sendNetConsoleMessage (const QString& message)
 {
     if (!message.isEmpty())
         DS_SendNetConsoleMessage (qstring_to_sds (message));
 }
 
+/**
+ * Registers a new joystick with the Driver Station
+ *
+ * \param axes the number of axes of the new joystick
+ * \param hats the number of hats/povs of the new joystick
+ * \param buttons the number of buttons of the new joystick
+ */
 void DriverStation::addJoystick (int axes, int hats, int buttons)
 {
     DS_JoysticksAdd (axes, hats, buttons);
 }
 
+/**
+ * Updates the \a angle of the given \a hat of the given \a joystick
+ *
+ * \param joystick the ID of the joystick to update (e.g. 0 for Joystick 0)
+ * \param hat the ID of the hat to update (e.g. 0 for primary hat)
+ * \param angle the new angle to apply to the hat
+ */
 void DriverStation::setJoystickHat (int joystick, int hat, int angle)
 {
     DS_SetJoystickHat (joystick, hat, angle);
 }
 
+/**
+ * Updates the \a value of the given \a axis of the given \a joystick
+ *
+ * \param joystick the ID of the joystick to update (e.g. 0 for Joystick 0)
+ * \param axis the ID of the axis to update (e.g. 0 for primary X axis)
+ * \param value the new value to apply to the given axis (e.g. 0.5)
+ *
+ * \note the \a value must have a range from \c -1 to \c 1
+ */
 void DriverStation::setJoystickAxis (int joystick, int axis, double value)
 {
     DS_SetJoystickAxis (joystick, axis, value);
 }
 
+/**
+ * Updates the \a pressed state of the given \a button of the given \a joystick
+ *
+ * \param joystick the ID of the joystick to update (e.g. 0 for Joystick 0)
+ * \param button the ID of the button to update (e.g. 0 for A in an Xbox stick)
+ * \param pressed the new pressed state of the button
+ */
 void DriverStation::setJoystickButton (int joystick, int button, bool pressed)
 {
     DS_SetJoystickButton (joystick, button, pressed);
 }
 
+/**
+ * Breaks the internal loops of the LibDS, de-allocates its assets and
+ * closes all the network sockets used by the library
+ */
 void DriverStation::quitDS()
 {
     if (initialized)
         DS_Close();
 }
 
+/**
+ * Polls for new LibDS events and emits Qt signals as appropiate.
+ * This function is called every 5 milliseconds.
+ */
 void DriverStation::processEvents()
 {
     DS_Event event;
