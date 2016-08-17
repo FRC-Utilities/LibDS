@@ -94,7 +94,6 @@ Window::Window (QWidget* parent) : QMainWindow (parent)
 
     /* Initialize the DS with the 2016 protocol */
     ds->setProtocol (DriverStation::kProtocol2016);
-    ds->setCustomRobotAddress ("192.168.1.72");
 }
 
 /**
