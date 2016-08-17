@@ -1,4 +1,4 @@
-INCLUDEPATH += $$PWD
+INCLUDEPATH += $$PWD/src
 
-HEADERS += $$PWD/sds.h
-SOURCES += $$PWD/sds.c
+HEADERS += $$PWD/src/sds.h
+SOURCES += $$PWD/src/sds.c

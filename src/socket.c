@@ -26,7 +26,7 @@
 #include "DS_Socket.h"
 
 #include <pthread.h>
-#include <libinetsocket.h>
+#include <socky.h>
 
 /**
  * Holds the sockets in a dynamic array (for automatic closing)
@@ -67,26 +67,25 @@ static void* create_socket (void* data)
 
     /* Open TCP socket */
     if (ptr->type == DS_SOCKET_TCP) {
-        ptr->info.sock_in = create_inet_server_socket (ptr->address,
-                                                       ptr->info.in_service,
-                                                       LIBSOCKET_TCP,
-                                                       LIBSOCKET_BOTH,
-                                                       0);
+        ptr->info.sock_in = create_server_tcp (ptr->address,
+                                               ptr->info.in_service,
+                                               SOCKY_ANY,
+                                               0);
 
-        ptr->info.sock_out = create_inet_stream_socket (ptr->address,
-                                                        ptr->info.out_service,
-                                                        LIBSOCKET_IPv4, 0);
+        ptr->info.sock_out = create_client_tcp (ptr->address,
+                                                ptr->info.out_service,
+                                                SOCKY_IPv4,
+                                                0);
     }
 
     /* Open UDP socket */
     else if (ptr->type == DS_SOCKET_UDP) {
-        ptr->info.sock_in = create_inet_server_socket (ptr->address,
-                                                       ptr->info.in_service,
-                                                       LIBSOCKET_UDP,
-                                                       LIBSOCKET_BOTH,
-                                                       0);
+        ptr->info.sock_in = create_server_udp (ptr->address,
+                                               ptr->info.in_service,
+                                               SOCKY_ANY,
+                                               0);
 
-        ptr->info.sock_out = create_inet_dgram_socket (LIBSOCKET_IPv4, 0);
+        ptr->info.sock_out = create_client_udp (SOCKY_IPv4, 0);
     }
 
     /* Update initialized states */
@@ -127,13 +126,7 @@ DS_Socket DS_SocketEmpty()
  */
 void Sockets_Init()
 {
-#if defined _WIN32
-    if (WSAStartup (WINSOCK_VERSION, &wsa_data) != 0) {
-        fprintf (stderr, "Cannot initialize WinSock!\n");
-        exit (EXIT_FAILURE);
-    }
-#endif
-
+    sockets_init (1);
     DS_ArrayInit (&sockets, sizeof (DS_Socket) * 5);
 }
 
@@ -142,11 +135,6 @@ void Sockets_Init()
  */
 void Sockets_Close()
 {
-    /* Close WinSock */
-#if defined _WIN32
-    WSACleanup();
-#endif
-
     /* Close all sockets */
     int i = 0;
     for (i = 0; i < (int) sockets.used; ++i)
@@ -154,6 +142,9 @@ void Sockets_Close()
 
     /* Free socket array */
     DS_ArrayFree (&sockets);
+
+    /* Close the sockets API */
+    sockets_exit();
 }
 
 /**
@@ -190,8 +181,8 @@ void DS_SocketClose (DS_Socket* ptr)
         return;
 
     /* Destroy sockets */
-    destroy_inet_socket (ptr->info.sock_in);
-    destroy_inet_socket (ptr->info.sock_out);
+    socket_close (ptr->info.sock_in);
+    socket_close (ptr->info.sock_out);
 
     /* Reset the info structure */
     ptr->info.client_init = 0;
@@ -226,9 +217,8 @@ int DS_SocketSend (DS_Socket* ptr, sds data)
 
     /* Send data using UDP */
     else if (ptr->type == DS_SOCKET_UDP) {
-        return sendto_inet_dgram_socket (ptr->info.sock_out,
-                                         data, sdslen (data), ptr->address,
-                                         ptr->info.out_service, 0);
+        return udp_sendto (ptr->info.sock_out, data, sdslen (data),
+                           ptr->address, ptr->info.out_service, 0);
     }
 
     /* Should not happen */
@@ -262,17 +252,12 @@ int DS_SocketRead (DS_Socket* ptr, sds data)
 
     /* Read data using TCP */
     if (ptr->type == DS_SOCKET_TCP)
-        bytes = recv (ptr->info.sock_in, data, sdslen (data), MSG_DONTWAIT);
+        bytes = recv (ptr->info.sock_in, data, sdslen (data), ASYNC);
 
     /* Read data using UDP */
     else if (ptr->type == DS_SOCKET_UDP) {
-        bytes = recvfrom_inet_dgram_socket (ptr->info.sock_in,
-                                            data, sdslen (data),
-                                            ptr->address,
-                                            sdslen (ptr->address),
-                                            ptr->info.in_service,
-                                            sdslen (ptr->info.in_service),
-                                            MSG_DONTWAIT, 0);
+        bytes = udp_recvfrom (ptr->info.sock_in, data, sdslen (data),
+                              ptr->address, ptr->info.in_service, ASYNC);
     }
 
     /* Return number of received bytes */
