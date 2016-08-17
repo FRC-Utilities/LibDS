@@ -29,8 +29,6 @@
     #define GET_ERR errno
 #endif
 
-#define VERBOSE
-
 /**
  * Returns \c 0 if the given socket file descriptor is invalid
  *
@@ -256,6 +254,8 @@ int sockets_init (const int exit_on_fail)
 
         return -1;
     }
+#else
+    (void) exit_on_fail;
 #endif
 
     return 0;
