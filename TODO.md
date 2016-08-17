@@ -12,6 +12,6 @@
 - [ ] Add milliseconds in the 2015 date/time data packet
 - [x] Add protocol handler functions that free the generated (and obtained) data after being used
 - [x] Be able to send data with DS_Sockets
-- [ ] Non-blocking data receiving with DS_Sockets
+- [x] Non-blocking data receiving with DS_Sockets
 - [x] Implement joystick handling functions
 - [x] Implement the NetConsole (also using `DS_Socket` for the job)

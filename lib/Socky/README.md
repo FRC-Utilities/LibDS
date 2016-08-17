@@ -9,11 +9,11 @@ This library supports the following things:
 - IPv4 (client, server)
 - IPv6 (client, server)
 - TCP and UDP (client, server)
-- Error reporting ([more info](#more_info))
+- Error reporting
 
 Creating sockets, connecting them and checking for errors is already done for you.
 
-Most socket programming functions are wrapped by Socket, e.g:
+Most socket programming functions are wrapped by Socky, e.g:
 
 - `sendto` and `recvfrom`
 - `connect` and `bind` (both in one function)

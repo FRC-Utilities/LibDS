@@ -159,28 +159,22 @@ static void recv_data()
     clear_recv_data();
 
     /* Read data from sockets */
-    int fms_bytes = DS_SocketRead (&protocol->fms_socket, fms_data);
-    int radio_bytes = DS_SocketRead (&protocol->radio_socket, radio_data);
-    int robot_bytes = DS_SocketRead (&protocol->robot_socket, robot_data);
-    int netcs_bytes = DS_SocketRead (&protocol->netconsole_socket, netcs_data);
+    fms_data = DS_SocketRead (&protocol->fms_socket);
+    radio_data = DS_SocketRead (&protocol->radio_socket);
+    robot_data = DS_SocketRead (&protocol->robot_socket);
+    netcs_data = DS_SocketRead (&protocol->netconsole_socket);
 
     /* Read FMS packet */
-    if (fms_bytes > 0)
+    if (sdslen (fms_data) > 0)
         fms_read = protocol->read_fms_packet (fms_data);
-    else
-        fms_read = 0;
 
     /* Read radio packet */
-    if (radio_bytes > 0)
+    if (sdslen (radio_data) > 0)
         radio_read = protocol->read_radio_packet (radio_data);
-    else
-        radio_read = 0;
 
     /* Read robot packet */
-    if (robot_bytes > 0)
+    if (sdslen (robot_data) > 0)
         robot_read = protocol->read_robot_packet (robot_data);
-    else
-        robot_read = 0;
 
     /* Update communication statuses */
     CFG_SetFMSCommunications (fms_read);
@@ -188,7 +182,7 @@ static void recv_data()
     CFG_SetRobotCommunications (robot_read);
 
     /* Add NetConsole message to event system */
-    if (netcs_bytes > 0) {
+    if (sdslen (netcs_data) > 0) {
         DS_Event event;
         event.netconsole.type = DS_NETCONSOLE_NEW_MESSAGE;
         event.netconsole.message = sdsnew (netcs_data);

@@ -36,6 +36,7 @@ extern "C" {
  * to operate with the data provided by a \c DS_Socket structure
  */
 typedef struct {
+    sds buffer;      /**< Holds received data */
     sds in_service;  /**< Input port string */
     sds out_service; /**< Output port string */
     int sock_in;     /**< Server socket file descriptor */
@@ -70,8 +71,8 @@ extern void DS_SocketOpen (DS_Socket* ptr);
 extern void DS_SocketClose (DS_Socket* ptr);
 
 /* I/O functions */
+extern sds DS_SocketRead (DS_Socket* ptr);
 extern int DS_SocketSend (DS_Socket* ptr, sds data);
-extern int DS_SocketRead (DS_Socket* ptr, sds data);
 extern void DS_SocketChangeAddress (DS_Socket* ptr, sds address);
 
 #ifdef __cplusplus

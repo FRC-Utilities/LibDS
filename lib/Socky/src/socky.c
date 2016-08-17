@@ -29,6 +29,8 @@
     #define GET_ERR errno
 #endif
 
+#define VERBOSE
+
 /**
  * Returns \c 0 if the given socket file descriptor is invalid
  *
@@ -42,15 +44,24 @@ static int valid_sfd (int sfd)
 /**
  * Prints a detailed error message if \c VERBOSE is defined
  */
-static void error (int sfd, const char* message, int error)
+static void error (int sfd, char* message, int error)
 {
 #if defined VERBOSE
+#if defined _WIN32
+    char* string = gai_strerrorA (error);
+#else
+    char* string = gai_strerror (error);
+#endif
+
     fprintf (stderr,
              "Socket %d:\n"
              "\t Message: %s\n"
              "\t Error Code: %d\n"
              "\t Error Desc: %s\n",
-             sfd, message, error, strerror (error));
+             sfd, message, error, string);
+
+    free (string);
+    free (message);
 #else
     (void) sfd;
     (void) error;
@@ -109,6 +120,39 @@ static int get_socktype (int flag)
 }
 
 /**
+ * Sets the \c SO_REUSEADDR option to the given socket
+ */
+static int set_socket_options (int sfd)
+{
+    if (valid_sfd (sfd)) {
+        /* Windows & UNIX handle socket options a bit differently... */
+#if defined _WIN32
+        char val = 1;
+#else
+        int val = 1;
+#endif
+
+        /* Set the SO_REUSEADDR option */
+        int err = setsockopt (sfd,
+                              SOL_SOCKET,
+                              SO_REUSEADDR,
+                              &val, sizeof (val));
+
+        /* Setting the option failed */
+        if (err != 0) {
+            error (sfd, "cannot set SO_REUSEADDR", GET_ERR);
+            return -1;
+        }
+
+        /* Options set correctly */
+        return 0;
+    }
+
+    /* Socket is invalid, return -1 */
+    return -1;
+}
+
+/**
  * Obtains the address information for the given \a host, \a service and
  * address \a family
  *
@@ -151,7 +195,7 @@ static struct addrinfo* get_address_info (const char* host,
         return NULL;
     }
 
-    /* All good, return pointer */
+    /* All good, return the obtained data */
     return info;
 }
 
@@ -185,13 +229,13 @@ static int create_server (const char* host, const char* port,
                       info->ai_socktype | flags,
                       info->ai_protocol);
 
+
         /* Invalid socket, continue probing... */
-        if (!valid_sfd (sfd))
+        if (!valid_sfd (sfd) || (set_socket_options (sfd) == -1))
             continue;
 
         /* Bound without error, break loop */
         if (bind (sfd, info->ai_addr, info->ai_addrlen) == 0) {
-
             /* Configure the TCP listener */
             if (socktype == SOCKY_TCP) {
                 if (listen (sfd, SOCKY_BACKLOG) == 0)
@@ -289,6 +333,12 @@ int create_client_udp (const int family, const int flags)
         return -1;
     }
 
+    /* Set socket options */
+    if (set_socket_options (sfd) == -1) {
+        socket_close (sfd);
+        return -1;
+    }
+
     /* Return the socket file descriptor */
     return sfd;
 }
@@ -322,7 +372,7 @@ int create_client_tcp (const char* host, const char* port,
                       info->ai_protocol);
 
         /* Invalid socket, continue probing... */
-        if (!valid_sfd (sfd))
+        if (!valid_sfd (sfd) || (set_socket_options (sfd) == -1))
             continue;
 
         /* Connected without error, break loop */

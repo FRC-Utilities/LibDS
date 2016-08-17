@@ -430,8 +430,11 @@ void CFG_SetRadioCommunications (const int communications)
 /**
  * Updates the state of the robot communications.
  */
+#include <stdio.h>
 void CFG_SetRobotCommunications (const int communications)
 {
+    fprintf (stderr, "%d\n", communications);
+
     int boolean = to_boolean (communications);
 
     if (robot_communications != boolean) {

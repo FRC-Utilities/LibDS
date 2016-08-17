@@ -42,13 +42,6 @@ extern "C" {
 #include <sys/socket.h>
 #endif
 
-/* Cross-platform flags */
-#if defined _WIN32
-#define ASYNC FIOASYNC
-#else
-#define ASYNC MSG_DONTWAIT
-#endif
-
 /* Socket types */
 #define SOCKY_TCP 0x01
 #define SOCKY_UDP 0x02

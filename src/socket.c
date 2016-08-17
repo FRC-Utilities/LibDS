@@ -25,8 +25,9 @@
 #include "DS_Utils.h"
 #include "DS_Socket.h"
 
-#include <pthread.h>
+#include <fcntl.h>
 #include <socky.h>
+#include <pthread.h>
 
 /**
  * Holds the sockets in a dynamic array (for automatic closing)
@@ -39,6 +40,85 @@ static DS_Array sockets;
 static sds itc (int number)
 {
     return sdscatprintf (sdsempty(), "%d", number);
+}
+
+/**
+ * Runs the server socket loop, which reads received data only when the
+ * socket receives data.
+ *
+ * \param raw_pointer a pointer to a \c DS_Socket structure
+ */
+static void* server_loop (void* raw_pointer)
+{
+    DS_Socket* ptr = (DS_Socket*) raw_pointer;
+
+    /* The pointer is NULL */
+    if (!ptr)
+        return NULL;
+
+    /* Set flags for the socket descriptor */
+#if !defined _WIN32
+    fcntl (ptr->info.sock_in, F_SETFL, O_NONBLOCK);
+#endif
+
+    /* Initialize the variables */
+    sds data;
+    int bytes;
+    int ready;
+    fd_set fds;
+    struct timeval timeout;
+
+    /* Setup the reader loop */
+    while (ptr->info.server_init == 1) {
+        /* Setup the file descriptor structures */
+        FD_ZERO (&fds);
+        FD_SET (ptr->info.sock_in, &fds);
+
+        /* Set the timeout values */
+        timeout.tv_sec = 0;
+        timeout.tv_usec = 5000;
+
+        /* Check if there is data available */
+        ready = select (0, &fds, NULL, NULL, &timeout);
+
+        /* Data is available, get it */
+        if (ready > 0) {
+            /* Prepare the data buffer */
+            DS_FREESTR (data);
+            data = sdsnewlen (NULL, 1024);
+
+            /* Read data using TCP */
+            if (ptr->type == DS_SOCKET_TCP)
+                bytes = recv (ptr->info.sock_in, data, sdslen (data), 0);
+
+            /* Read data using UDP */
+            else if (ptr->type == DS_SOCKET_UDP) {
+                bytes = udp_recvfrom (ptr->info.sock_in, data, sdslen (data),
+                                      ptr->address, ptr->info.in_service, 0);
+            }
+
+            /* Copy received data to socekt buffer */
+            if (bytes > 0) {
+                /* Resize socket buffer */
+                DS_FREESTR (ptr->info.buffer);
+                ptr->info.buffer = sdsnewlen (NULL, bytes);
+
+                /* Copy data to buffer */
+                int i;
+                for (i = 0; i < bytes; ++i)
+                    ptr->info.buffer [i] = data [i];
+            }
+
+            /* Free data buffer */
+            DS_FREESTR (data);
+        }
+
+        /* Reset variables */
+        bytes = -1;
+        ready = -1;
+    }
+
+    return NULL;
 }
 
 /**
@@ -74,16 +154,14 @@ static void* create_socket (void* data)
 
         ptr->info.sock_out = create_client_tcp (ptr->address,
                                                 ptr->info.out_service,
-                                                SOCKY_IPv4,
-                                                0);
+                                                SOCKY_IPv4, 0);
     }
 
     /* Open UDP socket */
     else if (ptr->type == DS_SOCKET_UDP) {
         ptr->info.sock_in = create_server_udp (ptr->address,
                                                ptr->info.in_service,
-                                               SOCKY_ANY,
-                                               0);
+                                               SOCKY_ANY, 0);
 
         ptr->info.sock_out = create_client_udp (SOCKY_IPv4, 0);
     }
@@ -92,6 +170,11 @@ static void* create_socket (void* data)
     ptr->info.server_init = (ptr->info.sock_in > 0);
     ptr->info.client_init = (ptr->info.sock_out > 0);
 
+    /* Start server loop */
+    pthread_t thread;
+    pthread_create (&thread, NULL, &server_loop, (void*) ptr);
+
+    /* Exit */
     return NULL;
 }
 
@@ -107,6 +190,7 @@ DS_Socket DS_SocketEmpty()
     info.sock_out = -1;
     info.server_init = 0;
     info.client_init = 0;
+    info.buffer = sdsempty();
     info.in_service = sdsempty();
     info.out_service = sdsempty();
 
@@ -194,6 +278,29 @@ void DS_SocketClose (DS_Socket* ptr)
 }
 
 /**
+ * Returns any data received by the given socket
+ *
+ * \param ptr pointer to a \c DS_Socket structure
+ */
+sds DS_SocketRead (DS_Socket* ptr)
+{
+    /* Invalid pointer */
+    if (!ptr)
+        return sdsempty();
+
+    /* Socket is disabled or uninitialized */
+    if ((ptr->info.server_init == 0) || (ptr->disabled == 1))
+        return sdsempty();
+
+    /* Return a copy of the current buffer */
+    if (sdslen (ptr->info.buffer) > 0)
+        return sdsdup (ptr->info.buffer);
+
+    return sdsempty();
+}
+
+
+/**
  * Sends the given \a data using the given socket
  *
  * \param data the data buffer to send
@@ -223,45 +330,6 @@ int DS_SocketSend (DS_Socket* ptr, sds data)
 
     /* Should not happen */
     return -1;
-}
-
-/**
- * Writes any data received from the socket to the given buffer
- *
- * \param ptr the socket to read data from
- * \param data the buffer in which to write received data
- *
- * \returns number of received bytes on success, -1 on failure
- */
-int DS_SocketRead (DS_Socket* ptr, sds data)
-{
-    /* Invalid pointer */
-    if (!ptr)
-        return -1;
-
-    /* Socket is disabled or uninitialized */
-    if ((ptr->info.server_init == 0) || (ptr->disabled == 1))
-        return -1;
-
-    /* Initialize the bytes counter */
-    int bytes = -1;
-
-    /* Clear data buffer and expand it */
-    DS_FREESTR (data);
-    data = sdsnewlen (NULL, 1024);
-
-    /* Read data using TCP */
-    if (ptr->type == DS_SOCKET_TCP)
-        bytes = recv (ptr->info.sock_in, data, sdslen (data), ASYNC);
-
-    /* Read data using UDP */
-    else if (ptr->type == DS_SOCKET_UDP) {
-        bytes = udp_recvfrom (ptr->info.sock_in, data, sdslen (data),
-                              ptr->address, ptr->info.in_service, ASYNC);
-    }
-
-    /* Return number of received bytes */
-    return bytes;
 }
 
 /**
