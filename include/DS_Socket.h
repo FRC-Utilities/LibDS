@@ -31,26 +31,17 @@ extern "C" {
 #include <sds.h>
 #include "DS_Types.h"
 
-#if defined _WIN32
-#include <ws2tcpip.h>
-#else
-#include <netdb.h>
-#endif
-
 /**
  * Holds all the private (erm, dirty) variables that the sockets module needs
  * to operate with the data provided by a \c DS_Socket structure
  */
 typedef struct {
-    sds buffer;                /**< Cleared when user reads socket data */
-    int socket_in;             /**< Server socket file descriptor */
-    int socket_out;            /**< Client socket file descriptor */
-    int socket_tmp;            /**< TCP server socket */
-    int initialized;           /**< Set to 0 if no socket is ready yet */
-    int server_initialized;    /**< If set to 1, server socket is ready */
-    int client_initialized;    /**< If set to 1, client socket is ready */
-    struct addrinfo in_addr;  /**< Server/local address information */
-    struct addrinfo out_addr; /**< Client/remote address information */
+    sds in_service;  /**< Input port string */
+    sds out_service; /**< Output port string */
+    int sock_in;     /**< Server socket file descriptor */
+    int sock_out;    /**< Client socket file descriptor */
+    int client_init; /**< Set to \c 1 if client socket is initialized */
+    int server_init; /**< Set to \c 1 if server socket is initialized */
 } DS_SocketInfo;
 
 /**
@@ -61,8 +52,8 @@ typedef struct {
     sds address;        /**< Holds the remote address */
     int disabled;       /**< Disables/enables the socket */
     int broadcast;      /**< Enables/disables broadcasting */
-    int input_port;     /**< Sets the server/sender port */
-    int output_port;    /**< Sets the client/sender port */
+    int in_port;        /**< Sets the server/sender port */
+    int out_port;       /**< Sets the client/sender port */
     DS_SocketType type; /**< Socket type (UDP or TCP) */
     DS_SocketInfo info; /**< Holds private socket information */
 } DS_Socket;

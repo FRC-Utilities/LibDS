@@ -73,7 +73,7 @@ static int robot_read = 0;
 static sds fms_data = NULL;
 static sds radio_data = NULL;
 static sds robot_data = NULL;
-static sds netconsole_data = NULL;
+static sds netcs_data = NULL;
 
 /**
  * Sends a new packet to the FMS
@@ -142,12 +142,7 @@ static void clear_recv_data()
     DS_FREESTR (fms_data);
     DS_FREESTR (radio_data);
     DS_FREESTR (robot_data);
-    DS_FREESTR (netconsole_data);
-
-    fms_data = sdsempty();
-    radio_data = sdsempty();
-    robot_data = sdsempty();
-    netconsole_data = sdsempty();
+    DS_FREESTR (netcs_data);
 }
 
 /**
@@ -164,15 +159,28 @@ static void recv_data()
     clear_recv_data();
 
     /* Read data from sockets */
-    DS_SocketRead (&protocol->fms_socket, fms_data);
-    DS_SocketRead (&protocol->radio_socket, radio_data);
-    DS_SocketRead (&protocol->robot_socket, robot_data);
-    DS_SocketRead (&protocol->netconsole_socket, netconsole_data);
+    int fms_bytes = DS_SocketRead (&protocol->fms_socket, fms_data);
+    int radio_bytes = DS_SocketRead (&protocol->radio_socket, radio_data);
+    int robot_bytes = DS_SocketRead (&protocol->robot_socket, robot_data);
+    int netcs_bytes = DS_SocketRead (&protocol->netconsole_socket, netcs_data);
 
-    /* Let the protocol interpret received data */
-    fms_read = protocol->read_fms_packet (fms_data);
-    radio_read = protocol->read_radio_packet (radio_data);
-    robot_read = protocol->read_robot_packet (robot_data);
+    /* Read FMS packet */
+    if (fms_bytes > 0)
+        fms_read = protocol->read_fms_packet (fms_data);
+    else
+        fms_read = 0;
+
+    /* Read radio packet */
+    if (radio_bytes > 0)
+        radio_read = protocol->read_radio_packet (radio_data);
+    else
+        radio_read = 0;
+
+    /* Read robot packet */
+    if (robot_bytes > 0)
+        robot_read = protocol->read_robot_packet (robot_data);
+    else
+        robot_read = 0;
 
     /* Update communication statuses */
     CFG_SetFMSCommunications (fms_read);
@@ -180,10 +188,10 @@ static void recv_data()
     CFG_SetRobotCommunications (robot_read);
 
     /* Add NetConsole message to event system */
-    if (!DS_StringIsEmpty (netconsole_data)) {
+    if (netcs_bytes > 0) {
         DS_Event event;
         event.netconsole.type = DS_NETCONSOLE_NEW_MESSAGE;
-        event.netconsole.message = sdsnew (netconsole_data);
+        event.netconsole.message = sdsnew (netcs_data);
         DS_AddEvent (&event);
     }
 

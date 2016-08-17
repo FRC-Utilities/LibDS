@@ -41,3 +41,4 @@ SOURCES += \
     $$PWD/src/queue.c
     
 include ($$PWD/lib/SDS/SDS.pri)
+include ($$PWD/lib/libsocket/libsocket.pri)

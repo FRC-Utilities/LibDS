@@ -21,36 +21,12 @@
  * DEALINGS IN THE SOFTWARE.
  */
 
-#include "DS_Timer.h"
 #include "DS_Array.h"
 #include "DS_Utils.h"
 #include "DS_Socket.h"
 
-#include <fcntl.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
 #include <pthread.h>
-
-#if defined _WIN32
-    #include <winsock2.h>
-#else
-    #include <errno.h>
-    #include <unistd.h>
-    #include <sys/types.h>
-    #include <netinet/in.h>
-    #include <sys/socket.h>
-#endif
-
-#if defined _WIN32
-    static WSADATA wsa_data;
-    #define GET_ERR WSAGetLastError()
-    #define SO_REUSEPORT SO_REUSEADDR
-#else
-    #define GET_ERR errno
-#endif
-
-#define SOCK_ERROR -1
+#include <libinetsocket.h>
 
 /**
  * Holds the sockets in a dynamic array (for automatic closing)
@@ -58,336 +34,64 @@
 static DS_Array sockets;
 
 /**
- * Closes the given \a socket using OS-specific functions
- *
- * \param descriptor the socket descriptor to close
+ * Returns the given \a number as a string
  */
-static void close_socket (int descriptor)
+static sds itc (int number)
 {
-    if (descriptor > 0 && descriptor != SOCK_ERROR) {
-#ifdef WIN32
-        closesocket (descriptor);
-#else
-        close (descriptor);
-#endif
-    }
-}
-
-/**
- * Alerts the user about an error during a socket operation
- *
- * \param ptr a pointer to a \c DS_Socket structure
- * \param message a descriptive error message (e.g. cannot bind socket)
- * \param error the error code
- */
-static void error (DS_Socket* ptr, sds message, int error)
-{
-    if (ptr) {
-        fprintf (stderr,
-                 "Socket %p:\n"
-                 "\t Address: %s\n"
-                 "\t Message: %s\n"
-                 "\t Error Code: %d\n"
-                 "\t Error Desc: %s\n",
-                 ptr, ptr->address, message, error, strerror (error));
-    }
-}
-
-/**
- * Enables or disables socket blocking
- *
- * \param sockfd the socket file descriptor
- * \param blocking whenever the file should be blocking or not
- *
- * \returns 1 on success, 0 on failure
- */
-static int set_socket_blocking (int sockfd, int blocking)
-{
-    if (sockfd < 0)
-        return 0;
-
-#ifdef WIN32
-    unsigned long mode = (blocking ? 0 : 1);
-    return (ioctlsocket (sockfd, FIONBIO, &mode) == 0);
-#else
-    int flags = fcntl (sockfd, F_GETFL, 0);
-
-    if (flags < 0)
-        return 0;
-
-    flags = blocking ? (flags & ~O_NONBLOCK) : (flags | O_NONBLOCK);
-    return (fcntl (sockfd, F_SETFL, flags) == 0);
-#endif
-}
-
-/**
- * Obtains information for the given socket structure and port
- *
- * \param ptr pointer to a \c DS_Socket structure
- * \param local if set to \c 1, the node-name will be empty (localhost)
- */
-static struct addrinfo* get_address_info (DS_Socket* ptr, int server)
-{
-    /* Check for NULL pointer */
-    if (!ptr)
-        return NULL;
-
-    /* Initialize variables */
-    struct addrinfo hints, *res;
-    memset (&hints, 0, sizeof (hints));
-
-    /* Set hints */
-    hints.ai_flags = AI_PASSIVE;
-    hints.ai_family = AF_UNSPEC;
-    hints.ai_socktype = (ptr->type == DS_SOCKET_TCP) ? SOCK_STREAM : SOCK_DGRAM;
-
-    /* Get the port string */
-    sds port_str = sdscatprintf (sdsempty(), "%d",
-                                 server ? ptr->input_port : ptr->output_port);
-
-    /* Get the address */
-    sds address = server ? NULL : sdsdup (ptr->address);
-    if (DS_StringIsEmpty (ptr->address) && !server)
-        address = sdsnew ("0.0.0.0");
-
-    /* Get address information */
-    getaddrinfo (address, port_str, &hints, &res);
-
-    /* De-allocate strings */
-    DS_FREESTR (address);
-    DS_FREESTR (port_str);
-
-    /* Return obtained address info */
-    return res;
-}
-
-/**
- * Creates a new socket and configures it to use the following flags:
- *    - \c SO_REUSEPORT
- *    - \c SO_BROADCAST (if the \a ptr requires it)
- *
- * \param ptr a pointer to a \c DS_Socket struct
- * \param addr the address information to use to create the socket
- */
-static int create_socket (DS_Socket* ptr, struct addrinfo* addr)
-{
-    /* Check for NULL pointers */
-    if (!ptr || !addr)
-        return SOCK_ERROR;
-
-    /* Create the socket */
-    int sockfd = socket (addr->ai_family,
-                         addr->ai_socktype,
-                         addr->ai_protocol);
-
-    /* Check if socket is valid */
-    if (sockfd < 0) {
-        close_socket (sockfd);
-        error (ptr, "cannot create socket", GET_ERR);
-        return SOCK_ERROR;
-    }
-
-    /* Windows uses char instead of int in setsockopt() */
-#if defined _WIN32
-    char value = 1;
-#else
-    int value = 1;
-#endif
-
-    /* Set timeout value */
-    struct timeval tv;
-    tv.tv_sec = 2;
-    tv.tv_usec = 0;
-
-    /* Set a socket timeout flag */
-    int timeout_err = setsockopt (sockfd,
-                                  SOL_SOCKET,
-                                  SO_SNDTIMEO,
-                                  (char*) &tv, sizeof (tv));
-
-    /* Setting the SO_SNDTIMEO flag failed */
-    if (timeout_err != 0) {
-        close_socket (sockfd);
-        error (ptr, "cannot set SO_SNDTIMEO", GET_ERR);
-        return SOCK_ERROR;
-    }
-
-    /* Reuse the address and port */
-    int reuse_port = setsockopt (sockfd,
-                                 SOL_SOCKET,
-                                 SO_REUSEPORT,
-                                 &value, sizeof (value));
-
-    /* Setting the SO_REUSEPORT flag failed */
-    if (reuse_port != 0) {
-        close_socket (sockfd);
-        error (ptr, "cannot set SO_REUSEPORT", GET_ERR);
-        return SOCK_ERROR;
-    }
-
-    /* Socket is UDP and broadcast flag is set */
-    if ((ptr->broadcast == 1) && (ptr->type == DS_SOCKET_UDP)) {
-        int broadcast = setsockopt (sockfd,
-                                    SOL_SOCKET,
-                                    SO_BROADCAST,
-                                    &value, sizeof (value));
-
-        /* Cannot set the broadcast option */
-        if (broadcast != 0) {
-            close_socket (sockfd);
-            error (ptr, "cannot set SO_BROADCAST", GET_ERR);
-            return SOCK_ERROR;
-        }
-    }
-
-    /* Return the socket's file descriptor */
-    return sockfd;
-}
-
-/**
- * Executes the server socket loop
- *
- * \param ptr pointer to an initialized \c DS_Socket structure
- */
-static void* run_server (void* ptr)
-{
-    /* Pointer is NULL */
-    if (!ptr)
-        return NULL;
-
-    /* Cast the pointer to a socket */
-    DS_Socket* sock = (DS_Socket*) ptr;
-
-    /* Make the socket non-blocking */
-    set_socket_blocking (sock->info.socket_in, 0);
-
-    /* Run the main server loop */
-    while (sock->info.initialized && sock->info.server_initialized) {
-        int bytes = 0;
-        char* buffer = NULL;
-
-#if defined _WIN32
-        bytes = recvfrom (sock->info.socket_in,
-                          buffer, 1024, FIOASYNC,
-                          sock->info.in_addr.ai_addr,
-                          (int*) &sock->info.in_addr.ai_addrlen);
-#else
-        bytes = recvfrom (sock->info.socket_in,
-                          buffer, 1024, MSG_DONTWAIT,
-                          sock->info.in_addr.ai_addr,
-                          &sock->info.in_addr.ai_addrlen);
-#endif
-
-        if (bytes > 0)
-            sock->info.buffer = sdscat (sock->info.buffer, buffer);
-
-        DS_FREE (buffer);
-        DS_Sleep (10);
-    }
-
-    return NULL;
-}
-
-/**
- * Creates and configures a new socket descriptor for the given structure
- *
- * \param ptr pointer to \c DS_Socket structure
- * \param server if set to \c 1, then this function shall configure the input
- *        socket. Otherwise, this function shall configure the output socket.
- */
-static int configure_socket (DS_Socket* ptr, int server)
-{
-    /* Check for NULL pointers */
-    if (!ptr)
-        return 0;
-
-
-    /* Configure the server socket */
-    if (server) {
-        ptr->info.in_addr = *get_address_info (ptr, 1);
-        ptr->info.socket_in = create_socket (ptr, &ptr->info.in_addr);
-
-        /* Check if socket is valid */
-        if (ptr->info.socket_in < 0) {
-            error (ptr, "cannot create server socket", GET_ERR);
-            return 0;
-        }
-
-        /* Bind the socket */
-        int bind_err = bind (ptr->info.socket_in,
-                             ptr->info.in_addr.ai_addr,
-                             ptr->info.in_addr.ai_addrlen);
-
-        /* Check if there was an error while binding the socket */
-        if (bind_err) {
-            error (ptr, "cannot bind server socket", GET_ERR);
-            return 0;
-        }
-
-        /* Start server loop */
-        pthread_t thread;
-        pthread_create (&thread, NULL, &run_server, (void*) ptr);
-    }
-
-    /* Configure the client socket */
-    else {
-        ptr->info.out_addr = *get_address_info (ptr, 0);
-        ptr->info.socket_out = create_socket (ptr, &ptr->info.out_addr);
-
-        /* Check if socket is valid */
-        if (ptr->info.socket_out < 0) {
-            error (ptr, "cannot create client socket", GET_ERR);
-            return 0;
-        }
-
-        if (ptr->type == DS_SOCKET_TCP) {
-            /* Connect the socket (if we use TCP) */
-            int connect_err = connect (ptr->info.socket_out,
-                                       ptr->info.out_addr.ai_addr,
-                                       ptr->info.out_addr.ai_addrlen);
-
-            /* Check if there was an error while connecting the socket */
-            if (connect_err) {
-                error (ptr, "cannot connect client socket", GET_ERR);
-                return 0;
-            }
-        }
-    }
-
-    /* If we reach this, then socket initialization was successfull */
-    return 1;
+    return sdscatprintf (sdsempty(), "%d", number);
 }
 
 /**
  * Initializes the given socket structure
  *
- * \param ptr pointer to a \c DS_Socket structure
+ * \param data raw pointer to a \c DS_Socket structure
  */
-static void* initialize (void* ptr)
+static void* create_socket (void* data)
 {
-    DS_Socket* sock = (DS_Socket*) ptr;
-    if (sock) {
-        /* Do not allow the module to use this socket yet */
-        sock->info.initialized = 0;
-        sock->info.client_initialized = 0;
-        sock->info.server_initialized = 0;
+    /* Data pointer is NULL */
+    if (!data)
+        return NULL;
 
-        /* Clear the address if required */
-        if (sock->broadcast || DS_StringIsEmpty (sock->address))
-            sock->address = sdsempty();
+    /* Cast raw pointer to socket */
+    DS_Socket* ptr = (DS_Socket*) data;
 
-        /* Initialize and configure the client and server sockets */
-        int client = configure_socket (sock, 0);
-        int server = configure_socket (sock, 1);
-
-        /* Apply the obtained configuration */
-        sock->info.client_initialized = client;
-        sock->info.server_initialized = server;
-        sock->info.initialized = client || server;
-
-        /* Register the new socket with the module */
-        DS_ArrayInsert (&sockets, (void*) ptr);
+    /* Make the address 0.0.0.0 if it is empty */
+    if (DS_StringIsEmpty (ptr->address)) {
+        DS_FREESTR (ptr->address);
+        ptr->address = sdsnew ("0.0.0.0");
     }
+
+    /* Set service strings */
+    ptr->info.in_service = itc (ptr->in_port);
+    ptr->info.out_service = itc (ptr->out_port);
+
+    /* Open TCP socket */
+    if (ptr->type == DS_SOCKET_TCP) {
+        ptr->info.sock_in = create_inet_server_socket (ptr->address,
+                                                       ptr->info.in_service,
+                                                       LIBSOCKET_TCP,
+                                                       LIBSOCKET_BOTH,
+                                                       0);
+
+        ptr->info.sock_out = create_inet_stream_socket (ptr->address,
+                                                        ptr->info.out_service,
+                                                        LIBSOCKET_IPv4, 0);
+    }
+
+    /* Open UDP socket */
+    else if (ptr->type == DS_SOCKET_UDP) {
+        ptr->info.sock_in = create_inet_server_socket (ptr->address,
+                                                       ptr->info.in_service,
+                                                       LIBSOCKET_UDP,
+                                                       LIBSOCKET_BOTH,
+                                                       0);
+
+        ptr->info.sock_out = create_inet_dgram_socket (LIBSOCKET_IPv4, 0);
+    }
+
+    /* Update initialized states */
+    ptr->info.server_init = (ptr->info.sock_in > 0);
+    ptr->info.client_init = (ptr->info.sock_out > 0);
 
     return NULL;
 }
@@ -400,19 +104,18 @@ DS_Socket DS_SocketEmpty()
     DS_Socket socket;
     DS_SocketInfo info;
 
-    info.initialized = 0;
-    info.buffer = sdsempty();
-    info.server_initialized = 0;
-    info.client_initialized = 0;
-    info.socket_in = SOCK_ERROR;
-    info.socket_out = SOCK_ERROR;
-    info.socket_tmp = SOCK_ERROR;
+    info.sock_in = -1;
+    info.sock_out = -1;
+    info.server_init = 0;
+    info.client_init = 0;
+    info.in_service = sdsempty();
+    info.out_service = sdsempty();
 
     socket.info = info;
     socket.disabled = 0;
     socket.broadcast = 0;
-    socket.input_port = 0;
-    socket.output_port = 0;
+    socket.in_port = 0;
+    socket.out_port = 0;
     socket.address = sdsempty();
     socket.type = DS_SOCKET_UDP;
 
@@ -469,9 +172,9 @@ void DS_SocketOpen (DS_Socket* ptr)
     if (ptr->disabled)
         return;
 
-    /* Initialize socket in another thread */
+    /* Initialize the socket in another thread */
     pthread_t thread;
-    pthread_create (&thread, NULL, &initialize, (void*) ptr);
+    pthread_create (&thread, NULL, &create_socket, (void*) ptr);
 }
 
 /**
@@ -486,21 +189,17 @@ void DS_SocketClose (DS_Socket* ptr)
     if (!ptr)
         return;
 
-    /* Close socket descriptors */
-    close_socket (ptr->info.socket_in);
-    close_socket (ptr->info.socket_out);
-
-    /* Close TCP server descriptor */
-    if (ptr->type == DS_SOCKET_TCP)
-        close_socket (ptr->info.socket_tmp);
+    /* Destroy sockets */
+    destroy_inet_socket (ptr->info.sock_in);
+    destroy_inet_socket (ptr->info.sock_out);
 
     /* Reset the info structure */
-    ptr->info.initialized = 0;
-    ptr->info.client_initialized = 0;
-    ptr->info.server_initialized = 0;
+    ptr->info.client_init = 0;
+    ptr->info.server_init = 0;
 
     /* Clear socket buffer */
-    DS_FREESTR (ptr->info.buffer);
+    DS_FREESTR (ptr->info.in_service);
+    DS_FREESTR (ptr->info.out_service);
 }
 
 /**
@@ -515,16 +214,25 @@ int DS_SocketSend (DS_Socket* ptr, sds data)
 {
     /* Invalid pointer and/or empty data buffer */
     if (!ptr || DS_StringIsEmpty (data))
-        return SOCK_ERROR;
+        return -1;
 
     /* Socket is disabled or uninitialized */
-    if (ptr->info.client_initialized != 1 || ptr->disabled == 1)
-        return SOCK_ERROR;
+    if ((ptr->info.client_init == 0) || (ptr->disabled == 1))
+        return -1;
 
-    /* Send the data */
-    return sendto (ptr->info.socket_out, data, sdslen (data), 0,
-                   ptr->info.out_addr.ai_addr,
-                   ptr->info.out_addr.ai_addrlen);
+    /* Send data using TCP */
+    if (ptr->type == DS_SOCKET_TCP)
+        return send (ptr->info.sock_out, data, sdslen (data), 0);
+
+    /* Send data using UDP */
+    else if (ptr->type == DS_SOCKET_UDP) {
+        return sendto_inet_dgram_socket (ptr->info.sock_out,
+                                         data, sdslen (data), ptr->address,
+                                         ptr->info.out_service, 0);
+    }
+
+    /* Should not happen */
+    return -1;
 }
 
 /**
@@ -533,26 +241,42 @@ int DS_SocketSend (DS_Socket* ptr, sds data)
  * \param ptr the socket to read data from
  * \param data the buffer in which to write received data
  *
- * \returns number of received bytes on success, SOCK_ERROR on failure
+ * \returns number of received bytes on success, -1 on failure
  */
 int DS_SocketRead (DS_Socket* ptr, sds data)
 {
     /* Invalid pointer */
     if (!ptr)
-        return SOCK_ERROR;
+        return -1;
 
     /* Socket is disabled or uninitialized */
-    if (ptr->info.server_initialized != 1 || ptr->disabled == 1)
-        return SOCK_ERROR;
+    if ((ptr->info.server_init == 0) || (ptr->disabled == 1))
+        return -1;
 
-    /* Copy buffer to data pointer */
-    if (ptr->info.buffer != NULL) {
-        data = sdscpy (sdsempty(), ptr->info.buffer);
-        DS_FREESTR (ptr->info.buffer);
+    /* Initialize the bytes counter */
+    int bytes = -1;
+
+    /* Clear data buffer and expand it */
+    DS_FREESTR (data);
+    data = sdsnewlen (NULL, 1024);
+
+    /* Read data using TCP */
+    if (ptr->type == DS_SOCKET_TCP)
+        bytes = recv (ptr->info.sock_in, data, sdslen (data), MSG_DONTWAIT);
+
+    /* Read data using UDP */
+    else if (ptr->type == DS_SOCKET_UDP) {
+        bytes = recvfrom_inet_dgram_socket (ptr->info.sock_in,
+                                            data, sdslen (data),
+                                            ptr->address,
+                                            sdslen (ptr->address),
+                                            ptr->info.in_service,
+                                            sdslen (ptr->info.in_service),
+                                            MSG_DONTWAIT, 0);
     }
 
-    /* Return length of received data */
-    return (int) sdslen (data);
+    /* Return number of received bytes */
+    return bytes;
 }
 
 /**

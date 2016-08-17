@@ -750,8 +750,8 @@ DS_Protocol* DS_GetProtocolFRC_2015()
     /* Define FMS socket properties */
     DS_Socket fms_socket = DS_SocketEmpty();
     fms_socket.disabled = 0;
-    fms_socket.input_port = 1120;
-    fms_socket.output_port = 1160;
+    fms_socket.in_port = 1120;
+    fms_socket.out_port = 1160;
     fms_socket.type = DS_SOCKET_UDP;
 
     /* Define radio socket properties */
@@ -761,16 +761,16 @@ DS_Protocol* DS_GetProtocolFRC_2015()
     /* Define robot socket properties */
     DS_Socket robot_socket = DS_SocketEmpty();
     robot_socket.disabled = 0;
-    robot_socket.input_port = 1150;
-    robot_socket.output_port = 1110;
+    robot_socket.in_port = 1150;
+    robot_socket.out_port = 1110;
     robot_socket.type = DS_SOCKET_UDP;
 
     /* Define netconsole socket properties */
     DS_Socket netconsole_socket = DS_SocketEmpty();
     netconsole_socket.disabled = 0;
     netconsole_socket.broadcast = 1;
-    netconsole_socket.input_port = 6666;
-    netconsole_socket.output_port = 6668;
+    netconsole_socket.in_port = 6666;
+    netconsole_socket.out_port = 6668;
     netconsole_socket.type = DS_SOCKET_UDP;
 
     /* Assign socket objects */
