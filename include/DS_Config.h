@@ -41,6 +41,14 @@
 extern "C" {
 #endif
 
+#define RECONFIGURE_FMS   0x01
+#define RECONFIGURE_RADIO 0x02
+#define RECONFIGURE_ROBOT 0x04
+#define RECONFIGURE_ALL   0x01 | 0x02 | 0x04
+
+/* Misc */
+extern void CFG_ReconfigureAddresses (const int flags);
+
 /* Getters */
 extern int CFG_GetTeamNumber();
 extern int CFG_GetRobotCode();

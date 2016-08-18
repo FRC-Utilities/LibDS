@@ -91,17 +91,23 @@ static void create_robot_event (const DS_EventType type)
 
 /**
  * Re-applies the network addresses of the FMS, radio and robot.
- * This function is called when the team number is changed
+ * This function is called when the team number is changed or when a watchdog
+ * expires (to force the sockets module to perform a lookup)
  */
-static void reconfigure_addresses()
+void CFG_ReconfigureAddresses (const int flags)
 {
     if (DS_CurrentProtocol()) {
-        DS_SocketChangeAddress (&DS_CurrentProtocol()->fms_socket,
-                                DS_GetAppliedFMSAddress());
-        DS_SocketChangeAddress (&DS_CurrentProtocol()->radio_socket,
-                                DS_GetAppliedRadioAddress());
-        DS_SocketChangeAddress (&DS_CurrentProtocol()->robot_socket,
-                                DS_GetAppliedRobotAddress());
+        if (flags & RECONFIGURE_FMS)
+            DS_SocketChangeAddress (&DS_CurrentProtocol()->fms_socket,
+                                    DS_GetAppliedFMSAddress());
+
+        if (flags & RECONFIGURE_RADIO)
+            DS_SocketChangeAddress (&DS_CurrentProtocol()->radio_socket,
+                                    DS_GetAppliedRadioAddress());
+
+        if (flags & RECONFIGURE_ROBOT)
+            DS_SocketChangeAddress (&DS_CurrentProtocol()->robot_socket,
+                                    DS_GetAppliedRobotAddress());
     }
 }
 
@@ -242,13 +248,9 @@ DS_ControlMode CFG_GetControlMode()
  */
 void CFG_SetRobotCode (const int code)
 {
-    int boolean = to_boolean (code);
-
-    if (robot_code != boolean) {
-        robot_code = boolean;
-        create_robot_event (DS_ROBOT_CODE_CHANGED);
-        create_robot_event (DS_STATUS_STRING_CHANGED);
-    }
+    robot_code = to_boolean (code);
+    create_robot_event (DS_ROBOT_CODE_CHANGED);
+    create_robot_event (DS_STATUS_STRING_CHANGED);
 }
 
 /**
@@ -256,10 +258,8 @@ void CFG_SetRobotCode (const int code)
  */
 void CFG_SetTeamNumber (const int number)
 {
-    if (team != number) {
-        team = number;
-        reconfigure_addresses();
-    }
+    team = number;
+    CFG_ReconfigureAddresses (RECONFIGURE_ALL);
 }
 
 /**
@@ -267,13 +267,9 @@ void CFG_SetTeamNumber (const int number)
  */
 void CFG_SetRobotEnabled (const int enabled)
 {
-    int boolean = to_boolean (enabled);
-
-    if (robot_enabled != boolean) {
-        robot_enabled = boolean;
-        create_robot_event (DS_ROBOT_ENABLED_CHANGED);
-        create_robot_event (DS_STATUS_STRING_CHANGED);
-    }
+    robot_enabled = to_boolean (enabled);
+    create_robot_event (DS_ROBOT_ENABLED_CHANGED);
+    create_robot_event (DS_STATUS_STRING_CHANGED);
 }
 
 /**
@@ -282,12 +278,8 @@ void CFG_SetRobotEnabled (const int enabled)
  */
 void CFG_SetRobotCPUUsage (const int percent)
 {
-    int value = respect_range (percent, 0, 100);
-
-    if (cpu_usage != value) {
-        cpu_usage = value;
-        create_robot_event (DS_ROBOT_CPU_INFO_CHANGED);
-    }
+    cpu_usage = respect_range (percent, 0, 100);
+    create_robot_event (DS_ROBOT_CPU_INFO_CHANGED);
 }
 
 /**
@@ -296,12 +288,8 @@ void CFG_SetRobotCPUUsage (const int percent)
  */
 void CFG_SetRobotRAMUsage (const int percent)
 {
-    int value = respect_range (percent, 0, 100);
-
-    if (ram_usage != value) {
-        ram_usage = value;
-        create_robot_event (DS_ROBOT_RAM_INFO_CHANGED);
-    }
+    ram_usage = respect_range (percent, 0, 100);
+    create_robot_event (DS_ROBOT_RAM_INFO_CHANGED);
 }
 
 /**
@@ -310,12 +298,8 @@ void CFG_SetRobotRAMUsage (const int percent)
  */
 void CFG_SetRobotDiskUsage (const int percent)
 {
-    int value = respect_range (percent, 0, 100);
-
-    if (disk_usage != value) {
-        disk_usage = value;
-        create_robot_event (DS_ROBOT_DISK_INFO_CHANGED);
-    }
+    disk_usage = respect_range (percent, 0, 100);
+    create_robot_event (DS_ROBOT_DISK_INFO_CHANGED);
 }
 
 /**
@@ -323,10 +307,8 @@ void CFG_SetRobotDiskUsage (const int percent)
  */
 void CFG_SetRobotVoltage (const double voltage)
 {
-    if (robot_voltage != voltage) {
-        robot_voltage = voltage;
-        create_robot_event (DS_ROBOT_VOLTAGE_CHANGED);
-    }
+    robot_voltage = voltage;
+    create_robot_event (DS_ROBOT_VOLTAGE_CHANGED);
 }
 
 /**
@@ -334,13 +316,9 @@ void CFG_SetRobotVoltage (const double voltage)
  */
 void CFG_SetEmergencyStopped (const int stopped)
 {
-    int boolean = to_boolean (stopped);
-
-    if (emergency_stopped != boolean) {
-        emergency_stopped = boolean;
-        create_robot_event (DS_ROBOT_ESTOP_CHANGED);
-        create_robot_event (DS_STATUS_STRING_CHANGED);
-    }
+    emergency_stopped = to_boolean (stopped);
+    create_robot_event (DS_ROBOT_ESTOP_CHANGED);
+    create_robot_event (DS_STATUS_STRING_CHANGED);
 }
 
 /**
@@ -348,10 +326,8 @@ void CFG_SetEmergencyStopped (const int stopped)
  */
 void CFG_SetAlliance (const DS_Alliance alliance)
 {
-    if (robot_alliance != alliance) {
-        robot_alliance = alliance;
-        create_robot_event (DS_ROBOT_STATION_CHANGED);
-    }
+    robot_alliance = alliance;
+    create_robot_event (DS_ROBOT_STATION_CHANGED);
 }
 
 /**
@@ -359,10 +335,8 @@ void CFG_SetAlliance (const DS_Alliance alliance)
  */
 void CFG_SetPosition (const DS_Position position)
 {
-    if (robot_position != position) {
-        robot_position = position;
-        create_robot_event (DS_ROBOT_STATION_CHANGED);
-    }
+    robot_position = position;
+    create_robot_event (DS_ROBOT_STATION_CHANGED);
 }
 
 /**
@@ -370,10 +344,8 @@ void CFG_SetPosition (const DS_Position position)
  */
 void CFG_SetCANUtilization (const int utilization)
 {
-    if (can_utilization != utilization) {
-        can_utilization = utilization;
-        create_robot_event (DS_ROBOT_CAN_UTIL_CHANGED);
-    }
+    can_utilization = utilization;
+    create_robot_event (DS_ROBOT_CAN_UTIL_CHANGED);
 }
 
 /**
@@ -381,11 +353,9 @@ void CFG_SetCANUtilization (const int utilization)
  */
 void CFG_SetControlMode (const DS_ControlMode mode)
 {
-    if (control_mode != mode) {
-        control_mode = mode;
-        create_robot_event (DS_ROBOT_MODE_CHANGED);
-        create_robot_event (DS_STATUS_STRING_CHANGED);
-    }
+    control_mode = mode;
+    create_robot_event (DS_ROBOT_MODE_CHANGED);
+    create_robot_event (DS_STATUS_STRING_CHANGED);
 }
 
 /**
@@ -393,17 +363,12 @@ void CFG_SetControlMode (const DS_ControlMode mode)
  */
 void CFG_SetFMSCommunications (const int communications)
 {
-    int boolean = to_boolean (communications);
+    fms_communications = to_boolean (communications);
 
-    if (fms_communications != boolean) {
-        fms_communications = boolean;
-
-        DS_Event event;
-        event.fms.type = DS_FMS_COMMS_CHANGED;
-        event.fms.connected = fms_communications;
-
-        DS_AddEvent (&event);
-    }
+    DS_Event event;
+    event.fms.type = DS_FMS_COMMS_CHANGED;
+    event.fms.connected = fms_communications;
+    DS_AddEvent (&event);
 }
 
 /**
@@ -411,17 +376,12 @@ void CFG_SetFMSCommunications (const int communications)
  */
 void CFG_SetRadioCommunications (const int communications)
 {
-    int boolean = to_boolean (communications);
+    radio_communications = to_boolean (communications);
 
-    if (radio_communications != boolean) {
-        radio_communications = boolean;
-
-        DS_Event event;
-        event.radio.type = DS_RADIO_COMMS_CHANGED;
-        event.radio.connected = fms_communications;
-
-        DS_AddEvent (&event);
-    }
+    DS_Event event;
+    event.radio.type = DS_RADIO_COMMS_CHANGED;
+    event.radio.connected = fms_communications;
+    DS_AddEvent (&event);
 }
 
 /**
@@ -429,13 +389,9 @@ void CFG_SetRadioCommunications (const int communications)
  */
 void CFG_SetRobotCommunications (const int communications)
 {
-    int boolean = to_boolean (communications);
-
-    if (robot_communications != boolean) {
-        robot_communications = boolean;
-        create_robot_event (DS_ROBOT_COMMS_CHANGED);
-        create_robot_event (DS_STATUS_STRING_CHANGED);
-    }
+    robot_communications = to_boolean (communications);
+    create_robot_event (DS_ROBOT_COMMS_CHANGED);
+    create_robot_event (DS_STATUS_STRING_CHANGED);
 }
 
 /**
@@ -443,12 +399,11 @@ void CFG_SetRobotCommunications (const int communications)
  */
 void CFG_FMSWatchdogExpired()
 {
+    /* Reset communications */
     CFG_SetFMSCommunications (0);
 
-    DS_Event event;
-    event.fms.type = DS_FMS_COMMS_CHANGED;
-    event.fms.connected = CFG_GetFMSCommunications();
-    DS_AddEvent (&event);
+    /* Force the sockets to perform another lookup */
+    CFG_ReconfigureAddresses (RECONFIGURE_FMS);
 }
 
 /**
@@ -456,12 +411,11 @@ void CFG_FMSWatchdogExpired()
  */
 void CFG_RadioWatchdogExpired()
 {
+    /* Reset communications */
     CFG_SetRadioCommunications (0);
 
-    DS_Event event;
-    event.radio.type = DS_RADIO_COMMS_CHANGED;
-    event.radio.connected = CFG_GetRadioCommunications();
-    DS_AddEvent (&event);
+    /* Force the sockets to perform another lookup */
+    CFG_ReconfigureAddresses (RECONFIGURE_RADIO);
 }
 
 /**
@@ -469,6 +423,7 @@ void CFG_RadioWatchdogExpired()
  */
 void CFG_RobotWatchdogExpired()
 {
+    /* Reset everything to safe state */
     CFG_SetRobotCode (0);
     CFG_SetRobotVoltage (0);
     CFG_SetRobotEnabled (0);
@@ -479,5 +434,9 @@ void CFG_RobotWatchdogExpired()
     CFG_SetRobotCommunications (0);
     CFG_SetControlMode (DS_CONTROL_TELEOPERATED);
 
+    /* Force the sockets to perform another lookup */
+    CFG_ReconfigureAddresses (RECONFIGURE_ROBOT);
+
+    /* Update the status label */
     create_robot_event (DS_STATUS_STRING_CHANGED);
 }

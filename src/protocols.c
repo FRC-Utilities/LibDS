@@ -310,7 +310,7 @@ static void close_protocol()
     DS_TimerStop (&radio_recv_timer);
     DS_TimerStop (&robot_recv_timer);
 
-    /* Delete the protocol */
+    /* De-allocate the protocol */
     DS_FREE (protocol);
 }
 
@@ -338,12 +338,7 @@ void DS_ConfigureProtocol (DS_Protocol* ptr)
     close_protocol();
 
     /* Re-assign the protocol */
-    protocol = malloc (sizeof (DS_Protocol));
-    memcpy (protocol, ptr, sizeof (DS_Protocol));
-
-    /* Change input pointer */
-    DS_FREE (ptr);
-    ptr = protocol;
+    protocol = ptr;
 
     /* Update sockets */
     DS_SocketOpen (&protocol->fms_socket);

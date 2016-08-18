@@ -400,14 +400,11 @@ void DS_SetControlMode (const DS_ControlMode mode)
  */
 void DS_SetCustomFMSAddress (sds address)
 {
-    if (address) {
+    if (!DS_StringIsEmpty (address)) {
         DS_FREESTR (custom_fms_address);
-        custom_fms_address = sdscpy (sdsempty(), address);
+        custom_fms_address = sdsdup (address);
 
-        if (DS_CurrentProtocol()) {
-            DS_SocketChangeAddress (&DS_CurrentProtocol()->fms_socket,
-                                    DS_GetAppliedFMSAddress());
-        }
+        CFG_ReconfigureAddresses (RECONFIGURE_FMS);
     }
 }
 
@@ -416,14 +413,11 @@ void DS_SetCustomFMSAddress (sds address)
  */
 void DS_SetCustomRadioAddress (sds address)
 {
-    if (address) {
+    if (!DS_StringIsEmpty (address)) {
         DS_FREESTR (custom_radio_address);
-        custom_radio_address = sdscpy (sdsempty(), address);
+        custom_radio_address = sdsdup (address);
 
-        if (DS_CurrentProtocol()) {
-            DS_SocketChangeAddress (&DS_CurrentProtocol()->radio_socket,
-                                    DS_GetAppliedRadioAddress());
-        }
+        CFG_ReconfigureAddresses (RECONFIGURE_RADIO);
     }
 }
 
@@ -432,14 +426,11 @@ void DS_SetCustomRadioAddress (sds address)
  */
 void DS_SetCustomRobotAddress (sds address)
 {
-    if (address) {
+    if (!DS_StringIsEmpty (address)) {
         DS_FREESTR (custom_robot_address);
-        custom_robot_address = sdscpy (sdsempty(), address);
+        custom_robot_address = sdsdup (address);
 
-        if (DS_CurrentProtocol()) {
-            DS_SocketChangeAddress (&DS_CurrentProtocol()->robot_socket,
-                                    DS_GetAppliedRobotAddress());
-        }
+        CFG_ReconfigureAddresses (RECONFIGURE_ROBOT);
     }
 }
 
