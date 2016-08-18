@@ -63,6 +63,9 @@ extern "C" {
 extern int sockets_exit();
 extern int sockets_init (const int exit_on_fail);
 extern int set_socket_block (const int sfd, const int block);
+extern struct addrinfo* get_address_info (const char* host,
+                                          const char* service,
+                                          int socktype, int family);
 
 /* Socket initialization functions */
 extern int create_client_udp (const int family, const int flags);

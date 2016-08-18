@@ -97,8 +97,8 @@ static void* server_loop (void* ptr)
 
     /* Configure a 5-ms timeout */
     struct timeval tv;
-    tv.tv_sec = 0;
-    tv.tv_usec = 5000;
+    tv.tv_sec = 1;
+    tv.tv_usec = 0;
 
     /* Execute the event loop */
     while (sock->info.server_init) {
@@ -142,8 +142,7 @@ static void* create_socket (void* data)
     if (ptr->type == DS_SOCKET_TCP) {
         ptr->info.sock_in = create_server_tcp (ptr->address,
                                                ptr->info.in_service,
-                                               SOCKY_ANY,
-                                               0);
+                                               SOCKY_IPv4, 0);
 
         ptr->info.sock_out = create_client_tcp (ptr->address,
                                                 ptr->info.out_service,
@@ -154,7 +153,7 @@ static void* create_socket (void* data)
     else if (ptr->type == DS_SOCKET_UDP) {
         ptr->info.sock_in = create_server_udp (ptr->address,
                                                ptr->info.in_service,
-                                               SOCKY_ANY, 0);
+                                               SOCKY_IPv4, 0);
 
         ptr->info.sock_out = create_client_udp (SOCKY_IPv4, 0);
     }
@@ -321,7 +320,8 @@ int DS_SocketSend (DS_Socket* ptr, sds data)
 
     /* Send data using UDP */
     else if (ptr->type == DS_SOCKET_UDP) {
-        return udp_sendto (ptr->info.sock_out, data, sdslen (data),
+        return udp_sendto (ptr->info.sock_out,
+                           data, sdslen (data),
                            ptr->address, ptr->info.out_service, 0);
     }
 

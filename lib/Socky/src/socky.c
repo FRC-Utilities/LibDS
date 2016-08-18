@@ -29,6 +29,8 @@
     #define GET_ERR errno
 #endif
 
+#define VERBOSE
+
 /**
  * Returns \c 0 if the given socket file descriptor is invalid
  *
@@ -42,13 +44,13 @@ static int valid_sfd (int sfd)
 /**
  * Prints a detailed error message if \c VERBOSE is defined
  */
-static void error (int sfd, char* message, int error)
+static void error (int sfd, const char* message, int error)
 {
 #if defined VERBOSE
 #if defined _WIN32
-    char* string = gai_strerrorA (error);
+    const char* string = gai_strerrorA (error);
 #else
-    char* string = gai_strerror (error);
+    const char* string = strerror (error);
 #endif
 
     fprintf (stderr,
@@ -57,9 +59,6 @@ static void error (int sfd, char* message, int error)
              "\t Error Code: %d\n"
              "\t Error Desc: %s\n",
              sfd, message, error, string);
-
-    free (string);
-    free (message);
 #else
     (void) sfd;
     (void) error;
@@ -123,22 +122,27 @@ static int get_socktype (int flag)
 static int set_socket_options (int sfd)
 {
     if (valid_sfd (sfd)) {
-        /* Windows & UNIX handle socket options a bit differently... */
 #if defined _WIN32
         char val = 1;
-#else
-        int val = 1;
-#endif
 
         /* Set the SO_REUSEADDR option */
         int err = setsockopt (sfd,
                               SOL_SOCKET,
                               SO_REUSEADDR,
                               &val, sizeof (val));
+#else
+        int val = 1;
 
-        /* Setting the option failed */
+        /* Set the SO_REUSEPORT option */
+        int err = setsockopt (sfd,
+                              SOL_SOCKET,
+                              SO_REUSEPORT,
+                              &val, sizeof (val));
+#endif
+
+        /* Setting the options failed */
         if (err != 0) {
-            error (sfd, "cannot set SO_REUSEADDR", GET_ERR);
+            error (sfd, "cannot set socket options", GET_ERR);
             return -1;
         }
 
@@ -148,53 +152,6 @@ static int set_socket_options (int sfd)
 
     /* Socket is invalid, return -1 */
     return -1;
-}
-
-/**
- * Obtains the address information for the given \a host, \a service and
- * address \a family
- *
- * \param host the host name
- * \param service the service name or port string
- * \param socktype the socket type
- * \param family the address family (e.g. \c AF_INET or \c AF_INET6)
- */
-static struct addrinfo* get_address_info (const char* host,
-                                          const char* service,
-                                          int socktype, int family)
-{
-    struct addrinfo hints, *info;
-
-    /* Fill the hints with zeroes */
-    memset (&hints, 0, sizeof (hints));
-
-    /* Set hints */
-    hints.ai_flags = AI_PASSIVE;
-    hints.ai_family = get_family (family);
-    hints.ai_socktype = get_socktype (socktype);
-
-    /* Get address info */
-    int error = getaddrinfo (host, service, &hints, &info);
-
-    /* Check if there was an error with the address */
-    if (error != 0) {
-#if defined VERBOSE
-        int code = GET_ERR;
-        fprintf (stderr,
-                 "Cannot obtain address info:\n"
-                 "\t Address: %s\n"
-                 "\t Service: %s\n"
-                 "\t Error Code: %d\n"
-                 "\t Error Desc: %s\n",
-                 host, service, code, strerror (code));
-#endif
-
-        freeaddrinfo (info);
-        return NULL;
-    }
-
-    /* All good, return the obtained data */
-    return info;
 }
 
 /**
@@ -214,7 +171,13 @@ static int create_server (const char* host, const char* port,
 {
     int sfd;
     struct addrinfo* info = NULL;
+
+#if defined _WIN32
     struct addrinfo* addr = get_address_info (host, port, socktype, family);
+#else
+    (void) host;
+    struct addrinfo* addr = get_address_info (NULL, port, socktype, family);
+#endif
 
     /* Obtained address info is NULL */
     if (addr == NULL)
@@ -258,7 +221,6 @@ static int create_server (const char* host, const char* port,
     }
 
     /* Server socket setup correctly */
-    freeaddrinfo (info);
     return sfd;
 }
 
@@ -318,6 +280,53 @@ int set_socket_block (const int sfd, const int block)
     int flags = block ? 0 : O_NONBLOCK;
     return fcntl (sfd, F_SETFL, flags);
 #endif
+}
+
+/**
+ * Obtains the address information for the given \a host, \a service and
+ * address \a family
+ *
+ * \param host the host name
+ * \param service the service name or port string
+ * \param socktype the socket type
+ * \param family the address family (e.g. \c AF_INET or \c AF_INET6)
+ */
+struct addrinfo* get_address_info (const char* host,
+                                   const char* service,
+                                   int socktype, int family)
+{
+    struct addrinfo hints, *info;
+
+    /* Fill the hints with zeroes */
+    memset (&hints, 0, sizeof (hints));
+
+    /* Set hints */
+    hints.ai_flags = AI_PASSIVE;
+    hints.ai_family = get_family (family);
+    hints.ai_socktype = get_socktype (socktype);
+
+    /* Get address info */
+    int error = getaddrinfo (host, service, &hints, &info);
+
+    /* Check if there was an error with the address */
+    if (error != 0) {
+#if defined VERBOSE
+        int code = GET_ERR;
+        fprintf (stderr,
+                 "Cannot obtain address info:\n"
+                 "\t Address: %s\n"
+                 "\t Service: %s\n"
+                 "\t Error Code: %d\n"
+                 "\t Error Desc: %s\n",
+                 host, service, code, strerror (code));
+#endif
+
+        freeaddrinfo (info);
+        return NULL;
+    }
+
+    /* All good, return the obtained data */
+    return info;
 }
 
 /**
