@@ -29,8 +29,6 @@
     #define GET_ERR errno
 #endif
 
-#define VERBOSE
-
 /**
  * Returns \c 0 if the given socket file descriptor is invalid
  *

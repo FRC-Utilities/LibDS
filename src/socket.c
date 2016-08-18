@@ -25,7 +25,6 @@
 #include "DS_Utils.h"
 #include "DS_Socket.h"
 
-#include <fcntl.h>
 #include <socky.h>
 #include <pthread.h>
 
