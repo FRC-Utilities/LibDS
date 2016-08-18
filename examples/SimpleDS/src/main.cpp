@@ -41,7 +41,7 @@ int main (int argc, char* argv[])
     VirtualJoystick joystick;
     Q_UNUSED (joystick);
 
-    /* Play with the FRC simulator */
+    /* Play with the FRC simulator (and/or OpenRIO's Simulator) */
     DriverStation::getInstance()->setCustomRobotAddress ("127.0.0.1");
 
     return app.exec();
