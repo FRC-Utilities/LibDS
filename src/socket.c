@@ -97,8 +97,8 @@ static void* server_loop (void* ptr)
 
     /* Configure a 5-ms timeout */
     struct timeval tv;
-    tv.tv_sec = 1;
-    tv.tv_usec = 0;
+    tv.tv_sec = 0;
+    tv.tv_usec = 5000;
 
     /* Execute the event loop */
     while (sock->info.server_init) {
