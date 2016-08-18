@@ -40,6 +40,7 @@ extern "C" {
 
 extern uint32_t DS_CRC32 (uint32_t crc, const void* buf, size_t size);
 
+extern sds DS_Append (sds string, char data);
 extern int DS_StringIsEmpty (const sds string);
 extern sds DS_GetStaticIP (const int net, const int team, const int host);
 

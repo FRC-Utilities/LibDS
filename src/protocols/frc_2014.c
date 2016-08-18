@@ -212,37 +212,30 @@ static uint8_t get_digital_inputs()
  * Button states are stored in a similar way as enumerated flags in a C/C++
  * program.
  */
-static void add_joystick_data (sds data, const int offset)
+static sds get_joystick_data()
 {
-    /* Do not proceed if data pointer is invalid */
-    if (!data)
-        return;
+    /* Initialize variables */
+    int i = 0;
+    int j = 0;
+    sds buf = sdsempty();
 
     /* Add data for every joystick */
-    int i = 0;
-    int pos = offset;
     for (i = 0; i < max_joysticks; ++i) {
-        /* Initialize the iterator */
-        int j = 0;
-
         /* Add axis data */
-        for (j = 0; j < max_axes; ++j) {
-            data [pos] = (uint8_t) (DS_GetJoystickAxis (i, j) * 127);
-            ++pos;
-        }
+        for (j = 0; j < max_axes; ++j)
+            buf = DS_Append (buf, (uint8_t) (DS_GetJoystickAxis (i, j) * 127));
 
         /* Generate button data */
-        uint8_t button_flags = 0;
-        for (j = 0; (j < DS_GetJoystickNumButtons (i)) && (j < max_buttons); ++j)
+        uint16_t button_flags = 0;
+        for (j = 0; j < max_buttons; ++j)
             button_flags += DS_GetJoystickButton (i, j) ? pow (2, j) : 0;
 
         /* Add button data */
-        data [pos + 0] = (button_flags & 0xff00) >> 8;
-        data [pos + 1] = (button_flags & 0xff);
-
-        /* Increase offset for next joystick */
-        pos += 2;
+        buf = DS_Append (buf, (button_flags & 0xff00) >> 8);
+        buf = DS_Append (buf, (button_flags & 0xff));
     }
+
+    return buf;
 }
 
 /**
@@ -304,8 +297,8 @@ static sds create_radio_packet()
  */
 static sds create_robot_packet()
 {
-    /* Create a 1024-byte long packet */
-    sds data = sdsnewlen (NULL, 1024);
+    /* Create initial packet */
+    sds data = sdsnewlen (NULL, 8);
 
     /* Add packet index */
     data [0] = (sent_robot_packets & 0xff00) >> 8;
@@ -324,7 +317,12 @@ static sds create_robot_packet()
     data [7] = get_position_code();
 
     /* Add joystick data */
-    add_joystick_data (data, 8);
+    sds joystick_data = get_joystick_data();
+    data = sdscatsds (data, joystick_data);
+    DS_FREESTR (joystick_data);
+
+    /* Now resize the datagram to 1024 bytes */
+    data = sdsgrowzero (data, 1024);
 
     /* Add FRC Driver Station version (same as the one sent by 16.0.1) */
     data [72] = (uint8_t) 0x30;

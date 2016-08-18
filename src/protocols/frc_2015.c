@@ -270,9 +270,9 @@ static uint8_t get_joystick_size (const int joystick)
  * The robot may ask for this information in some cases (e.g. when initializing
  * the robot code).
  */
-static sds add_timezone_data (sds packet)
+static sds get_timezone_data()
 {
-    sds data = sdsgrowzero (sdsempty(), 12);
+    sds data = sdsnewlen (NULL, 12);
 
     /* Get current time */
     time_t rt;
@@ -303,16 +303,10 @@ static sds add_timezone_data (sds packet)
 
     /* Add timezone string */
     data = sdscatsds (data, tz);
-
-    /* Append timezone data to the packet */
-    packet = sdscatsds (packet, data);
-
-    /* Free allocated memory */
     DS_FREESTR (tz);
-    DS_FREESTR (data);
 
-    /* Return the new reference */
-    return packet;
+    /* Return the obtained data */
+    return data;
 }
 
 /**
@@ -320,71 +314,43 @@ static sds add_timezone_data (sds packet)
  * Unlike the 2014 protocol, the 2015 protocol only generates joystick data
  * for the attached joysticks.
  */
-static sds add_joystick_data (sds packet)
+static sds get_joystick_data()
 {
-    if (DS_GetJoystickCount() <= 0)
-        return packet;
-
     /* Initialize the variables */
-    sds data;
-    int pos = 0;
-    int length = 0;
-
-    /* Initialize the iterator */
     int i = 0;
-
-    /* Calculate size of josytick section */
-    for (i = 0; i < DS_GetJoystickCount(); ++i)
-        length += get_joystick_size (i);
-
-    /* Resize data string */
-    data = sdsgrowzero (sdsempty(), length);
+    int j = 0;
+    sds data = sdsempty();
 
     /* Generate data for each joystick */
     for (i = 0; i < DS_GetJoystickCount(); ++i) {
-        data [pos + 0] = get_joystick_size (i);
-        data [pos + 1] = cTagJoystick;
+        data = DS_Append (data, get_joystick_size (i));
+        data = DS_Append (data, cTagJoystick);
 
-        /* Initialize joystick iterator */
-        int j = 0;
-
-        /* Add axis data (and automatically increase offset) */
-        data [pos + 2] = DS_GetJoystickNumAxes (i);
-        for (j = 0; j < DS_GetJoystickNumAxes (i); ++j) {
-            data [pos + 3 + j] = (uint8_t) (DS_GetJoystickAxis (i, j) * 127);
-            ++pos;
-        }
+        /* Add axis data */
+        data = DS_Append (data, DS_GetJoystickNumAxes (i));
+        for (j = 0; j < DS_GetJoystickNumAxes (i); ++j)
+            data = DS_Append (data, (uint8_t) (DS_GetJoystickAxis (i, j) * 127));
 
         /* Generate button data */
-        uint8_t button_flags = 0;
+        uint16_t button_flags = 0;
         for (j = 0; j < DS_GetJoystickNumButtons (i); ++j)
-            button_flags += DS_GetJoystickButton (i, j) ? pow (2, j) : 0;
+            button_flags += DS_GetJoystickButton (i, j) ? (int) pow (2, j) : 0;
 
         /* Add button data */
-        pos += 2;
-        data [pos + 1] = DS_GetJoystickNumButtons (i);
-        data [pos + 2] = (button_flags & 0xff00) >> 8;
-        data [pos + 3] = (button_flags & 0xff);
+        data = DS_Append (data, DS_GetJoystickNumButtons (i));
+        data = DS_Append (data, (button_flags & 0xff00) >> 8);
+        data = DS_Append (data, (button_flags & 0xff));
 
-        /* Increase offset and add hat data */
-        pos += 4;
-        data [pos] = DS_GetJoystickNumHats (i);
+        /* Add hat data */
+        data = DS_Append (data, DS_GetJoystickNumHats (i));
         for (j = 0; j < DS_GetJoystickNumHats (i); ++j) {
-            data [pos + 1] = (DS_GetJoystickHat (i, j) & 0xff00) >> 8;
-            data [pos + 2] = (DS_GetJoystickHat (i, j) & 0xff);
-            pos += 2;
+            data = DS_Append (data, (DS_GetJoystickHat (i, j) & 0xff00) >> 8);
+            data = DS_Append (data, (DS_GetJoystickHat (i, j) & 0xff));
         }
-
-        /* Increase offset by 1 (to avoid writing next joystick on last POV byte) */
-        pos += 1;
     }
 
-    /* Append generated data to packet */
-    packet = sdscatsds (packet, data);
-    DS_FREESTR (data);
-
-    /* Return the new reference */
-    return packet;
+    /* Return obtained data */
+    return data;
 }
 
 /**
@@ -536,7 +502,7 @@ static sds create_radio_packet()
  */
 static sds create_robot_packet()
 {
-    sds data = sdsnewlen (NULL, 8);
+    sds data = sdsnewlen (NULL, 6);
 
     /* Add packet index */
     data [0] = (sent_robot_packets & 0xff00) >> 8;
@@ -551,12 +517,18 @@ static sds create_robot_packet()
     data [5] = get_station_code();
 
     /* Add timezone data (if robot wants it) */
-    if (send_time_data)
-        data = add_timezone_data (data);
+    if (send_time_data) {
+        sds timezone_data = get_timezone_data();
+        data = sdscatsds (data, timezone_data);
+        DS_FREESTR (timezone_data);
+    }
 
     /* Add joystick data */
-    else if (sent_robot_packets > 5)
-        data = add_joystick_data (data);
+    else if (sent_robot_packets > 5) {
+        sds joystick_data = get_joystick_data();
+        data = sdscatsds (data, joystick_data);
+        DS_FREESTR (joystick_data);
+    }
 
     /* Increase packet counter */
     ++sent_robot_packets;

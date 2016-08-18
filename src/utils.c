@@ -28,6 +28,36 @@
 #include <stdlib.h>
 
 /**
+ * Appends the given \a data to the \a string
+ *
+ * \param string the original string
+ * \param data the byte to append
+ *
+ * \example data = DS_Append (data, 'a')
+ *
+ * \warning the original string will be deleted to avoid memory leaks,
+ *          just use the value returned by this function afterwards!
+ *
+ * \returns the pointer to the newly obtained string
+ */
+sds DS_Append (sds string, char data)
+{
+    /* Initialize the variables */
+    sds temp;
+    size_t len = sdslen (string);
+
+    /* Duplicate string and append data */
+    temp = sdsnewlen (string, len + 1);
+    temp [len] = data;
+
+    /* Delete original string */
+    DS_FREESTR (string);
+
+    /* Return new string */
+    return temp;
+}
+
+/**
  * Returns \c 1 if the given \a string is empty
  */
 int DS_StringIsEmpty (const sds string)
@@ -53,6 +83,10 @@ int DS_StringIsEmpty (const sds string)
  *
  * If you call this function outside the scope of the \c LibDS, remember to
  * call \c free() to avoid memory leaks.
+ *
+ * \param net the desired first octet of the IP
+ * \param team the team number, used in second and third octets
+ * \param host the host byte (or the last octet) of the IP
  */
 sds DS_GetStaticIP (const int net, const int team, const int host)
 {

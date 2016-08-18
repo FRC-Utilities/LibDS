@@ -179,26 +179,6 @@ void DS_JoysticksReset()
  */
 void DS_JoysticksAdd (const int axes, const int hats, const int buttons)
 {
-    /* Initialize the iterator */
-    int iterator = 0;
-
-    /* Initialize the joystick values */
-    int* v_hats    = (int*) malloc (sizeof (int) * hats);
-    int* v_buttons = (int*) malloc (sizeof (int) * buttons);
-    double* v_axes = (double*) malloc (sizeof (double) * axes);
-
-    /* Ensure that hat angles are neutral */
-    for (iterator = 0; iterator < hats; ++iterator)
-        v_hats [iterator] = 0;
-
-    /* Ensure that axis values are neutral */
-    for (iterator = 0; iterator < axes; ++iterator)
-        v_axes [iterator] = 0;
-
-    /* Ensure that button states are neutral */
-    for (iterator = 0; iterator < buttons; ++iterator)
-        v_buttons [iterator] = 0;
-
     /* Allocate memory for a new joystick */
     DS_Joystick* joystick = (DS_Joystick*) malloc (sizeof (DS_Joystick));
 
@@ -207,10 +187,10 @@ void DS_JoysticksAdd (const int axes, const int hats, const int buttons)
     joystick->num_hats = hats;
     joystick->num_buttons = buttons;
 
-    /* Set joystick values */
-    joystick->axes = v_axes;
-    joystick->hats = v_hats;
-    joystick->buttons = v_buttons;
+    /* Set joystick value arrays */
+    joystick->hats = calloc (hats, sizeof (int));
+    joystick->axes = calloc (axes, sizeof (double));
+    joystick->buttons = calloc (buttons, sizeof (int));
 
     /* Register the new joystick in the joystick list */
     DS_ArrayInsert (&array, (void*) joystick);
