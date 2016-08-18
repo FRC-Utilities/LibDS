@@ -165,21 +165,22 @@ static void recv_data()
     netcs_data = DS_SocketRead (&protocol->netconsole_socket);
 
     /* Read FMS packet */
-    if (sdslen (fms_data) > 0)
+    if (sdslen (fms_data) > 0) {
         fms_read = protocol->read_fms_packet (fms_data);
+        CFG_SetFMSCommunications (fms_read);
+    }
 
     /* Read radio packet */
-    if (sdslen (radio_data) > 0)
+    if (sdslen (radio_data) > 0) {
         radio_read = protocol->read_radio_packet (radio_data);
+        CFG_SetRadioCommunications (radio_read);
+    }
 
     /* Read robot packet */
-    if (sdslen (robot_data) > 0)
+    if (sdslen (robot_data) > 0) {
         robot_read = protocol->read_robot_packet (robot_data);
-
-    /* Update communication statuses */
-    CFG_SetFMSCommunications (fms_read);
-    CFG_SetRadioCommunications (radio_read);
-    CFG_SetRobotCommunications (robot_read);
+        CFG_SetRobotCommunications (robot_read);
+    }
 
     /* Add NetConsole message to event system */
     if (sdslen (netcs_data) > 0) {
@@ -203,6 +204,11 @@ static void update_watchdogs()
     if (radio_read) DS_TimerReset (&radio_recv_timer);
     if (robot_read) DS_TimerReset (&robot_recv_timer);
 
+    /* Clear the read success values */
+    fms_read = 0;
+    radio_read = 0;
+    robot_read = 0;
+
     /* Reset the FMS if the watchdog expires */
     if (fms_recv_timer.expired) {
         CFG_FMSWatchdogExpired();
@@ -220,11 +226,6 @@ static void update_watchdogs()
         CFG_RobotWatchdogExpired();
         DS_TimerReset (&robot_recv_timer);
     }
-
-    /* Clear the read success values */
-    fms_read = 0;
-    radio_read = 0;
-    robot_read = 0;
 }
 
 /**

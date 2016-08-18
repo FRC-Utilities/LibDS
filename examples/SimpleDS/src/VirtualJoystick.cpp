@@ -32,6 +32,7 @@ VirtualJoystick::VirtualJoystick()
     qApp->installEventFilter (this);
 
     /* Register a joystick with 6 axis, 1 POV and 10 buttons */
+    DriverStation::getInstance()->resetJoysticks();
     DriverStation::getInstance()->addJoystick (6, 1, 10);
 }
 

@@ -50,10 +50,7 @@ static DS_ControlMode control_mode = DS_CONTROL_TELEOPERATED;
  */
 static int to_boolean (const int input)
 {
-    if (input < 1)
-        return 0;
-
-    return 1;
+    return (input > 0);
 }
 
 /**
@@ -430,11 +427,8 @@ void CFG_SetRadioCommunications (const int communications)
 /**
  * Updates the state of the robot communications.
  */
-#include <stdio.h>
 void CFG_SetRobotCommunications (const int communications)
 {
-    fprintf (stderr, "%d\n", communications);
-
     int boolean = to_boolean (communications);
 
     if (robot_communications != boolean) {
@@ -485,6 +479,5 @@ void CFG_RobotWatchdogExpired()
     CFG_SetRobotCommunications (0);
     CFG_SetControlMode (DS_CONTROL_TELEOPERATED);
 
-    create_robot_event (DS_ROBOT_COMMS_CHANGED);
     create_robot_event (DS_STATUS_STRING_CHANGED);
 }

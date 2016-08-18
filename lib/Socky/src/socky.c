@@ -306,6 +306,23 @@ int sockets_init (const int exit_on_fail)
 }
 
 /**
+ * Makes the given socket blocking or not
+ *
+ * \param sfd the socket file descriptor
+ * \param block determines if the socket shall be blocking or not
+ */
+int set_socket_block (const int sfd, const int block)
+{
+#if defined _WIN32
+    u_long flags = block ? 1 : 0;
+    return ioctlsocket (sfd, FIONBIO, &flags);
+#else
+    int flags = block ? 0 : O_NONBLOCK;
+    return fcntl (sfd, F_SETFL, flags);
+#endif
+}
+
+/**
  * Creates a new UDP client socket using the given \a family and \a flags
  *
  * \param family the address family (\c SOCKY_IPv4 or \c SOCKY_IPv6)

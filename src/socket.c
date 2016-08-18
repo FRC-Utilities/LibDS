@@ -43,79 +43,73 @@ static sds itc (int number)
 }
 
 /**
+ * Copies the received data from the socket in its data buffer
+ */
+static void read_socket (DS_Socket* ptr)
+{
+    if (!ptr)
+        return;
+
+    /* Initialize temporary buffer */
+    int read = -1;
+    sds data = sdsnewlen (NULL, 1024);
+
+    /* Read TCP socket */
+    if (ptr->type == DS_SOCKET_TCP)
+        read = recv (ptr->info.sock_in, data, sdslen (data), 0);
+
+    /* Read UDP socket */
+    if (ptr->type == DS_SOCKET_UDP)
+        read = udp_recvfrom (ptr->info.sock_in,
+                             data, sdslen (data),
+                             ptr->address, ptr->info.in_service, 0);
+
+    /* We received some data, copy it to socket's buffer */
+    if (read > 0) {
+        sdsfree (ptr->info.buffer);
+        ptr->info.buffer = sdsnewlen (NULL, read);
+
+        int i;
+        for (i = 0; i < read; ++i)
+            ptr->info.buffer [i] = data [i];
+    }
+
+    /* De-allocate temporary data */
+    sdsfree (data);
+}
+
+/**
  * Runs the server socket loop, which reads received data only when the
  * socket receives data.
  *
- * \param raw_pointer a pointer to a \c DS_Socket structure
+ * \param ptr a pointer to a \c DS_Socket structure
  */
-static void* server_loop (void* raw_pointer)
+static void* server_loop (void* ptr)
 {
-    DS_Socket* ptr = (DS_Socket*) raw_pointer;
-
-    /* The pointer is NULL */
+    /* Pointer is NULL */
     if (!ptr)
         return NULL;
 
-    /* Set flags for the socket descriptor */
-#if !defined _WIN32
-    fcntl (ptr->info.sock_in, F_SETFL, O_NONBLOCK);
-#endif
+    /* Cast to socket pointer */
+    DS_Socket* sock = (DS_Socket*) ptr;
 
-    /* Initialize the variables */
-    sds data;
-    int bytes;
-    int ready;
-    fd_set fds;
-    struct timeval timeout;
+    /* Make the socket non-blockinf */
+    set_socket_block (sock->info.sock_in, 0);
 
-    /* Setup the reader loop */
-    while (ptr->info.server_init == 1) {
-        /* Setup the file descriptor structures */
-        FD_ZERO (&fds);
-        FD_SET (ptr->info.sock_in, &fds);
+    /* Configure a 5-ms timeout */
+    struct timeval tv;
+    tv.tv_sec = 0;
+    tv.tv_usec = 5000;
 
-        /* Set the timeout values */
-        timeout.tv_sec = 0;
-        timeout.tv_usec = 5000;
+    /* Execute the event loop */
+    while (sock->info.server_init) {
+        fd_set set;
+        FD_ZERO (&set);
+        FD_SET (sock->info.sock_in, &set);
 
-        /* Check if there is data available */
-        ready = select (0, &fds, NULL, NULL, &timeout);
-
-        /* Data is available, get it */
-        if (ready > 0) {
-            /* Prepare the data buffer */
-            DS_FREESTR (data);
-            data = sdsnewlen (NULL, 1024);
-
-            /* Read data using TCP */
-            if (ptr->type == DS_SOCKET_TCP)
-                bytes = recv (ptr->info.sock_in, data, sdslen (data), 0);
-
-            /* Read data using UDP */
-            else if (ptr->type == DS_SOCKET_UDP) {
-                bytes = udp_recvfrom (ptr->info.sock_in, data, sdslen (data),
-                                      ptr->address, ptr->info.in_service, 0);
-            }
-
-            /* Copy received data to socekt buffer */
-            if (bytes > 0) {
-                /* Resize socket buffer */
-                DS_FREESTR (ptr->info.buffer);
-                ptr->info.buffer = sdsnewlen (NULL, bytes);
-
-                /* Copy data to buffer */
-                int i;
-                for (i = 0; i < bytes; ++i)
-                    ptr->info.buffer [i] = data [i];
-            }
-
-            /* Free data buffer */
-            DS_FREESTR (data);
-        }
-
-        /* Reset variables */
-        bytes = -1;
-        ready = -1;
+        /* Data is available */
+        if (select (0, &set, NULL, NULL, &tv) > 0)
+            read_socket (sock);
     }
 
     return NULL;
@@ -271,6 +265,7 @@ void DS_SocketClose (DS_Socket* ptr)
     /* Reset the info structure */
     ptr->info.client_init = 0;
     ptr->info.server_init = 0;
+    ptr->info.buffer = sdsempty();
 
     /* Clear socket buffer */
     DS_FREESTR (ptr->info.in_service);
@@ -292,9 +287,12 @@ sds DS_SocketRead (DS_Socket* ptr)
     if ((ptr->info.server_init == 0) || (ptr->disabled == 1))
         return sdsempty();
 
-    /* Return a copy of the current buffer */
-    if (sdslen (ptr->info.buffer) > 0)
-        return sdsdup (ptr->info.buffer);
+    /* Copy the current buffer and clear it */
+    if (sdslen (ptr->info.buffer) > 0) {
+        sds buffer = sdsdup (ptr->info.buffer);
+        DS_FREESTR (ptr->info.buffer);
+        return buffer;
+    }
 
     return sdsempty();
 }

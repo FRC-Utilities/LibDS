@@ -37,12 +37,12 @@ int main (int argc, char* argv[])
     Window window;
     window.show();
 
-    /* Play with the FRC simulator */
-    DriverStation::getInstance()->setCustomRobotAddress ("127.0.0.1");
-
     /* Initialize the virtual joystick */
     VirtualJoystick joystick;
     Q_UNUSED (joystick);
+
+    /* Play with the FRC simulator */
+    DriverStation::getInstance()->setCustomRobotAddress ("127.0.0.1");
 
     return app.exec();
 }
