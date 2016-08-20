@@ -27,6 +27,12 @@
 #include <stdlib.h>
 #include <string.h>
 
+/**
+ * Removes the first item in the given \a queue
+ *
+ * \param queue the queue in which to operate
+ * \returns \c 1 on success, \c 0 on failure
+ */
 extern int DS_QueuePop (DS_Queue* queue)
 {
     /* Queue is NULL */
@@ -48,6 +54,12 @@ extern int DS_QueuePop (DS_Queue* queue)
     return 1;
 }
 
+/**
+ * Resets the properties of the given \a queue and de-allocates the memory
+ * used by the queue's elements
+ *
+ * \param queue the queue to destroy
+ */
 extern void DS_QueueFree (DS_Queue* queue)
 {
     /* Queue is NULL, abort */
@@ -70,6 +82,13 @@ extern void DS_QueueFree (DS_Queue* queue)
     queue->max_elements = 0;
 }
 
+/**
+ * Returns the first elemenent of the given \a queue
+ *
+ * \param queue the queue from which to get the first item_size
+ * \returns the first element of the given \a queue, on failure, this
+ *          function shall return a \c NULL pointer
+ */
 void* DS_QueueGetFirst (DS_Queue* queue)
 {
     /* We won't crash, unless the programmer does not check return value */
@@ -84,6 +103,13 @@ void* DS_QueueGetFirst (DS_Queue* queue)
     return (void*) queue->buffer [queue->front];
 }
 
+/**
+ * Adds the given \a item to the \a queue in a circular fashion
+ *
+ * \param queue the queue in which to operate
+ * \param item the item to add, to avoid potential errors, the pointer data
+ *        is duplicated by this function
+ */
 void DS_QueuePush (DS_Queue* queue, void* item)
 {
     /* You can thank me later */
@@ -106,6 +132,13 @@ void DS_QueuePush (DS_Queue* queue, void* item)
     memcpy (queue->buffer [queue->rear], item, queue->item_size);
 }
 
+/**
+ * Initializes the given queue and allocates memory for its elements
+ *
+ * \param queue the queue to initialize
+ * \param max_elements the maximum number of elements that the queue can have
+ * \param item_size the size to use for each inidividual element of the queue
+ */
 void DS_QueueInit (DS_Queue* queue, int max_elements, int item_size)
 {
     /* Set initial navitation values */
