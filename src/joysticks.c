@@ -22,6 +22,7 @@
  */
 
 #include "DS_Array.h"
+#include "DS_Config.h"
 #include "DS_Events.h"
 #include "DS_Joysticks.h"
 
@@ -124,10 +125,14 @@ int DS_GetJoystickNumButtons (int joystick)
 /**
  * Returns the value that the given \a hat in the given \a joystick has.
  * If the joystick or hat do not exist, this function will return \c 0
+ *
+ * \note Regardless of protocol implementation, this function will return
+ *       a neutral value if the robot is disabled. This is for additional
+ *       safety!
  */
 int DS_GetJoystickHat (int joystick, int hat)
 {
-    if (DS_GetJoystickCount() > joystick) {
+    if (DS_GetJoystickCount() > joystick && CFG_GetRobotEnabled()) {
         if (get_joystick (joystick)->num_hats > hat)
             return get_joystick (joystick)->hats [hat];
     }
@@ -138,10 +143,14 @@ int DS_GetJoystickHat (int joystick, int hat)
 /**
  * Returns the value that the given \a axis in the given \a joystick has.
  * If the joystick or axis do not exist, this function will return \c 0
+ *
+ * \note Regardless of protocol implementation, this function will return
+ *       a neutral value if the robot is disabled. This is for additional
+ *       safety!
  */
 double DS_GetJoystickAxis (int joystick, int axis)
 {
-    if (DS_GetJoystickCount() > joystick) {
+    if (DS_GetJoystickCount() > joystick && CFG_GetRobotEnabled()) {
         if (get_joystick (joystick)->num_axes > axis)
             return get_joystick (joystick)->axes [axis];
     }
@@ -152,10 +161,14 @@ double DS_GetJoystickAxis (int joystick, int axis)
 /**
  * Returns the value that the given \a button in the given \a joystick has.
  * If the joystick or button do not exist, this function will return \c 0
+ *
+ * \note Regardless of protocol implementation, this function will return
+ *       a neutral value if the robot is disabled. This is for additional
+ *       safety!
  */
 int DS_GetJoystickButton (int joystick, int button)
 {
-    if (DS_GetJoystickCount() > joystick) {
+    if (DS_GetJoystickCount() > joystick && CFG_GetRobotEnabled()) {
         if (get_joystick (joystick)->num_buttons > button)
             return get_joystick (joystick)->buttons [button];
     }

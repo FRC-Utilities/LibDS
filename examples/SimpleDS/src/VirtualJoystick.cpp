@@ -118,7 +118,7 @@ void VirtualJoystick::readPOVs (int key, bool pressed)
 
 
     /* Update Driver Station */
-    DriverStation::getInstance()->setJoystickHat (0, 1, angle);
+    DriverStation::getInstance()->setJoystickHat (0, 0, angle);
 }
 
 /**

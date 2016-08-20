@@ -49,11 +49,11 @@ void DS_Close()
     if (init) {
         init = 0;
 
-        Timers_Close();
         Events_Close();
         Client_Close();
-        Protocols_Close();
-        Joysticks_Close();
+        Timers_Close();
         Sockets_Close();
+        Joysticks_Close();
+        Protocols_Close();
     }
 }

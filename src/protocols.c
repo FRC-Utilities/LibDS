@@ -347,11 +347,6 @@ void DS_ConfigureProtocol (DS_Protocol* ptr)
     DS_SocketOpen (&ptr->robot_socket);
     DS_SocketOpen (&ptr->netconsole_socket);
 
-    /* Force address reset */
-    DS_SocketChangeAddress (&ptr->fms_socket, DS_GetAppliedFMSAddress());
-    DS_SocketChangeAddress (&ptr->radio_socket, DS_GetAppliedRadioAddress());
-    DS_SocketChangeAddress (&ptr->robot_socket, DS_GetAppliedRobotAddress());
-
     /* Update sender timers */
     fms_send_timer.time = ptr->fms_interval;
     radio_send_timer.time = ptr->radio_interval;
