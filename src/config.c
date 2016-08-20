@@ -108,9 +108,10 @@ void CFG_ReconfigureAddresses (const int flags)
             DS_SocketChangeAddress (&DS_CurrentProtocol()->radio_socket,
                                     DS_GetAppliedRadioAddress());
 
-        if (flags & RECONFIGURE_ROBOT)
+        if (flags & RECONFIGURE_ROBOT) {
             DS_SocketChangeAddress (&DS_CurrentProtocol()->robot_socket,
                                     DS_GetAppliedRobotAddress());
+        }
     }
 }
 
@@ -270,7 +271,8 @@ void CFG_SetTeamNumber (const int number)
  */
 void CFG_SetRobotEnabled (const int enabled)
 {
-    robot_enabled = to_boolean (enabled);
+    robot_enabled = to_boolean (enabled) && !CFG_GetEmergencyStopped();
+
     create_robot_event (DS_ROBOT_ENABLED_CHANGED);
     create_robot_event (DS_STATUS_STRING_CHANGED);
 }

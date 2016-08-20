@@ -398,11 +398,11 @@ void DS_SetControlMode (const DS_ControlMode mode)
 /**
  * Changes the \a address used to communicate with the FMS
  */
-void DS_SetCustomFMSAddress (sds address)
+void DS_SetCustomFMSAddress (const char* address)
 {
-    if (!DS_StringIsEmpty (address)) {
+    if (strlen (address) > 0) {
         DS_FREESTR (custom_fms_address);
-        custom_fms_address = sdsdup (address);
+        custom_fms_address = sdsnew (address);
 
         CFG_ReconfigureAddresses (RECONFIGURE_FMS);
     }
@@ -411,11 +411,11 @@ void DS_SetCustomFMSAddress (sds address)
 /**
  * Changes the \a address used to communicate with the radio
  */
-void DS_SetCustomRadioAddress (sds address)
+void DS_SetCustomRadioAddress (const char* address)
 {
-    if (!DS_StringIsEmpty (address)) {
+    if (strlen (address) > 0) {
         DS_FREESTR (custom_radio_address);
-        custom_radio_address = sdsdup (address);
+        custom_radio_address = sdsnew (address);
 
         CFG_ReconfigureAddresses (RECONFIGURE_RADIO);
     }
@@ -424,11 +424,11 @@ void DS_SetCustomRadioAddress (sds address)
 /**
  * Changes the \a address used to communicate with the robot
  */
-void DS_SetCustomRobotAddress (sds address)
+void DS_SetCustomRobotAddress (const char* address)
 {
-    if (!DS_StringIsEmpty (address)) {
+    if (strlen (address) > 0) {
         DS_FREESTR (custom_robot_address);
-        custom_robot_address = sdsdup (address);
+        custom_robot_address = sdsnew (address);
 
         CFG_ReconfigureAddresses (RECONFIGURE_ROBOT);
     }
@@ -437,8 +437,9 @@ void DS_SetCustomRobotAddress (sds address)
 /**
  * Sends the given \a message to the NetConsole of the robot
  */
-void DS_SendNetConsoleMessage (sds message)
+void DS_SendNetConsoleMessage (const char* message)
 {
     if (DS_CurrentProtocol())
-        DS_SocketSend (&DS_CurrentProtocol()->netconsole_socket, message);
+        DS_SocketSend (&DS_CurrentProtocol()->netconsole_socket,
+                       sdsnew (message));
 }

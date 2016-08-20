@@ -86,6 +86,18 @@ static sds set_checked (sds label, int checked)
 }
 
 /**
+ * Return "--.--" if there are no communications with the robot, otherwise,
+ * this function shall return the given \a string
+ */
+static sds update_label (sds string)
+{
+    if (DS_GetRobotCommunications())
+        return string;
+
+    return sdsnew (INVALID);
+}
+
+/**
  * Sets the default label texts
  */
 static void init_strings()
@@ -261,7 +273,7 @@ void update_interface()
 void set_can (const int can)
 {
     DS_FREESTR (can_str);
-    can_str = sdscatprintf (sdsempty(), "%d %%", can);
+    can_str = update_label (sdscatprintf (sdsempty(), "%d %%", can));
 }
 
 /**
@@ -270,7 +282,7 @@ void set_can (const int can)
 void set_cpu (const int cpu)
 {
     DS_FREESTR (cpu_str);
-    cpu_str = sdscatprintf (sdsempty(), "%d %%", cpu);
+    cpu_str = update_label (sdscatprintf (sdsempty(), "%d %%", cpu));
 }
 
 /**
@@ -279,7 +291,7 @@ void set_cpu (const int cpu)
 void set_ram (const int ram)
 {
     DS_FREESTR (ram_str);
-    ram_str = sdscatprintf (sdsempty(), "%d %%", ram);
+    ram_str = update_label (sdscatprintf (sdsempty(), "%d %%", ram));
 }
 
 /**
@@ -288,7 +300,7 @@ void set_ram (const int ram)
 void set_disk (const int disk)
 {
     DS_FREESTR (disk_str);
-    disk_str = sdscatprintf (sdsempty(), "%d %%", disk);
+    disk_str = update_label (sdscatprintf (sdsempty(), "%d %%", disk));
 }
 
 /**
@@ -322,7 +334,7 @@ void set_robot_comms (const int comms)
 void set_voltage (const double voltage)
 {
     DS_FREESTR (voltage_str);
-    voltage_str = sdscatprintf (sdsempty(), "%f V", voltage);
+    voltage_str = update_label (sdscatprintf (sdsempty(), "%.2f V", voltage));
 }
 
 /**

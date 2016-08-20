@@ -79,10 +79,10 @@ extern void DS_SetEmergencyStopped (const int stop);
 extern void DS_SetAlliance (const DS_Alliance alliance);
 extern void DS_SetPosition (const DS_Position position);
 extern void DS_SetControlMode (const DS_ControlMode mode);
-extern void DS_SetCustomFMSAddress (const sds address);
-extern void DS_SetCustomRadioAddress (const sds address);
-extern void DS_SetCustomRobotAddress (const sds address);
-extern void DS_SendNetConsoleMessage (const sds message);
+extern void DS_SetCustomFMSAddress (const char* address);
+extern void DS_SetCustomRadioAddress (const char* address);
+extern void DS_SetCustomRobotAddress (const char* address);
+extern void DS_SendNetConsoleMessage (const char* message);
 
 #ifdef __cplusplus
 }

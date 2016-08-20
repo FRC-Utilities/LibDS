@@ -23,6 +23,7 @@
 
 #include "DS_Utils.h"
 #include "DS_Timer.h"
+#include "DS_Client.h"
 #include "DS_Config.h"
 #include "DS_Events.h"
 #include "DS_Socket.h"
@@ -341,10 +342,15 @@ void DS_ConfigureProtocol (DS_Protocol* ptr)
     protocol = ptr;
 
     /* Update sockets */
-    DS_SocketOpen (&protocol->fms_socket);
-    DS_SocketOpen (&protocol->radio_socket);
-    DS_SocketOpen (&protocol->robot_socket);
-    DS_SocketOpen (&protocol->netconsole_socket);
+    DS_SocketOpen (&ptr->fms_socket);
+    DS_SocketOpen (&ptr->radio_socket);
+    DS_SocketOpen (&ptr->robot_socket);
+    DS_SocketOpen (&ptr->netconsole_socket);
+
+    /* Force address reset */
+    DS_SocketChangeAddress (&ptr->fms_socket, DS_GetAppliedFMSAddress());
+    DS_SocketChangeAddress (&ptr->radio_socket, DS_GetAppliedRadioAddress());
+    DS_SocketChangeAddress (&ptr->robot_socket, DS_GetAppliedRobotAddress());
 
     /* Update sender timers */
     fms_send_timer.time = ptr->fms_interval;

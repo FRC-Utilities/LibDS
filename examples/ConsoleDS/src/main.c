@@ -43,24 +43,26 @@ int main()
     /* Initialize the DS (and its event loop) */
     DS_Init();
 
+    /* Use the DS with the FRC Simulator (or Toast Sim) */
+    DS_SetCustomRobotAddress ("127.0.0.1");
+
     /* Initialize the application modules */
     init_joysticks();
     init_interface();
-
-    /* Load the 2016 protocol */
-    DS_ConfigureProtocol (DS_GetProtocolFRC_2016());
-    DS_SetCustomRobotAddress ("127.0.0.1");
 
     /* Get user input from a different thread */
     pthread_t thread;
     pthread_create (&thread, NULL, &get_user_input, NULL);
 
+    /* Load the FRC 2016 communication protocol */
+    DS_ConfigureProtocol (DS_GetProtocolFRC_2016());
+
     /* Run the application's event loop (unrelated to DS) */
     while (running) {
-        process_events();   /* Check for DS events */
-        update_interface(); /* Re-draw the user interface */
-        update_joysticks(); /* Get joystick input */
-        DS_Sleep (10);      /* A 100 Hz cycle is adequate */
+        process_events();
+        update_interface();
+        update_joysticks();
+        DS_Sleep (20);
     }
 
     /* Close the DS and the application modules */
@@ -103,6 +105,15 @@ static void process_events()
             break;
         case DS_STATUS_STRING_CHANGED:
             update_status_label (DS_GetStatusString());
+            break;
+        case DS_ROBOT_COMMS_CHANGED:
+            set_robot_comms (event.robot.connected);
+            break;
+        case DS_ROBOT_CODE_CHANGED:
+            set_robot_code (event.robot.code);
+            break;
+        case DS_ROBOT_ENABLED_CHANGED:
+            set_enabled (event.robot.enabled);
             break;
         default:
             break;
