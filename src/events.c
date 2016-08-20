@@ -33,7 +33,7 @@ static DS_Queue events;
  */
 void Events_Init()
 {
-    DS_QueueInit (&events, sizeof (DS_Event) * 20, sizeof (DS_Event));
+    DS_QueueInit (&events, 50, sizeof (DS_Event));
 }
 
 /**
@@ -60,13 +60,12 @@ void DS_AddEvent (DS_Event* event)
  */
 int DS_PollEvent (DS_Event* event)
 {
-    if (DS_QueuePop (&events)) {
-        DS_Event* front = (DS_Event*) events.head;
+    DS_Event* front = (DS_Event*) DS_QueueGetFirst (&events);
 
-        if (front) {
-            memcpy (event, front, sizeof (DS_Event));
-            return 1;
-        }
+    if (front) {
+        DS_QueuePop (&events);
+        memcpy (event, front, sizeof (DS_Event));
+        return 1;
     }
 
     return 0;

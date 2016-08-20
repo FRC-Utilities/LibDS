@@ -26,6 +26,8 @@
 #include "DS_Config.h"
 #include "DS_Protocol.h"
 
+#include <math.h>
+
 /*
  * These variables hold the state(s) of the LibDS and its modules
  */
@@ -78,6 +80,7 @@ static void create_robot_event (const DS_EventType type)
     event.robot.type = type;
     event.robot.code = CFG_GetRobotCode();
     event.robot.mode = CFG_GetControlMode();
+    event.robot.enabled = CFG_GetRobotEnabled();
     event.robot.voltage = CFG_GetRobotVoltage();
     event.robot.can_util = CFG_GetCANUtilization();
     event.robot.cpu_usage = CFG_GetRobotCPUUsage();
@@ -307,7 +310,7 @@ void CFG_SetRobotDiskUsage (const int percent)
  */
 void CFG_SetRobotVoltage (const double voltage)
 {
-    robot_voltage = voltage;
+    robot_voltage = roundf (voltage * 100) / 100;
     create_robot_event (DS_ROBOT_VOLTAGE_CHANGED);
 }
 

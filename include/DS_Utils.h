@@ -32,11 +32,17 @@ extern "C" {
 #include <stdlib.h>
 #include <stdint.h>
 
+/*
+ * You may find these useful
+ */
 #define DS_Max(a,b) ((a) > (b) ? a : b)
 #define DS_Min(a,b) ((a) < (b) ? a : b)
 
-#define DS_FREE(ptr) if (ptr != NULL) { free (ptr); ptr = NULL; }
-#define DS_FREESTR(str) if (str != NULL) {sdsfree (str); str = NULL; }
+/*
+ * Smarter memory de-allocation functions
+ */
+#define DS_FREE(ptr)    if (ptr != NULL) { free    (ptr); ptr = NULL; }
+#define DS_FREESTR(str) if (str != NULL) { sdsfree (str); str = NULL; }
 
 extern uint32_t DS_CRC32 (uint32_t crc, const void* buf, size_t size);
 

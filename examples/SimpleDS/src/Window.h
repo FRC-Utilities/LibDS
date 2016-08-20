@@ -44,8 +44,9 @@ public:
 
 public slots:
     void updateEnabled (int unused);
-    void updateControlMode (int unused);
     void setVoltage (double voltage);
+    void syncButtons (bool enabled);
+    void updateControlMode (int unused);
 
 private:
     Ui::Window* ui;

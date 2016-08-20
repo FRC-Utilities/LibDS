@@ -28,24 +28,22 @@
 extern "C" {
 #endif
 
-#include <stdio.h>
-#include <stdlib.h>
-
 typedef struct _queue {
-    size_t count;
-    size_t capacity;
-    size_t item_size;
+    int count;
+    int item_size;
+    int max_elements;
 
-    void* head;
-    void* tail;
-    void* buffer;
-    void* buffer_end;
+    int rear;
+    int front;
+
+    void** buffer;
 } DS_Queue;
 
 extern int DS_QueuePop (DS_Queue* queue);
 extern void DS_QueueFree (DS_Queue* queue);
-extern void DS_QueuePush (DS_Queue* queue, void** item);
-extern void DS_QueueInit (DS_Queue* queue, size_t capacity, size_t item);
+extern void* DS_QueueGetFirst (DS_Queue* queue);
+extern void DS_QueuePush (DS_Queue* queue, void* item);
+extern void DS_QueueInit (DS_Queue* queue, int max_elements, int item_size);
 
 #ifdef __cplusplus
 }

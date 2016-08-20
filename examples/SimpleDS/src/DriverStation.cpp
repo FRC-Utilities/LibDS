@@ -481,7 +481,7 @@ void DriverStation::switchToTeleoperated()
 /**
  * Disables or enables the robot
  */
-void DriverStation::setEnabled (const bool  enabled)
+void DriverStation::setEnabled (const bool enabled)
 {
     DS_SetRobotEnabled (enabled);
 }
@@ -735,8 +735,7 @@ void DriverStation::setJoystickButton (int joystick, int button, bool pressed)
  */
 void DriverStation::quitDS()
 {
-    if (initialized)
-        DS_Close();
+    DS_Close();
 }
 
 /**

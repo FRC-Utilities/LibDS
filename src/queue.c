@@ -24,91 +24,106 @@
 #include "DS_Utils.h"
 #include "DS_Queue.h"
 
+#include <stdlib.h>
 #include <string.h>
 
-/**
- * Removes an item from the \a queue
- */
-int DS_QueuePop (DS_Queue* queue)
+extern int DS_QueuePop (DS_Queue* queue)
 {
-    /* Pointer is NULL */
+    /* Queue is NULL */
     if (!queue)
         return 0;
 
-    /* There are no items in the queue */
-    if (queue->count < 1)
+    /* There are no items on the queue */
+    if (queue->count <= 0)
         return 0;
 
-    /* Re-assign the pointer of the last item */
-    if (queue->tail == queue->buffer_end)
-        queue->tail = queue->buffer;
+    /* Update queue properties */
+    --queue->count;
+    ++queue->front;
 
-    /* Decrease the number of items in queue */
-    queue->count--;
+    /* This is a circular queue, go back to the beginning */
+    if (queue->front >= queue->max_elements)
+        queue->front = 0;
+
     return 1;
 }
 
-/**
- * De-allocates the memory used by the \a queue and resets its properties
- */
-void DS_QueueFree (DS_Queue* queue)
+extern void DS_QueueFree (DS_Queue* queue)
 {
-    /* Pointer is NULL */
+    /* Queue is NULL, abort */
     if (!queue)
         return;
 
-    /* De-allocate the queue data */
+    /* Free all the items in the queue */
+    int element;
+    for (element = 0; element < queue->max_elements; ++element)
+        DS_FREE (queue->buffer [element]);
+
+    /* Delete the buffer */
     DS_FREE (queue->buffer);
 
-    /* Reset the queue's properties */
+    /* Reset queue properties */
+    queue->rear = -1;
     queue->count = 0;
-    queue->capacity = 0;
+    queue->front = 0;
     queue->item_size = 0;
+    queue->max_elements = 0;
 }
 
-/**
- * Inserts the given \a item into the \a queue
- */
-void DS_QueuePush (DS_Queue* queue, void** item)
+void* DS_QueueGetFirst (DS_Queue* queue)
 {
-    /* Pointer is NULL */
+    /* We won't crash, unless the programmer does not check return value */
+    if (!queue)
+        return NULL;
+
+    /* There are no items on the queue */
+    if (queue->count <= 0)
+        return NULL;
+
+    /* Get the first item in the list */
+    return (void*) queue->buffer [queue->front];
+}
+
+void DS_QueuePush (DS_Queue* queue, void* item)
+{
+    /* You can thank me later */
     if (!queue)
         return;
 
-    /* We have reached the queue's capacity */
-    if (queue->count == queue->capacity)
+    /* Queue is full, abort */
+    if (queue->count >= queue->max_elements)
         return;
 
-    /* Copy the given item to the first element */
-    memcpy (queue->head, item, queue->item_size);
+    /* Update queue properties */
+    ++queue->rear;
+    ++queue->count;
 
-    /* Re-assign the pointer of the first element */
-    if (queue->head == queue->buffer_end)
-        queue->head = queue->buffer;
+    /* Front item should be somewhere in the middle by now */
+    if (queue->rear >= queue->max_elements)
+        queue->rear = 0;
 
-    /* Increase the items in queue */
-    queue->count++;
+    /* Since we don't want to depend on potential idiots, copy the data */
+    memcpy (queue->buffer [queue->rear], item, queue->item_size);
 }
 
-/**
- * Initializes the given \a queue with the given \a capacity and \a item size
- */
-void DS_QueueInit (DS_Queue* queue, size_t capacity, size_t item)
+void DS_QueueInit (DS_Queue* queue, int max_elements, int item_size)
 {
-    /* Pointer is NULL */
-    if (!queue)
-        return;
-
-    /* Set general properties */
+    /* Set initial navitation values */
+    queue->rear = -1;
     queue->count = 0;
-    queue->item_size = item;
-    queue->capacity = capacity;
+    queue->front = 0;
 
-    /* Initialize the data buffer */
-    queue->buffer = malloc (capacity * item);
-    queue->buffer_end = (char*) queue->buffer + capacity * item;
+    /* Set queue properties */
+    queue->item_size = item_size;
+    queue->max_elements = max_elements;
 
-    /* Initialize the first and last item pointer */
-    queue->head = queue->buffer;
-    queue->tail = queue->buffer;
+    /* Initialize the pointer list */
+    queue->buffer = calloc (max_elements, max_elements * item_size);
+
+    /* Initialize each item in the list */
+    int item;
+    for (item = 0; item < max_elements; ++item) {
+        queue->buffer [item] = malloc (item_size);
+        memset (queue->buffer [item], 0, item_size);
+    }
 }

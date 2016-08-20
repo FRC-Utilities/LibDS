@@ -23,7 +23,6 @@
 #include "Window.h"
 #include "DriverStation.h"
 
-#include <math.h>
 #include <QMessageBox>
 
 /**
@@ -74,7 +73,7 @@ Window::Window (QWidget* parent) : QMainWindow (parent)
 
     /* Make sure that enabled buttons are in sync with DS */
     connect (ds,       SIGNAL (enabledChanged (bool)),
-             ui->Enable, SLOT (setChecked (bool)));
+             this,       SLOT (syncButtons (bool)));
 
     /* Update team station automatically */
     connect (ui->TeamStation, SIGNAL (currentIndexChanged (int)),
@@ -137,6 +136,16 @@ void Window::updateEnabled (int unused)
 }
 
 /**
+ * Ensures that the check-state of the buttons is the same as the enabled-state
+ * reported by the Driver Station
+ */
+void Window::syncButtons (bool enabled)
+{
+    ui->Enable->setChecked (enabled);
+    ui->Disable->setChecked (!enabled);
+}
+
+/**
  * Called when the user changes the desired operation mode of the robot
  *
  * \param unused unused value (which is needed for the singal/slot connection)
@@ -167,6 +176,9 @@ void Window::updateControlMode (int unused)
  */
 void Window::setVoltage (double voltage)
 {
-    voltage = roundf (voltage * 100) / 100;
-    ui->Voltage->setText (QString ("%1 V").arg (voltage));
+    if (ds->connectedToRobot())
+        ui->Voltage->setText (QString ("%1 V").arg (voltage));
+
+    else
+        ui->Voltage->setText ("--.--");
 }
