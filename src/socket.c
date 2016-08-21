@@ -270,6 +270,9 @@ void DS_SocketClose (DS_Socket* ptr)
     /* Reset the info structure */
     ptr->info.client_init = 0;
     ptr->info.server_init = 0;
+
+    /* Clear the buffer */
+    DS_FREESTR (ptr->info.buffer);
     ptr->info.buffer = sdsempty();
 
     /* Clear socket buffer */
@@ -352,7 +355,10 @@ void DS_SocketChangeAddress (DS_Socket* ptr, sds address)
     DS_SocketClose (ptr);
 
     /* Re-assign address */
-    ptr->address = sdscpy (sdsempty(), address);
+    if (sdscmp (ptr->address, address) != 0) {
+        DS_FREESTR (ptr->address);
+        ptr->address = sdscpy (sdsempty(), address);
+    }
 
     /* Open socket */
     DS_SocketOpen (ptr);
