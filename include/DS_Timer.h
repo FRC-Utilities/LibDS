@@ -32,14 +32,15 @@ extern "C" {
  * Represents a tiemr and its properties
  */
 typedef struct _timer {
-    int time;        /**< The time to wait until the timer expires */
-    int expired;     /**< Set to \c 1 if \a elapsed is greater than \a time */
-    int enabled;     /**< Enabled state of the timer */
-    int elapsed;     /**< Number of milliseconds elapsed since last reset */
-    int precision;   /**< The update interval (in milliseconds) */
-    int initialized; /**< Set to \c 1 if the timer has been initialized */
+    int time;         /**< The time to wait until the timer expires */
+    int expired;      /**< Set to \c 1 if \a elapsed is greater than \a time */
+    int enabled;      /**< Enabled state of the timer */
+    int elapsed;      /**< Number of milliseconds elapsed since last reset */
+    int precision;    /**< The update interval (in milliseconds) */
+    int initialized;  /**< Set to \c 1 if the timer has been initialized */
 } DS_Timer;
 
+extern void Timers_Init();
 extern void Timers_Close();
 extern void DS_Sleep (const int millisecs);
 extern void DS_TimerStop (DS_Timer* timer);

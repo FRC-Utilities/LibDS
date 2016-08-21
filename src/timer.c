@@ -21,6 +21,7 @@
  * DEALINGS IN THE SOFTWARE.
  */
 
+#include "DS_Array.h"
 #include "DS_Timer.h"
 
 #include <stdio.h>
@@ -32,6 +33,7 @@
     #include <unistd.h>
 #endif
 
+static DS_Array array;
 static int running = 1;
 
 /**
@@ -61,11 +63,20 @@ static void* update_timer (void* ptr)
 }
 
 /**
- * Breaks all the timer loops
+ * Initializes the array that holds all registered timers
+ */
+void Timers_Init()
+{
+    DS_ArrayInit (&array, sizeof (DS_Timer) * 2);
+}
+
+/**
+ * Breaks all the timer loops and de-allocates all the timers
  */
 void Timers_Close()
 {
     running = 0;
+    DS_ArrayFree (&array);
 }
 
 /**
@@ -148,7 +159,11 @@ int DS_TimerInit (DS_Timer* timer, const int time, const int precision)
         if (error)
             printf ("Cannot start timer %p (%d)", timer, error);
 
-        return !error;
+        /* Register the timer */
+        DS_ArrayInsert (&array, (void*) timer);
+
+        /* Return 1 if there are no errors */
+        return (error == 0);
     }
 
     return 0;

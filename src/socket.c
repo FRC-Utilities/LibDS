@@ -21,6 +21,7 @@
  * DEALINGS IN THE SOFTWARE.
  */
 
+#include "DS_Timer.h"
 #include "DS_Array.h"
 #include "DS_Utils.h"
 #include "DS_Socket.h"
@@ -74,7 +75,7 @@ static void read_socket (DS_Socket* ptr)
     }
 
     /* De-allocate temporary data */
-    sdsfree (data);
+    DS_FREESTR (data);
 }
 
 /**
@@ -101,7 +102,7 @@ static void* server_loop (void* ptr)
     tv.tv_usec = 5000;
 
     /* Execute the event loop */
-    while (sock->info.server_init) {
+    while (sock->info.server_init == 1) {
         fd_set set;
         FD_ZERO (&set);
         FD_SET (sock->info.sock_in, &set);
@@ -116,6 +117,9 @@ static void* server_loop (void* ptr)
         /* Data is available */
         if (select (nfds, &set, NULL, NULL, &tv) > 0)
             read_socket (sock);
+
+        /* Pause the execution to avoid burning CPU */
+        DS_Sleep (1);
     }
 
     return NULL;
@@ -170,8 +174,7 @@ static void* create_socket (void* data)
     ptr->info.client_init = (ptr->info.sock_out > 0);
 
     /* Start server loop */
-    pthread_t thread;
-    pthread_create (&thread, NULL, &server_loop, (void*) ptr);
+    pthread_create (&ptr->info.server_thread, NULL, &server_loop, (void*) ptr);
 
     /* Exit */
     return NULL;
@@ -189,6 +192,7 @@ DS_Socket DS_SocketEmpty()
     info.sock_out = -1;
     info.server_init = 0;
     info.client_init = 0;
+    info.server_thread = 0;
     info.buffer = sdsempty();
     info.in_service = sdsempty();
     info.out_service = sdsempty();
@@ -270,6 +274,9 @@ void DS_SocketClose (DS_Socket* ptr)
     /* Reset the info structure */
     ptr->info.client_init = 0;
     ptr->info.server_init = 0;
+
+    /* Remove server thread */
+    pthread_join (ptr->info.server_thread, NULL);
 
     /* Clear the buffer */
     DS_FREESTR (ptr->info.buffer);
@@ -355,10 +362,8 @@ void DS_SocketChangeAddress (DS_Socket* ptr, sds address)
     DS_SocketClose (ptr);
 
     /* Re-assign address */
-    if (sdscmp (ptr->address, address) != 0) {
-        DS_FREESTR (ptr->address);
+    if (sdscmp (ptr->address, address) != 0)
         ptr->address = sdscpy (sdsempty(), address);
-    }
 
     /* Open socket */
     DS_SocketOpen (ptr);
