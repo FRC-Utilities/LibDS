@@ -106,8 +106,15 @@ static void* server_loop (void* ptr)
         FD_ZERO (&set);
         FD_SET (sock->info.sock_in, &set);
 
+        /* Windows needs the first parameter to be 0 in order to work */
+#if defined _WIN32
+        int nfds = 0;
+#else
+        int nfds = sock->info.sock_in + 1;
+#endif
+
         /* Data is available */
-        if (select (0, &set, NULL, NULL, &tv) > 0)
+        if (select (nfds, &set, NULL, NULL, &tv) > 0)
             read_socket (sock);
     }
 
@@ -345,7 +352,6 @@ void DS_SocketChangeAddress (DS_Socket* ptr, sds address)
     DS_SocketClose (ptr);
 
     /* Re-assign address */
-    DS_FREESTR (ptr->address);
     ptr->address = sdscpy (sdsempty(), address);
 
     /* Open socket */
