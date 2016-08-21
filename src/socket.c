@@ -174,7 +174,8 @@ static void* create_socket (void* data)
     ptr->info.client_init = (ptr->info.sock_out > 0);
 
     /* Start server loop */
-    pthread_create (&ptr->info.server_thread, NULL, &server_loop, (void*) ptr);
+    pthread_t thread;
+    pthread_create (&thread, NULL, &server_loop, (void*) ptr);
 
     /* Exit */
     return NULL;
@@ -192,7 +193,6 @@ DS_Socket DS_SocketEmpty()
     info.sock_out = -1;
     info.server_init = 0;
     info.client_init = 0;
-    info.server_thread = 0;
     info.buffer = sdsempty();
     info.in_service = sdsempty();
     info.out_service = sdsempty();
@@ -274,9 +274,6 @@ void DS_SocketClose (DS_Socket* ptr)
     /* Reset the info structure */
     ptr->info.client_init = 0;
     ptr->info.server_init = 0;
-
-    /* Remove server thread */
-    pthread_join (ptr->info.server_thread, NULL);
 
     /* Clear the buffer */
     DS_FREESTR (ptr->info.buffer);

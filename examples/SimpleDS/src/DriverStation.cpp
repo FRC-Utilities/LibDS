@@ -22,11 +22,13 @@
 
 #include "DriverStation.h"
 
+#include <thread>
+
 #include <QTimer>
 #include <LibDS.h>
 #include <QApplication>
 
-static bool initialized = false;
+static bool initialized = 0;
 
 /**
  * Converts the given \c QString into a \c SDS string
@@ -798,5 +800,5 @@ void DriverStation::processEvents()
         }
     }
 
-    QTimer::singleShot (5, Qt::PreciseTimer, this, SLOT (processEvents()));
+    QTimer::singleShot (5, Qt::CoarseTimer, this, SLOT (processEvents()));
 }

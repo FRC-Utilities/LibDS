@@ -155,9 +155,9 @@ int DS_TimerInit (DS_Timer* timer, const int time, const int precision)
         pthread_t thread;
         int error = pthread_create (&thread, NULL, &update_timer, (void*) timer);
 
-        /* Warn the user if thread fails to start */
+        /* Report thread creation errors */
         if (error)
-            printf ("Cannot start timer %p (%d)", timer, error);
+            fprintf (stderr, "Cannot create timer thread, error %d\n", error);
 
         /* Register the timer */
         DS_ArrayInsert (&array, (void*) timer);

@@ -76,6 +76,11 @@ static sds radio_data = NULL;
 static sds robot_data = NULL;
 static sds netcs_data = NULL;
 
+/*
+ * Event thread ID
+ */
+static pthread_t thread;
+
 /**
  * Sends a new packet to the FMS
  */
@@ -276,7 +281,6 @@ void Protocols_Init()
     running = 1;
 
     /* Configure the event thread */
-    pthread_t thread;
     int error = pthread_create (&thread, NULL, &run_event_loop, NULL);
 
     /* Quit if the thread fails to start */
@@ -322,6 +326,7 @@ void Protocols_Close()
 {
     running = 0;
     close_protocol();
+    pthread_join (thread, NULL);
 }
 
 /**
