@@ -79,8 +79,16 @@ static void read_socket (DS_Socket* ptr)
 }
 
 /**
- * Runs the server socket loop, which reads received data only when the
- * socket receives data.
+ * Runs the server socket loop, which uses the \c select() function
+ * to copy received data into the socket's buffer only when the
+ * operating system detects that the socket received some data.
+ *
+ * Some people would use a socket timeout in this situation.
+ * However, we don't need that since each socket needs to have its
+ * own thread (because FRC networking is relatively intensive).
+ * Since each socket has its own dedicated thread, we can affort to
+ * use a blocking \c select() call, which also reduces the overall
+ * CPU usage of the application.
  *
  * \param ptr a pointer to a \c DS_Socket structure
  */
@@ -90,9 +98,8 @@ static void* server_loop (void* ptr)
     if (!ptr)
         return NULL;
 
-    /* Make the socket non-blocking */
+    /* Cast the generic pointer into a socket */
     DS_Socket* sock = (DS_Socket*) ptr;
-    set_socket_block (sock->info.sock_in, 0);
 
     /* Set file descriptor properties */
     fd_set set;
@@ -106,7 +113,10 @@ static void* server_loop (void* ptr)
     int nfds = sock->info.sock_in + 1;
 #endif
 
-    /* Read socket data */
+    /*
+     * Read received data, note that \c select() will block
+     * the thread until there is data available for reading
+     */
     while (sock->info.server_init == 1) {
         if (select (nfds, &set, NULL, NULL, NULL) > 0) {
             if (FD_ISSET (sock->info.sock_in, &set))
@@ -193,10 +203,10 @@ DS_Socket DS_SocketEmpty()
     info.out_service = sdsempty();
 
     socket.info = info;
-    socket.disabled = 0;
-    socket.broadcast = 0;
     socket.in_port = 0;
     socket.out_port = 0;
+    socket.disabled = 0;
+    socket.broadcast = 0;
     socket.address = sdsempty();
     socket.type = DS_SOCKET_UDP;
 
