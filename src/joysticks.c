@@ -59,7 +59,10 @@ static void register_event()
  */
 DS_Joystick* get_joystick (int joystick)
 {
-    return (DS_Joystick*) array.data [joystick];
+    if ((int) array.used > joystick)
+        return (DS_Joystick*) array.data [joystick];
+
+    return NULL;
 }
 
 /**
@@ -193,7 +196,7 @@ void DS_JoysticksReset()
 void DS_JoysticksAdd (const int axes, const int hats, const int buttons)
 {
     /* Allocate memory for a new joystick */
-    DS_Joystick* joystick = (DS_Joystick*) malloc (sizeof (DS_Joystick));
+    DS_Joystick* joystick = calloc (1, sizeof (DS_Joystick));
 
     /* Set joystick properties */
     joystick->num_axes = axes;

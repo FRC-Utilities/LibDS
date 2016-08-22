@@ -96,32 +96,28 @@ static void* server_loop (void* ptr)
     /* Make the socket non-blockinf */
     set_socket_block (sock->info.sock_in, 0);
 
-    /* Configure a 5-ms timeout */
-    struct timeval tv;
-    tv.tv_sec = 0;
-    tv.tv_usec = 5000;
+    /* Set file descriptor properties */
+    fd_set set;
+    FD_ZERO (&set);
+    FD_SET (sock->info.sock_in, &set);
 
-    /* Execute the event loop */
-    while (sock->info.server_init == 1) {
-        fd_set set;
-        FD_ZERO (&set);
-        FD_SET (sock->info.sock_in, &set);
-
-        /* Windows needs the first parameter to be 0 in order to work */
+    /* Windows needs the first parameter to be 0 in order to work */
 #if defined _WIN32
-        int nfds = 0;
+    int nfds = 0;
 #else
-        int nfds = sock->info.sock_in + 1;
+    int nfds = sock->info.sock_in + 1;
 #endif
 
-        /* Data is available */
-        if (select (nfds, &set, NULL, NULL, &tv) > 0)
-            read_socket (sock);
-
-        /* Pause the execution to avoid burning CPU */
-        DS_Sleep (1);
+    /* Read socket data */
+    while (sock->info.server_init == 1) {
+        if (select (nfds, &set, NULL, NULL, NULL) > 0) {
+            if (FD_ISSET (sock->info.sock_in, &set))
+                read_socket (sock);
+        }
     }
 
+    /* Close the thread and quit */
+    pthread_join (sock->info.server_thread, NULL);
     return NULL;
 }
 
@@ -174,10 +170,11 @@ static void* create_socket (void* data)
     ptr->info.client_init = (ptr->info.sock_out > 0);
 
     /* Start server loop */
-    pthread_t thread;
-    pthread_create (&thread, NULL, &server_loop, (void*) ptr);
+    pthread_create (&ptr->info.server_thread,
+                    NULL, &server_loop, (void*) ptr);
 
     /* Exit */
+    pthread_join (ptr->info.create_thread, NULL);
     return NULL;
 }
 
@@ -251,8 +248,8 @@ void DS_SocketOpen (DS_Socket* ptr)
         return;
 
     /* Initialize the socket in another thread */
-    pthread_t thread;
-    pthread_create (&thread, NULL, &create_socket, (void*) ptr);
+    pthread_create (&ptr->info.create_thread,
+                    NULL, &create_socket, (void*) ptr);
 }
 
 /**

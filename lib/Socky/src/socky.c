@@ -219,6 +219,7 @@ static int create_server (const char* host, const char* port,
     }
 
     /* Server socket setup correctly */
+    freeaddrinfo (info);
     return sfd;
 }
 
@@ -409,13 +410,12 @@ int create_client_tcp (const char* host, const char* port,
     if (info == NULL) {
         error (sfd, "cannot connect to any address!", GET_ERR);
         socket_close (sfd);
-
-        /* Fuck */
         return -1;
     }
 
     /* Yay! */
     freeaddrinfo (addr);
+    freeaddrinfo (info);
     return sfd;
 }
 
@@ -552,8 +552,10 @@ int udp_sendto (const int sfd,
                                               SOCKY_UDP, SOCKY_ANY);
 
     /* Invalid address info */
-    if (info == NULL)
+    if (info == NULL) {
+        freeaddrinfo (info);
         return -1;
+    }
 
     /* Send datagram */
     int bytes = sendto (sfd, buf, buf_len, flags,
@@ -602,5 +604,6 @@ int udp_recvfrom (const int sfd, char* buf, const int buf_len,
 #endif
 
     /* Return the number of bytes received */
+    freeaddrinfo (info);
     return bytes;
 }

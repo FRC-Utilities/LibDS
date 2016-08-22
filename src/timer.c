@@ -33,7 +33,6 @@
     #include <unistd.h>
 #endif
 
-static DS_Array array;
 static int running = 1;
 
 /**
@@ -59,24 +58,16 @@ static void* update_timer (void* ptr)
         DS_Sleep (timer->precision);
     }
 
+    pthread_join (timer->thread, NULL);
     return NULL;
 }
 
 /**
- * Initializes the array that holds all registered timers
- */
-void Timers_Init()
-{
-    DS_ArrayInit (&array, sizeof (DS_Timer) * 2);
-}
-
-/**
- * Breaks all the timer loops and de-allocates all the timers
+ * Breaks all the timer loops
  */
 void Timers_Close()
 {
     running = 0;
-    DS_ArrayFree (&array);
 }
 
 /**
@@ -152,15 +143,12 @@ int DS_TimerInit (DS_Timer* timer, const int time, const int precision)
         timer->precision = precision;
 
         /* Configure the thread */
-        pthread_t thread;
-        int error = pthread_create (&thread, NULL, &update_timer, (void*) timer);
+        int error = pthread_create (&timer->thread, NULL,
+                                    &update_timer, (void*) timer);
 
         /* Report thread creation errors */
         if (error)
             fprintf (stderr, "Cannot create timer thread, error %d\n", error);
-
-        /* Register the timer */
-        DS_ArrayInsert (&array, (void*) timer);
 
         /* Return 1 if there are no errors */
         return (error == 0);

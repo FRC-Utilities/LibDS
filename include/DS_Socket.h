@@ -36,13 +36,15 @@ extern "C" {
  * to operate with the data provided by a \c DS_Socket structure
  */
 typedef struct {
-    sds buffer;      /**< Holds received data */
-    sds in_service;  /**< Input port string */
-    sds out_service; /**< Output port string */
-    int sock_in;     /**< Server socket file descriptor */
-    int sock_out;    /**< Client socket file descriptor */
-    int client_init; /**< Set to \c 1 if client socket is initialized */
-    int server_init; /**< Set to \c 1 if server socket is initialized */
+    sds buffer;              /**< Holds received data */
+    sds in_service;          /**< Input port string */
+    sds out_service;         /**< Output port string */
+    int sock_in;             /**< Server socket file descriptor */
+    int sock_out;            /**< Client socket file descriptor */
+    int client_init;         /**< Set to \c 1 if client socket is initialized */
+    int server_init;         /**< Set to \c 1 if server socket is initialized */
+    pthread_t server_thread; /** Server event thread */
+    pthread_t create_thread; /** Server event thread */
 } DS_SocketInfo;
 
 /**
