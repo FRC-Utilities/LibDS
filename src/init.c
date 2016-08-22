@@ -33,6 +33,7 @@ void DS_Init()
     if (init == 0) {
         init = 1;
 
+        Timers_Init();
         Client_Init();
         Events_Init();
         Sockets_Init();

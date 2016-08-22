@@ -33,6 +33,7 @@
     #include <unistd.h>
 #endif
 
+static DS_Array timers;
 static int running = 1;
 
 /**
@@ -58,8 +59,15 @@ static void* update_timer (void* ptr)
         DS_Sleep (timer->precision);
     }
 
-    pthread_join (timer->thread, NULL);
     return NULL;
+}
+
+/**
+ * Initializes the timer arrays
+ */
+void Timers_Init()
+{
+    DS_ArrayInit (&timers, sizeof (DS_Timer) * 10);
 }
 
 /**
@@ -67,7 +75,22 @@ static void* update_timer (void* ptr)
  */
 void Timers_Close()
 {
+    /* Stop timer loops */
     running = 0;
+
+    /* Stop all timer threads */
+    int timer;
+    for (timer = 0; timer < (int) timers.used; ++timer) {
+        DS_Timer* ptr = (DS_Timer*) timers.data [timer];
+
+        if (ptr != NULL) {
+            pthread_cancel (ptr->thread);
+            pthread_join (ptr->thread, NULL);
+        }
+    }
+
+    /* Delete all the timers */
+    DS_ArrayFree (&timers);
 }
 
 /**

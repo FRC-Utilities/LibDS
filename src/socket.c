@@ -66,7 +66,7 @@ static void read_socket (DS_Socket* ptr)
 
     /* We received some data, copy it to socket's buffer */
     if (read > 0) {
-        sdsfree (ptr->info.buffer);
+        DS_FREESTR (ptr->info.buffer);
         ptr->info.buffer = sdsnewlen (NULL, read);
 
         int i;
@@ -90,10 +90,8 @@ static void* server_loop (void* ptr)
     if (!ptr)
         return NULL;
 
-    /* Cast to socket pointer */
+    /* Make the socket non-blocking */
     DS_Socket* sock = (DS_Socket*) ptr;
-
-    /* Make the socket non-blockinf */
     set_socket_block (sock->info.sock_in, 0);
 
     /* Set file descriptor properties */
@@ -116,8 +114,7 @@ static void* server_loop (void* ptr)
         }
     }
 
-    /* Close the thread and quit */
-    pthread_join (sock->info.server_thread, NULL);
+    /* Exit */
     return NULL;
 }
 
@@ -174,7 +171,6 @@ static void* create_socket (void* data)
                     NULL, &server_loop, (void*) ptr);
 
     /* Exit */
-    pthread_join (ptr->info.create_thread, NULL);
     return NULL;
 }
 
@@ -190,6 +186,8 @@ DS_Socket DS_SocketEmpty()
     info.sock_out = -1;
     info.server_init = 0;
     info.client_init = 0;
+    info.create_thread = 0;
+    info.server_thread = 0;
     info.buffer = sdsempty();
     info.in_service = sdsempty();
     info.out_service = sdsempty();
@@ -268,15 +266,14 @@ void DS_SocketClose (DS_Socket* ptr)
     socket_close (ptr->info.sock_in);
     socket_close (ptr->info.sock_out);
 
-    /* Reset the info structure */
-    ptr->info.client_init = 0;
-    ptr->info.server_init = 0;
+    /* Close socket threads */
+    pthread_cancel (ptr->info.server_thread);
+    pthread_cancel (ptr->info.create_thread);
+    pthread_join (ptr->info.server_thread, NULL);
+    pthread_join (ptr->info.create_thread, NULL);
 
-    /* Clear the buffer */
+    /* Clear data buffers */
     DS_FREESTR (ptr->info.buffer);
-    ptr->info.buffer = sdsempty();
-
-    /* Clear socket buffer */
     DS_FREESTR (ptr->info.in_service);
     DS_FREESTR (ptr->info.out_service);
 }
@@ -349,16 +346,18 @@ int DS_SocketSend (DS_Socket* ptr, sds data)
 void DS_SocketChangeAddress (DS_Socket* ptr, sds address)
 {
     /* Check if pointer is NULL */
-    if (!ptr)
+    if (!ptr || !address)
         return;
 
-    /* Close socket */
+    /* Close the socket */
     DS_SocketClose (ptr);
 
-    /* Re-assign address */
-    if (sdscmp (ptr->address, address) != 0)
-        ptr->address = sdscpy (sdsempty(), address);
+    /* Re-assign the address */
+    if (strcmp (ptr->address, address) != 0) {
+        DS_FREESTR (ptr->address);
+        ptr->address = sdsdup (address);
+    }
 
-    /* Open socket */
+    /* Re-configure the socket */
     DS_SocketOpen (ptr);
 }
