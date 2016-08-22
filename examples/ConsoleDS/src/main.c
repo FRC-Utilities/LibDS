@@ -112,9 +112,6 @@ static void process_events()
         case DS_ROBOT_CODE_CHANGED:
             set_robot_code (event.robot.code);
             break;
-        case DS_ROBOT_ENABLED_CHANGED:
-            set_enabled (event.robot.enabled);
-            break;
         default:
             break;
         }

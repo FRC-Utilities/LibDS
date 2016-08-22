@@ -40,7 +40,7 @@
  * Define windows
  */
 static WINDOW* window = NULL;
-static WINDOW* enabled_win = NULL;
+static WINDOW* robotip_win = NULL;
 static WINDOW* console_win = NULL;
 static WINDOW* status_info = NULL;
 static WINDOW* voltage_win = NULL;
@@ -55,24 +55,12 @@ static sds cpu_str = NULL;
 static sds ram_str = NULL;
 static sds disk_str = NULL;
 static sds rstatus_str = NULL;
-static sds enabled_str = NULL;
+static sds robot_ip = NULL;
 static sds voltage_str = NULL;
 static sds console_str = NULL;
 static sds stick_check_str = NULL;
 static sds rcode_check_str = NULL;
 static sds robot_check_str = NULL;
-
-/**
- * Clears the console screen output
- */
-static void clear_scr()
-{
-#if defined _WIN32
-    (void) system ("cls");
-#else
-    (void) system ("clear");
-#endif
-}
 
 /**
  * Changes the \a label to "[*]" if checked is greater than \c 0,
@@ -110,8 +98,8 @@ static void init_strings()
     cpu_str = sdsnew (INVALID);
     ram_str = sdsnew (INVALID);
     disk_str = sdsnew (INVALID);
+    robot_ip = sdsnew (INVALID);
     voltage_str = sdsnew (INVALID);
-    enabled_str = sdsnew (DISABLED);
     rstatus_str = sdsnew (DS_GetStatusString());
     console_str = sdsnew ("[INFO] Welcome to the ConsoleDS!");
 }
@@ -125,8 +113,8 @@ static void close_strings()
     DS_FREESTR (cpu_str);
     DS_FREESTR (ram_str);
     DS_FREESTR (disk_str);
+    DS_FREESTR (robot_ip);
     DS_FREESTR (rstatus_str);
-    DS_FREESTR (enabled_str);
     DS_FREESTR (voltage_str);
     DS_FREESTR (console_str);
     DS_FREESTR (stick_check_str);
@@ -140,7 +128,7 @@ static void close_strings()
 static void draw_windows()
 {
     /* Delete the windows */
-    delwin (enabled_win);
+    delwin (robotip_win);
     delwin (console_win);
     delwin (status_info);
     delwin (voltage_win);
@@ -155,7 +143,7 @@ static void draw_windows()
 
     /* Create top windows */
     voltage_win  = newwin (top_height, side_width, 0, 0);
-    enabled_win  = newwin (top_height, side_width, 0, COLS - side_width);
+    robotip_win  = newwin (top_height, side_width, 0, COLS - side_width);
     robot_status = newwin (top_height, COLS - 2 * (side_width), 0, side_width);
 
     /* Create central windows */
@@ -168,14 +156,14 @@ static void draw_windows()
     /* Draw borders */
     wborder (voltage_win,   0, 0, 0, 0, 0, 0, 0, 0);
     wborder (robot_status,  0, 0, 0, 0, 0, 0, 0, 0);
-    wborder (enabled_win,   0, 0, 0, 0, 0, 0, 0, 0);
+    wborder (robotip_win,   0, 0, 0, 0, 0, 0, 0, 0);
     wborder (console_win,   0, 0, 0, 0, 0, 0, 0, 0);
     wborder (status_info,   0, 0, 0, 0, 0, 0, 0, 0);
     wborder (bottom_window, 0, 0, 0, 0, 0, 0, 0, 0);
 
     /* Add top window elements */
     mvwaddstr (console_win,  1, 2, console_str);
-    mvwaddstr (enabled_win,  1, 2, enabled_str);
+    mvwaddstr (robotip_win,  1, 2, robot_ip);
     mvwaddstr (robot_status, 1, 2, rstatus_str);
 
     /* Add voltage elements */
@@ -215,7 +203,7 @@ static void draw_windows()
 static void refresh_windows()
 {
     wnoutrefresh (window);
-    wnoutrefresh (enabled_win);
+    wnoutrefresh (robotip_win);
     wnoutrefresh (console_win);
     wnoutrefresh (status_info);
     wnoutrefresh (voltage_win);
@@ -228,7 +216,7 @@ static void refresh_windows()
  */
 void init_interface()
 {
-    clear_scr();
+    clear();
     init_strings();
     window = initscr();
 
@@ -241,7 +229,7 @@ void init_interface()
     curs_set (0);
     keypad (window, 1);
 
-    clear_scr();
+    clear();
 }
 
 /**
@@ -254,7 +242,7 @@ void close_interface()
     refresh();
     close_strings();
 
-    clear_scr();
+    clear();
 }
 
 /**
@@ -304,15 +292,6 @@ void set_disk (const int disk)
 }
 
 /**
- * Updates the text of the \a enabled label
- */
-void set_enabled (const int enabled)
-{
-    DS_FREESTR (enabled_str);
-    enabled_str = sdsnew (enabled ? ENABLED : DISABLED);
-}
-
-/**
  * Updates the state of the robot code checkbox
  */
 void set_robot_code (const int code)
@@ -325,6 +304,8 @@ void set_robot_code (const int code)
  */
 void set_robot_comms (const int comms)
 {
+    DS_FREESTR (robot_ip);
+    robot_ip = sdsdup (DS_GetAppliedRobotAddress());
     robot_check_str = set_checked (robot_check_str, comms);
 }
 
@@ -334,7 +315,7 @@ void set_robot_comms (const int comms)
 void set_voltage (const double voltage)
 {
     DS_FREESTR (voltage_str);
-    voltage_str = update_label (sdscatprintf (sdsempty(), "%.2f V", voltage));
+    voltage_str = update_label (sdscatprintf (sdsempty(), "%.2f", voltage));
 }
 
 /**

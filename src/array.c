@@ -24,6 +24,8 @@
 #include "DS_Array.h"
 #include "DS_Utils.h"
 
+#include <stdio.h>
+
 /**
  * Deallocates the memory used to store the \a array data and resets the
  * properties of the \a array to 0.
@@ -50,14 +52,19 @@ void DS_ArrayFree (DS_Array* array)
 void DS_ArrayInsert (DS_Array* array, void* element)
 {
     /* Array pointer is NULL */
-    if (!array)
+    if (!array || !element)
         return;
+
+    /* If array data is empty, abort */
+    if (!array->data) {
+        fprintf (stderr, "Array %p is not initialized!\n", array);
+        return;
+    }
 
     /* Resize array if required */
     if (array->used == array->size) {
         array->size *= 2;
-        array->data = (void*) realloc (array->data,
-                                       array->size * sizeof (void*));
+        array->data = realloc (array->data, array->size);
     }
 
     /* Insert element */
@@ -74,7 +81,7 @@ void DS_ArrayInit (DS_Array* array, size_t initial_size)
         return;
 
     /* Allocate array data */
-    array->data = (void*) realloc (array->data, initial_size);
+    array->data = realloc (array->data, initial_size);
 
     /* Update array data */
     array->used = 0;

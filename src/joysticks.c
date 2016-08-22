@@ -70,7 +70,7 @@ DS_Joystick* get_joystick (int joystick)
  */
 void Joysticks_Init()
 {
-    DS_ArrayInit (&array, (sizeof (DS_Joystick) * 2));
+    DS_ArrayInit (&array, (sizeof (DS_Joystick)));
 }
 
 /**
@@ -185,6 +185,8 @@ int DS_GetJoystickButton (int joystick, int button)
 void DS_JoysticksReset()
 {
     DS_ArrayFree (&array);
+    DS_ArrayInit (&array, sizeof (DS_Joystick));
+
     register_event();
 }
 
