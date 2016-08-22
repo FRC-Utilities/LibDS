@@ -146,7 +146,7 @@ void DS_QueuePush (DS_Queue* queue, void* item)
  * Initializes the given queue and allocates memory for its elements
  *
  * \param queue the queue to initialize
- * \param max_elements the maximum number of elements that the queue can have
+ * \param initial_count the initial number of elements of the queue
  * \param item_size the size to use for each inidividual element of the queue
  */
 void DS_QueueInit (DS_Queue* queue, int initial_count, int item_size)

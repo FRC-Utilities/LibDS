@@ -56,6 +56,7 @@ static void register_event()
 
 /**
  * Returns the joystick structure at the given index
+ * If the joystick does not exist, this function shall return \c NULL
  */
 DS_Joystick* get_joystick (int joystick)
 {
@@ -66,11 +67,11 @@ DS_Joystick* get_joystick (int joystick)
 }
 
 /**
- * Initializes the joystick array
+ * Initializes the joystick array, with an initial support for 6 joysticks
  */
 void Joysticks_Init()
 {
-    DS_ArrayInit (&array, (sizeof (DS_Joystick)));
+    DS_ArrayInit (&array, 6);
 }
 
 /**
@@ -78,7 +79,8 @@ void Joysticks_Init()
  */
 void Joysticks_Close()
 {
-    DS_JoysticksReset();
+    DS_ArrayFree (&array);
+    register_event();
 }
 
 /**
@@ -185,7 +187,7 @@ int DS_GetJoystickButton (int joystick, int button)
 void DS_JoysticksReset()
 {
     DS_ArrayFree (&array);
-    DS_ArrayInit (&array, sizeof (DS_Joystick));
+    DS_ArrayInit (&array, 6);
 
     register_event();
 }

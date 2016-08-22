@@ -26,7 +26,9 @@
 static int init = 0;
 
 /**
- * Initializes all the modules of the LibDS library
+ * Initializes all the modules of the LibDS library, you should call this
+ * function before your application begins interacting with the different
+ * modules of the LibDS.
  */
 void DS_Init()
 {
@@ -43,7 +45,10 @@ void DS_Init()
 }
 
 /**
- * Closes all the modules of the LibDS library
+ * Closes all the modules of the LibDS library, you should call this before
+ * exiting your application. Failure to do this may result with socket
+ * problems (regardless if you are using the offical DS or not), memory
+ * problems and increased CPU usage (due to threads managed by the LibDS)
  */
 void DS_Close()
 {

@@ -48,7 +48,7 @@ static DS_Alliance robot_alliance = DS_ALLIANCE_RED;
 static DS_ControlMode control_mode = DS_CONTROL_TELEOPERATED;
 
 /**
- * Ensures that the given \a input number is either \c 0 or \c 1.
+ * Ensures that the given \a input number is either \c 0 or \c 1
  */
 static int to_boolean (const int input)
 {
@@ -58,6 +58,10 @@ static int to_boolean (const int input)
 /**
  * Ensures that the given \a input stays within the range established by the
  * \a min and \a max numbers
+ *
+ * \param input the number to check
+ * \param min the minimum value that the input number should have
+ * \param max the maximun value that the input number should have
  */
 static int respect_range (const int input, const int min, const int max)
 {
@@ -71,7 +75,7 @@ static int respect_range (const int input, const int min, const int max)
 }
 
 /**
- * Creates a robot event with the given \a type header
+ * Creates and fills a robot event with the given \a type header
  */
 static void create_robot_event (const DS_EventType type)
 {

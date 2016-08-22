@@ -57,7 +57,9 @@ void Client_Close()
 }
 
 /**
- * Returns the user-set FMS address
+ * Returns the user-set FMS address.
+ * This value may be empty, if that's the case, then the Driver Station will
+ * use the addresses specified by the currently loaded protocol.
  */
 sds DS_GetCustomFMSAddress()
 {
@@ -65,7 +67,9 @@ sds DS_GetCustomFMSAddress()
 }
 
 /**
- * Returns the user-set radio address
+ * Returns the user-set radio address.
+ * This value may be empty, if that's the case, then the Driver Station will
+ * use the addresses specified by the currently loaded protocol.
  */
 sds DS_GetCustomRadioAddress()
 {
@@ -74,6 +78,8 @@ sds DS_GetCustomRadioAddress()
 
 /**
  * Returns the user-set robot address
+ * This value may be empty, if that's the case, then the Driver Station will
+ * use the addresses specified by the currently loaded protocol.
  */
 sds DS_GetCustomRobotAddress()
 {
@@ -81,10 +87,9 @@ sds DS_GetCustomRobotAddress()
 }
 
 /**
- * Returns the protocol-set FMS address
- * This value may be empty, if that's the case, then
- * the Driver Station will use the addresses specified
- * by the currently loaded protocol.
+ * Returns the protocol-set FMS address, this address may change when the team
+ * number is changed, if your application relies on this value, consider
+ * updating in regurarly or using the events system of the LibDS.
  */
 sds DS_GetDefaultFMSAddress()
 {
@@ -92,10 +97,9 @@ sds DS_GetDefaultFMSAddress()
 }
 
 /**
- * Returns the protocol-set radio address
- * This value may be empty, if that's the case, then
- * the Driver Station will use the addresses specified
- * by the currently loaded protocol.
+ * Returns the protocol-set radio address, this address may change when the
+ * team number is changed, if your application relies on this value, consider
+ * updating in regurarly or using the events system of the LibDS.
  */
 sds DS_GetDefaultRadioAddress()
 {
@@ -103,10 +107,9 @@ sds DS_GetDefaultRadioAddress()
 }
 
 /**
- * Returns the protocol-set robot address
- * This value may be empty, if that's the case, then
- * the Driver Station will use the addresses specified
- * by the currently loaded protocol.
+ * Returns the protocol-set robot address, this address may change when the
+ * team number is changed, if your application relies on this value, consider
+ * updating in regurarly or using the events system of the LibDS.
  */
 sds DS_GetDefaultRobotAddress()
 {
@@ -115,10 +118,9 @@ sds DS_GetDefaultRobotAddress()
 
 /**
  * Returns the address used to communicate with the FMS.
- * If the user-set FMS address is not empty, then this
- * function will return the user-set address.
- * Otherwise, this function will return the address specified
- * by the currently loaded protocol.
+ * If the user-set address is not empty, then this function will return the
+ * user-set address. Otherwise, this function will return the address
+ * specified  by the currently loaded protocol.
  */
 sds DS_GetAppliedFMSAddress()
 {
@@ -130,10 +132,9 @@ sds DS_GetAppliedFMSAddress()
 
 /**
  * Returns the address used to communicate with the bridge.
- * If the user-set radio address is not empty, then this
- * function will return the user-set address.
- * Otherwise, this function will return the address specified
- * by the currently loaded protocol.
+ * If the user-set address is not empty, then this function will return the
+ * user-set address. Otherwise, this function will return the address
+ * specified  by the currently loaded protocol.
  */
 sds DS_GetAppliedRadioAddress()
 {
@@ -145,10 +146,9 @@ sds DS_GetAppliedRadioAddress()
 
 /**
  * Returns the address used to communicate with the robot.
- * If the user-set robot address is not empty, then this
- * function will return the user-set address.
- * Otherwise, this function will return the address specified
- * by the currently loaded protocol.
+ * If the user-set address is not empty, then this function will return the
+ * user-set address. Otherwise, this function will return the address
+ * specified  by the currently loaded protocol.
  */
 sds DS_GetAppliedRobotAddress()
 {
@@ -222,7 +222,11 @@ int DS_GetRobotCode()
 }
 
 /**
- * Returns \c 1 if the conditions to enable a robot are met
+ * Returns \c 1 if the conditions to enable a robot are met.
+ * We consider these parameters to determine if it is safe to enable a robot:
+ *    - We have communications with the robot
+ *    - The robot is **not** emergency stopped
+ *    - The protocol reports that the robot code is running
  */
 int DS_GetCanBeEnabled()
 {

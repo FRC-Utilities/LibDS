@@ -38,8 +38,10 @@ static int running = 1;
 
 /**
  * Updates the properties of the given \a timer
- * This function is called in a separate thread for each timer that
- * we use.
+ * This function is called in a separate thread for each timer that we use.
+ * This is **not** the best way to implement a timer, but its effective,
+ * easy to understand and efficient. Also, this implementation does not need
+ * to play with the kernel/OS to compare elapsed times periodically.
  */
 static void* update_timer (void* ptr)
 {
@@ -63,15 +65,17 @@ static void* update_timer (void* ptr)
 }
 
 /**
- * Initializes the timer arrays
+ * Initializes the timer array, which is used to keep track of all the timers
+ * used by the library. We need to do this so that we can terminate each timer
+ * thread once the module is closed.
  */
 void Timers_Init()
 {
-    DS_ArrayInit (&timers, sizeof (DS_Timer) * 10);
+    DS_ArrayInit (&timers, 10);
 }
 
 /**
- * Breaks all the timer loops
+ * Breaks all the timer loops and stops every thread used by this module
  */
 void Timers_Close()
 {
@@ -146,7 +150,13 @@ void DS_TimerReset (DS_Timer* timer)
 /**
  * Initializes the given \a timer with the given \a time and \a precision.
  * The timers are updated using a threaded while loop (that sleeps the number
- * of milliseconds specified with \a precision).
+ * of milliseconds specified with \a precision). As stated before, this is
+ * probably not the best timer implementation out there, but its simple and
+ * it works perfectly for this library.
+ *
+ * A word of advice, using a higher \a precision (lower value in msecs) will
+ * result in increased CPU usage, this thing does not have morals and will eat
+ * the whole cake if you allow it.
  *
  * This function will return \c 0 if the timer thread fails to start.
  */
@@ -179,4 +189,3 @@ int DS_TimerInit (DS_Timer* timer, const int time, const int precision)
 
     return 0;
 }
-

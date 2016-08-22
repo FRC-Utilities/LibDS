@@ -28,7 +28,9 @@
 
 /**
  * Deallocates the memory used to store the \a array data and resets the
- * properties of the \a array to 0.
+ * properties of the given \a array
+ *
+ * \param array the array object to free
  */
 void DS_ArrayFree (DS_Array* array)
 {
@@ -46,8 +48,12 @@ void DS_ArrayFree (DS_Array* array)
 }
 
 /**
- * Inserts the given \a element in the \a array and resizes the allocated
- * memory if required.
+ * Inserts the given \a element in the \a array. If there is no memory left
+ * in the array, then this function will double the size of the array and
+ * insert the item.
+ *
+ * \param array the array object in which to insert the given element
+ * \param element pointer to the item to register with the array
  */
 void DS_ArrayInsert (DS_Array* array, void* element)
 {
@@ -73,6 +79,11 @@ void DS_ArrayInsert (DS_Array* array, void* element)
 
 /**
  * Initializes the data list and properties of the given \a array
+ *
+ * \param array the array to initialize
+ * \param initial_size the initial size of the array, since the array is an
+ *        array of pointers, the initial size can also be thought as the
+ *        initial number of supported items
  */
 void DS_ArrayInit (DS_Array* array, size_t initial_size)
 {

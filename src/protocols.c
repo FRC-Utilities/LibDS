@@ -82,7 +82,8 @@ static sds netcs_data = NULL;
 static pthread_t thread;
 
 /**
- * Sends a new packet to the FMS
+ * Sends a new packet to the FMS, the generated data is immediatly deleted
+ * once the packet has been sent
  */
 static void send_fms_data()
 {
@@ -92,7 +93,8 @@ static void send_fms_data()
 }
 
 /**
- * Sends a new packet to the radio
+ * Sends a new packet to the radio, the generated data is immediatly deleted
+ * once the packet has been sent
  */
 static void send_radio_data()
 {
@@ -102,7 +104,8 @@ static void send_radio_data()
 }
 
 /**
- * Sends a new packet to the robot
+ * Sends a new packet to the robot, the generated data is immediatly deleted
+ * once the packet has been sent
  */
 static void send_robot_data()
 {

@@ -29,7 +29,7 @@
 static DS_Queue events;
 
 /**
- * Initializes the event queue
+ * Initializes the event queue with an initial support for 50 events
  */
 void Events_Init()
 {
@@ -37,7 +37,7 @@ void Events_Init()
 }
 
 /**
- * Frees the event queue
+ * De-allocates the event queue (that's all)
  */
 void Events_Close()
 {
@@ -55,8 +55,12 @@ void DS_AddEvent (DS_Event* event)
 }
 
 /**
- * Polls for currently pending events.
- * Returns 1 if there are any pending events, or 0 if there are none available.
+ * Polls for currently pending events and copies the first event in the queue
+ * to the given \a event object.
+ *
+ * \returns 1 if there are any pending events, or 0 if there are none available.
+ *
+ * \param event we write the obtained event data here
  */
 int DS_PollEvent (DS_Event* event)
 {

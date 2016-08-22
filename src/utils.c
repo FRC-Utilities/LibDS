@@ -59,6 +59,7 @@ sds DS_Append (sds string, char data)
 
 /**
  * Returns \c 1 if the given \a string is empty
+ * \note This function will also return \c 1 if the string is \c NULL
  */
 int DS_StringIsEmpty (const sds string)
 {
@@ -82,7 +83,7 @@ int DS_StringIsEmpty (const sds string)
  * different communication protocols.
  *
  * If you call this function outside the scope of the \c LibDS, remember to
- * call \c free() to avoid memory leaks.
+ * call \c DS_FREESTR() to avoid memory leaks.
  *
  * \param net the desired first octet of the IP
  * \param team the team number, used in second and third octets
