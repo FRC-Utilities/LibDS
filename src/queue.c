@@ -24,6 +24,7 @@
 #include "DS_Utils.h"
 #include "DS_Queue.h"
 
+#include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 
@@ -48,7 +49,7 @@ extern int DS_QueuePop (DS_Queue* queue)
     ++queue->front;
 
     /* This is a circular queue, go back to the beginning */
-    if (queue->front >= queue->max_elements)
+    if (queue->front >= queue->capacity)
         queue->front = 0;
 
     return 1;
@@ -68,7 +69,7 @@ extern void DS_QueueFree (DS_Queue* queue)
 
     /* Free all the items in the queue */
     int element;
-    for (element = 0; element < queue->max_elements; ++element)
+    for (element = 0; element < queue->capacity; ++element)
         DS_FREE (queue->buffer [element]);
 
     /* Delete the buffer */
@@ -79,7 +80,7 @@ extern void DS_QueueFree (DS_Queue* queue)
     queue->count = 0;
     queue->front = 0;
     queue->item_size = 0;
-    queue->max_elements = 0;
+    queue->capacity = 0;
 }
 
 /**
@@ -116,16 +117,25 @@ void DS_QueuePush (DS_Queue* queue, void* item)
     if (!queue)
         return;
 
-    /* Queue is full, abort */
-    if (queue->count >= queue->max_elements)
-        return;
+    /* Queue is full, expand it */
+    if (queue->count >= queue->capacity) {
+        queue->capacity *= 2;
+        queue->buffer = realloc (queue->buffer,
+                                 queue->capacity * queue->item_size);
+
+        int i;
+        for (i = queue->count; i < queue->capacity; ++i) {
+            queue->buffer [i] = malloc (queue->item_size);
+            memset (queue->buffer [i], 0, queue->item_size);
+        }
+    }
 
     /* Update queue properties */
     ++queue->rear;
     ++queue->count;
 
     /* Front item should be somewhere in the middle by now */
-    if (queue->rear >= queue->max_elements)
+    if (queue->rear >= queue->capacity)
         queue->rear = 0;
 
     /* Since we don't want to depend on potential idiots, copy the data */
@@ -139,7 +149,7 @@ void DS_QueuePush (DS_Queue* queue, void* item)
  * \param max_elements the maximum number of elements that the queue can have
  * \param item_size the size to use for each inidividual element of the queue
  */
-void DS_QueueInit (DS_Queue* queue, int max_elements, int item_size)
+void DS_QueueInit (DS_Queue* queue, int initial_count, int item_size)
 {
     /* Set initial navitation values */
     queue->rear = -1;
@@ -148,14 +158,14 @@ void DS_QueueInit (DS_Queue* queue, int max_elements, int item_size)
 
     /* Set queue properties */
     queue->item_size = item_size;
-    queue->max_elements = max_elements;
+    queue->capacity = initial_count;
 
     /* Initialize the pointer list */
-    queue->buffer = calloc (max_elements, max_elements * item_size);
+    queue->buffer = calloc (initial_count, initial_count * item_size);
 
     /* Initialize each item in the list */
     int item;
-    for (item = 0; item < max_elements; ++item) {
+    for (item = 0; item < initial_count; ++item) {
         queue->buffer [item] = malloc (item_size);
         memset (queue->buffer [item], 0, item_size);
     }

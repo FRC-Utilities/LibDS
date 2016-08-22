@@ -30,8 +30,8 @@ extern "C" {
 
 typedef struct _queue {
     int count;
+    int capacity;
     int item_size;
-    int max_elements;
 
     int rear;
     int front;
@@ -43,7 +43,7 @@ extern int DS_QueuePop (DS_Queue* queue);
 extern void DS_QueueFree (DS_Queue* queue);
 extern void* DS_QueueGetFirst (DS_Queue* queue);
 extern void DS_QueuePush (DS_Queue* queue, void* item);
-extern void DS_QueueInit (DS_Queue* queue, int max_elements, int item_size);
+extern void DS_QueueInit (DS_Queue* queue, int initial_count, int item_size);
 
 #ifdef __cplusplus
 }
