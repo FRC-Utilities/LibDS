@@ -319,8 +319,6 @@ struct addrinfo* get_address_info (const char* host,
                  "\t Error Desc: %s\n",
                  host, service, code, strerror (code));
 #endif
-
-        freeaddrinfo (info);
         return NULL;
     }
 

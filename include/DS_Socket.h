@@ -29,6 +29,8 @@ extern "C" {
 #endif
 
 #include <sds.h>
+#include <pthread.h>
+
 #include "DS_Types.h"
 
 /**

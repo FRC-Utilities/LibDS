@@ -27,7 +27,6 @@
 #include "DS_Socket.h"
 
 #include <socky.h>
-#include <pthread.h>
 
 /**
  * Holds the sockets in a dynamic array (for automatic closing)
@@ -101,24 +100,34 @@ static void* server_loop (void* ptr)
     /* Cast the generic pointer into a socket */
     DS_Socket* sock = (DS_Socket*) ptr;
 
-    /* Set file descriptor properties */
-    fd_set set;
-    FD_ZERO (&set);
-    FD_SET (sock->info.sock_in, &set);
-
-    /* Windows needs the first parameter to be 0 in order to work */
+    /* Set a 5-ms timeout on Windows */
 #if defined _WIN32
-    int nfds = 0;
-#else
-    int nfds = sock->info.sock_in + 1;
+    struct timeval tv;
+    tv.tv_sec = 0;
+    tv.tv_usec = 5000;
 #endif
 
-    /*
-     * Read received data, note that \c select() will block
-     * the thread until there is data available for reading
-     */
+    /* Make the socket non-blocking on Windows */
+#if defined _WIN32
+    set_socket_block (sock->info.sock_in, 0);
+#endif
+
+    /* Periodicaly Check if there is data available on the socket */
     while (sock->info.server_init == 1) {
-        if (select (nfds, &set, NULL, NULL, NULL) > 0) {
+        int rc = -1;
+
+        /* Set the file descriptor */
+        fd_set set;
+        FD_ZERO (&set);
+        FD_SET (sock->info.sock_in, &set);
+
+#if defined _WIN32
+        rc = select (0, &set, NULL, NULL, &tv);
+#else
+        rc = select (sock->info.sock_in + 1, &set, NULL, NULL, NULL);
+#endif
+
+        if (rc > 0) {
             if (FD_ISSET (sock->info.sock_in, &set))
                 read_socket (sock);
         }
@@ -275,6 +284,10 @@ void DS_SocketClose (DS_Socket* ptr)
     /* Destroy sockets */
     socket_close (ptr->info.sock_in);
     socket_close (ptr->info.sock_out);
+
+    /* Reset socket properties */
+    ptr->info.server_init = 0;
+    ptr->info.client_init = 0;
 
     /* Close socket threads */
     pthread_cancel (ptr->info.server_thread);

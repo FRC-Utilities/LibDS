@@ -168,9 +168,8 @@ void Window::updateControlMode (int unused)
 }
 
 /**
- * Called when the Driver Station detects a different robot voltage, this
- * function reduces the voltage to the nearest two decimal places and updates
- * the user interface.
+ * Called when the Driver Station detects a different robot voltage, updates
+ * the user interface controls to reflect the voltage changes.
  *
  * \param voltage the voltage detected by the Driver Station
  */
