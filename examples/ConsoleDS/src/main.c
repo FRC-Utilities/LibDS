@@ -48,7 +48,7 @@ int main()
 
     /* Initialize the application modules */
     init_joysticks();
-    //init_interface();
+    init_interface();
 
     /* Get user input from a different thread */
     pthread_t user_input_thread;
@@ -60,7 +60,7 @@ int main()
     /* Run the application's event loop (unrelated to DS) */
     while (running) {
         process_events();
-        //update_interface();
+        update_interface();
         update_joysticks();
         DS_Sleep (20);
     }
