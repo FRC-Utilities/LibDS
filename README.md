@@ -3,11 +3,17 @@
 [![Build Status](https://img.shields.io/travis/FRC-Utilities/LibDS-C.svg?style=flat-square)](https://travis-ci.org/FRC-Utilities/LibDS-C)
 [![Donate button](https://img.shields.io/badge/bitcoin-donate-brightgreen.svg?style=flat-square)](https://blockchain.info/address/1K85yLxjuqUmhkjP839R7C23XFhSxrefMx "Donate once-off to this project using BitCoin")
 
-> **Warning:** This project will be subject to many changes (and complete rewrites) as I learn new things about C.
+This is a re-implementation of LibDS in plain C (with SDS for dynamic string handling). This library implements all the features of LibDS, including (but not limited to):
 
-> If you are interested in learning how the Driver Station works, check the [original LibDS](https://github.com/frc-utilities/libds). It contains everything needed to operate FRC 2014 and 2015/2016 robots.
+- Modular design
+- Dynamic protocol loading
+- Integrated event system
+- Joystick handling functions
+- Safety features
+- Abstract-protocol object
+- Cross-platform socket handling 
 
-This is a re-implementation of LibDS in plain C (with SDS for dynamic string handling). You can check the [TODOs](TODO.md) for the current state of the project.
+You can check the [TODOs](TODO.md) for the current state of the project.
 
 You may find a lot of mistakes here, be it design choices or just stupid mistakes. If you spot something, I would be very grateful if you could tell me about it (or make a pull request).
 
