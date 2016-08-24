@@ -48,11 +48,11 @@ int main()
 
     /* Initialize the application modules */
     init_joysticks();
-    init_interface();
+    //init_interface();
 
     /* Get user input from a different thread */
-    pthread_t thread;
-    pthread_create (&thread, NULL, &get_user_input, NULL);
+    pthread_t user_input_thread;
+    pthread_create (&user_input_thread, NULL, &get_user_input, NULL);
 
     /* Load the FRC 2016 communication protocol */
     DS_ConfigureProtocol (DS_GetProtocolFRC_2016());
@@ -60,10 +60,14 @@ int main()
     /* Run the application's event loop (unrelated to DS) */
     while (running) {
         process_events();
-        update_interface();
+        //update_interface();
         update_joysticks();
         DS_Sleep (20);
     }
+
+    /* Close the input thread */
+    pthread_cancel (user_input_thread);
+    pthread_join (user_input_thread, NULL);
 
     /* Close the DS and the application modules */
     DS_Close();

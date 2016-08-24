@@ -124,10 +124,8 @@ void DS_QueuePush (DS_Queue* queue, void* item)
                                  queue->capacity * queue->item_size);
 
         int i;
-        for (i = queue->count; i < queue->capacity; ++i) {
-            queue->buffer [i] = malloc (queue->item_size);
-            memset (queue->buffer [i], 0, queue->item_size);
-        }
+        for (i = queue->count; i < queue->capacity; ++i)
+            queue->buffer [i] = calloc (1, queue->item_size);
     }
 
     /* Update queue properties */
@@ -165,8 +163,6 @@ void DS_QueueInit (DS_Queue* queue, int initial_count, int item_size)
 
     /* Initialize each item in the list */
     int item;
-    for (item = 0; item < initial_count; ++item) {
-        queue->buffer [item] = malloc (item_size);
-        memset (queue->buffer [item], 0, item_size);
-    }
+    for (item = 0; item < initial_count; ++item)
+        queue->buffer [item] = calloc (1, item_size);
 }

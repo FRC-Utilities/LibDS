@@ -26,6 +26,8 @@
 #include "DS_Events.h"
 #include "DS_Joysticks.h"
 
+#include <stdio.h>
+
 /**
  * Represents a joystick and its information
  */
@@ -199,6 +201,12 @@ void DS_JoysticksReset()
  */
 void DS_JoysticksAdd (const int axes, const int hats, const int buttons)
 {
+    /* Joystick is empty */
+    if (axes <= 0 && hats <= 0 && buttons <= 0) {
+        fprintf (stderr, "Cannot register empty joystick!\n");
+        return;
+    }
+
     /* Allocate memory for a new joystick */
     DS_Joystick* joystick = calloc (1, sizeof (DS_Joystick));
 
@@ -224,9 +232,11 @@ void DS_JoysticksAdd (const int axes, const int hats, const int buttons)
  */
 void DS_SetJoystickHat (int joystick, int hat, int angle)
 {
-    if (DS_GetJoystickCount() > joystick) {
-        if (get_joystick (joystick)->num_hats > hat)
-            get_joystick (joystick)->hats [hat] = angle;
+    DS_Joystick* stick = get_joystick (joystick);
+
+    if (stick != NULL && DS_GetJoystickCount() > joystick) {
+        if (stick->num_hats > hat)
+            stick->hats [hat] = angle;
     }
 }
 
@@ -235,9 +245,11 @@ void DS_SetJoystickHat (int joystick, int hat, int angle)
  */
 void DS_SetJoystickAxis (int joystick, int axis, double value)
 {
-    if (DS_GetJoystickCount() > joystick) {
-        if (get_joystick (joystick)->num_axes > axis)
-            get_joystick (joystick)->axes [axis] = value;
+    DS_Joystick* stick = get_joystick (joystick);
+
+    if (stick != NULL && DS_GetJoystickCount() > joystick) {
+        if (stick->num_axes > axis)
+            stick->axes [axis] = value;
     }
 }
 
@@ -246,8 +258,10 @@ void DS_SetJoystickAxis (int joystick, int axis, double value)
  */
 void DS_SetJoystickButton (int joystick, int button, int pressed)
 {
-    if (DS_GetJoystickCount() > joystick) {
-        if (get_joystick (joystick)->num_buttons > button)
-            get_joystick (joystick)->buttons [button] = pressed;
+    DS_Joystick* stick = get_joystick (joystick);
+
+    if (stick != NULL && DS_GetJoystickCount() > joystick) {
+        if (stick->num_buttons > button)
+            stick->buttons [button] = (pressed > 0) ? 1 : 0;
     }
 }

@@ -682,7 +682,7 @@ static void restart_robot_code()
 DS_Protocol* DS_GetProtocolFRC_2015()
 {
     /* Initialize pointers */
-    DS_Protocol* protocol = malloc (sizeof (DS_Protocol));
+    DS_Protocol* protocol = calloc (1, sizeof (DS_Protocol));
 
     /* Set address functions */
     protocol->fms_address = &fms_address;

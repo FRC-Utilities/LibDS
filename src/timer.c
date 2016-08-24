@@ -34,7 +34,7 @@
 #endif
 
 static DS_Array timers;
-static int running = 1;
+static int running = 0;
 
 /**
  * Updates the properties of the given \a timer
@@ -71,6 +71,7 @@ static void* update_timer (void* ptr)
  */
 void Timers_Init()
 {
+    running = 1;
     DS_ArrayInit (&timers, 10);
 }
 

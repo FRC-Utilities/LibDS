@@ -111,6 +111,12 @@ static void send_robot_data()
 {
     sds data = protocol->create_robot_packet();
     DS_SocketSend (&protocol->robot_socket, data);
+
+    for (int i = 0; i < (int) sdslen (data); ++i)
+        fprintf (stderr, "%02x ", (uint8_t) data [i]);
+
+    fprintf (stderr, "\n");
+
     DS_FREESTR (data);
 }
 
