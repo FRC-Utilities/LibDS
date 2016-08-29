@@ -112,7 +112,7 @@ static void* server_loop (void* ptr)
     set_socket_block (sock->info.sock_in, 0);
 #endif
 
-    /* Periodicaly Check if there is data available on the socket */
+    /* Periodicaly check if there is data available on the socket */
     while (sock->info.server_init == 1) {
         int rc = -1;
 
@@ -121,12 +121,14 @@ static void* server_loop (void* ptr)
         FD_ZERO (&set);
         FD_SET (sock->info.sock_in, &set);
 
+        /* Run select */
 #if defined _WIN32
         rc = select (0, &set, NULL, NULL, &tv);
 #else
         rc = select (sock->info.sock_in + 1, &set, NULL, NULL, NULL);
 #endif
 
+        /* Data is available, read it */
         if (rc > 0) {
             if (FD_ISSET (sock->info.sock_in, &set))
                 read_socket (sock);
@@ -310,11 +312,11 @@ sds DS_SocketRead (DS_Socket* ptr)
 {
     /* Invalid pointer */
     if (!ptr)
-        return sdsempty();
+        return NULL;
 
     /* Socket is disabled or uninitialized */
     if ((ptr->info.server_init == 0) || (ptr->disabled == 1))
-        return sdsempty();
+        return NULL;
 
     /* Copy the current buffer and clear it */
     if (sdslen (ptr->info.buffer) > 0) {
@@ -323,7 +325,7 @@ sds DS_SocketRead (DS_Socket* ptr)
         return buffer;
     }
 
-    return sdsempty();
+    return NULL;
 }
 
 

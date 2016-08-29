@@ -60,12 +60,23 @@ static void register_event()
  * Returns the joystick structure at the given index
  * If the joystick does not exist, this function shall return \c NULL
  */
-DS_Joystick* get_joystick (int joystick)
+static DS_Joystick* get_joystick (int joystick)
 {
     if ((int) array.used > joystick)
         return (DS_Joystick*) array.data [joystick];
 
     return NULL;
+}
+
+/**
+ * Returns \c true if the given \a joystick exists and is valid
+ */
+static int joystick_exists (int joystick)
+{
+    if (DS_GetJoystickCount() > joystick)
+        return get_joystick (joystick) != NULL;
+
+    return 0;
 }
 
 /**
@@ -99,7 +110,7 @@ int DS_GetJoystickCount()
  */
 int DS_GetJoystickNumHats (int joystick)
 {
-    if (DS_GetJoystickCount() > joystick)
+    if (joystick_exists (joystick))
         return get_joystick (joystick)->num_hats;
 
     return 0;
@@ -111,7 +122,7 @@ int DS_GetJoystickNumHats (int joystick)
  */
 int DS_GetJoystickNumAxes (int joystick)
 {
-    if (DS_GetJoystickCount() > joystick)
+    if (joystick_exists (joystick))
         return get_joystick (joystick)->num_axes;
 
     return 0;
@@ -123,7 +134,7 @@ int DS_GetJoystickNumAxes (int joystick)
  */
 int DS_GetJoystickNumButtons (int joystick)
 {
-    if (DS_GetJoystickCount() > joystick)
+    if (joystick_exists (joystick))
         return get_joystick (joystick)->num_buttons;
 
     return 0;
@@ -139,9 +150,11 @@ int DS_GetJoystickNumButtons (int joystick)
  */
 int DS_GetJoystickHat (int joystick, int hat)
 {
-    if (DS_GetJoystickCount() > joystick && CFG_GetRobotEnabled()) {
-        if (get_joystick (joystick)->num_hats > hat)
-            return get_joystick (joystick)->hats [hat];
+    if (CFG_GetRobotEnabled() && joystick_exists (joystick)) {
+        DS_Joystick* stick = get_joystick (joystick);
+
+        if (stick->num_hats > hat)
+            return stick->hats [hat];
     }
 
     return 0;
@@ -157,9 +170,11 @@ int DS_GetJoystickHat (int joystick, int hat)
  */
 double DS_GetJoystickAxis (int joystick, int axis)
 {
-    if (DS_GetJoystickCount() > joystick && CFG_GetRobotEnabled()) {
-        if (get_joystick (joystick)->num_axes > axis)
-            return get_joystick (joystick)->axes [axis];
+    if (CFG_GetRobotEnabled() && joystick_exists (joystick)) {
+        DS_Joystick* stick = get_joystick (joystick);
+
+        if (stick->num_axes > axis)
+            return stick->axes [axis];
     }
 
     return 0;
@@ -175,9 +190,11 @@ double DS_GetJoystickAxis (int joystick, int axis)
  */
 int DS_GetJoystickButton (int joystick, int button)
 {
-    if (DS_GetJoystickCount() > joystick && CFG_GetRobotEnabled()) {
-        if (get_joystick (joystick)->num_buttons > button)
-            return get_joystick (joystick)->buttons [button];
+    if (CFG_GetRobotEnabled() && joystick_exists (joystick)) {
+        DS_Joystick* stick = get_joystick (joystick);
+
+        if (stick->num_buttons > button)
+            return stick->buttons [button];
     }
 
     return 0;
@@ -232,9 +249,9 @@ void DS_JoysticksAdd (const int axes, const int hats, const int buttons)
  */
 void DS_SetJoystickHat (int joystick, int hat, int angle)
 {
-    DS_Joystick* stick = get_joystick (joystick);
+    if (joystick_exists (joystick)) {
+        DS_Joystick* stick = get_joystick (joystick);
 
-    if (stick != NULL && DS_GetJoystickCount() > joystick) {
         if (stick->num_hats > hat)
             stick->hats [hat] = angle;
     }
@@ -245,9 +262,9 @@ void DS_SetJoystickHat (int joystick, int hat, int angle)
  */
 void DS_SetJoystickAxis (int joystick, int axis, double value)
 {
-    DS_Joystick* stick = get_joystick (joystick);
+    if (joystick_exists (joystick)) {
+        DS_Joystick* stick = get_joystick (joystick);
 
-    if (stick != NULL && DS_GetJoystickCount() > joystick) {
         if (stick->num_axes > axis)
             stick->axes [axis] = value;
     }
@@ -258,9 +275,9 @@ void DS_SetJoystickAxis (int joystick, int axis, double value)
  */
 void DS_SetJoystickButton (int joystick, int button, int pressed)
 {
-    DS_Joystick* stick = get_joystick (joystick);
+    if (joystick_exists (joystick)) {
+        DS_Joystick* stick = get_joystick (joystick);
 
-    if (stick != NULL && DS_GetJoystickCount() > joystick) {
         if (stick->num_buttons > button)
             stick->buttons [button] = (pressed > 0) ? 1 : 0;
     }

@@ -174,28 +174,28 @@ static void recv_data()
     netcs_data = DS_SocketRead (&protocol->netconsole_socket);
 
     /* Read FMS packet */
-    if (sdslen (fms_data) > 0) {
+    if (fms_data) {
         fms_read = protocol->read_fms_packet (fms_data);
         CFG_SetFMSCommunications (fms_read);
     }
 
     /* Read radio packet */
-    if (sdslen (radio_data) > 0) {
+    if (radio_data) {
         radio_read = protocol->read_radio_packet (radio_data);
         CFG_SetRadioCommunications (radio_read);
     }
 
     /* Read robot packet */
-    if (sdslen (robot_data) > 0) {
+    if (robot_data) {
         robot_read = protocol->read_robot_packet (robot_data);
         CFG_SetRobotCommunications (robot_read);
     }
 
     /* Add NetConsole message to event system */
-    if (sdslen (netcs_data) > 0) {
+    if (netcs_data) {
         DS_Event event;
         event.netconsole.type = DS_NETCONSOLE_NEW_MESSAGE;
-        event.netconsole.message = sdsnew (netcs_data);
+        event.netconsole.message = sdsdup (netcs_data);
         DS_AddEvent (&event);
     }
 

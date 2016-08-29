@@ -74,7 +74,8 @@ void DS_ArrayInsert (DS_Array* array, void* element)
     }
 
     /* Insert element */
-    array->data [array->used++] = element;
+    ++array->used;
+    array->data [array->used] = element;
 }
 
 /**
