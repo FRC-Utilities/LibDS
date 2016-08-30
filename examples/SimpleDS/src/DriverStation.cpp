@@ -22,9 +22,8 @@
 
 #include "DriverStation.h"
 
-#include <thread>
-
 #include <QTimer>
+#include <QDebug>
 #include <LibDS.h>
 #include <QApplication>
 

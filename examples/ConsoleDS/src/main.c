@@ -43,8 +43,8 @@ int main()
     /* Initialize the DS (and its event loop) */
     DS_Init();
 
-    /* Un-comment the following line to use a simulator (or set a custom robot IP) */
-    /* DS_SetCustomRobotAddress ("127.0.0.1"); */
+    /* Connect to the FRC simulator (or OpenRIO Sim) */
+    DS_SetCustomRobotAddress ("127.0.0.1");
 
     /* Initialize the application modules */
     init_joysticks();

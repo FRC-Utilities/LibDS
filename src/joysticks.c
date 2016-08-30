@@ -247,6 +247,7 @@ void DS_JoysticksAdd (const int axes, const int hats, const int buttons)
 /**
  * Updates the \a angle of the given \a hat in the given \a joystick
  */
+#include <stdio.h>
 void DS_SetJoystickHat (int joystick, int hat, int angle)
 {
     if (joystick_exists (joystick)) {

@@ -41,8 +41,8 @@ int main (int argc, char* argv[])
     VirtualJoystick joystick;
     Q_UNUSED (joystick);
 
-    /* Un-comment the following line to use a simlator (or set a custom robot IP) */
-    /* DriverStation::getInstance()->setCustomRobotAddress ("127.0.0.1"); */
+    /* Connect to the FRC Simulator */
+    DriverStation::getInstance()->setCustomRobotAddress ("127.0.0.1");
 
     return app.exec();
 }

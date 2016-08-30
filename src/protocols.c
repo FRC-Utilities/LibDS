@@ -329,6 +329,7 @@ void Protocols_Close()
 {
     running = 0;
     close_protocol();
+    pthread_cancel (thread);
     pthread_join (thread, NULL);
 }
 

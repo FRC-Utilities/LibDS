@@ -91,6 +91,10 @@ Window::Window (QWidget* parent) : QMainWindow (parent)
     connect (ds,       SIGNAL (statusChanged (QString)),
              ui->Status, SLOT (setText (QString)));
 
+    /* Update the NetConsole automatically */
+    connect (ds,        SIGNAL (newMessage (QString)),
+             ui->Console, SLOT (append (QString)));
+
     /* Initialize the DS with the 2016 protocol */
     ds->setProtocol (DriverStation::kProtocol2016);
 }
