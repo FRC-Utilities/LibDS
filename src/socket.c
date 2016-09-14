@@ -159,6 +159,12 @@ static void* create_socket (void* data)
         ptr->address = sdsnew ("0.0.0.0");
     }
 
+    /* Set broadcast address */
+    if (ptr->broadcast == 1) {
+        DS_FREESTR (ptr->address);
+        ptr->address = sdsnew ("255.255.255.255");
+    }
+
     /* Set service strings */
     ptr->info.in_service = itc (ptr->in_port);
     ptr->info.out_service = itc (ptr->out_port);
