@@ -21,6 +21,7 @@
  * DEALINGS IN THE SOFTWARE.
  */
 
+#include "DS_Utils.h"
 #include "DS_Client.h"
 #include "DS_Events.h"
 #include "DS_Config.h"
@@ -31,18 +32,18 @@
 /*
  * These variables hold the state(s) of the LibDS and its modules
  */
-static int team = 0;
-static int cpu_usage = 0;
-static int ram_usage = 0;
-static int disk_usage = 0;
-static int robot_code = 0;
-static int robot_enabled = 0;
-static int can_utilization = 0;
-static double robot_voltage = 0;
-static int emergency_stopped = 0;
-static int fms_communications = 0;
-static int radio_communications = 0;
-static int robot_communications = 0;
+static int team = -1;
+static int cpu_usage = -1;
+static int ram_usage = -1;
+static int disk_usage = -1;
+static int robot_code = -1;
+static int robot_enabled = -1;
+static int can_utilization = -1;
+static double robot_voltage = -1;
+static int emergency_stopped = -1;
+static int fms_communications = -1;
+static int radio_communications = -1;
+static int robot_communications = -1;
 static DS_Position robot_position = DS_POSITION_1;
 static DS_Alliance robot_alliance = DS_ALLIANCE_RED;
 static DS_ControlMode control_mode = DS_CONTROL_TELEOPERATED;
@@ -52,7 +53,7 @@ static DS_ControlMode control_mode = DS_CONTROL_TELEOPERATED;
  */
 static int to_boolean (const int input)
 {
-    return (input > 0);
+    return (input > 0) ? 1 : 0;
 }
 
 /**
@@ -125,7 +126,7 @@ void CFG_ReconfigureAddresses (const int flags)
  */
 int CFG_GetTeamNumber()
 {
-    return team;
+    return DS_Max (team, 0);
 }
 
 /**
@@ -133,7 +134,7 @@ int CFG_GetTeamNumber()
  */
 int CFG_GetRobotCode()
 {
-    return robot_code;
+    return robot_code == 1;
 }
 
 /**
@@ -141,7 +142,7 @@ int CFG_GetRobotCode()
  */
 int CFG_GetRobotEnabled()
 {
-    return robot_enabled;
+    return robot_enabled == 1;
 }
 
 /**
@@ -149,7 +150,7 @@ int CFG_GetRobotEnabled()
  */
 int CFG_GetRobotCPUUsage()
 {
-    return cpu_usage;
+    return DS_Max (cpu_usage, 0);
 }
 
 /**
@@ -157,7 +158,7 @@ int CFG_GetRobotCPUUsage()
  */
 int CFG_GetRobotRAMUsage()
 {
-    return ram_usage;
+    return DS_Max (ram_usage, 0);
 }
 
 /**
@@ -165,7 +166,7 @@ int CFG_GetRobotRAMUsage()
  */
 int CFG_GetCANUtilization()
 {
-    return can_utilization;
+    return DS_Max (can_utilization, 0);
 }
 
 /**
@@ -173,7 +174,7 @@ int CFG_GetCANUtilization()
  */
 int CFG_GetRobotDiskUsage()
 {
-    return disk_usage;
+    return DS_Max (disk_usage, 0);
 }
 
 /**
@@ -181,7 +182,7 @@ int CFG_GetRobotDiskUsage()
  */
 double CFG_GetRobotVoltage()
 {
-    return robot_voltage;
+    return DS_Max (robot_voltage, 0);
 }
 
 /**
@@ -210,7 +211,7 @@ DS_Position CFG_GetPosition()
  */
 int CFG_GetEmergencyStopped()
 {
-    return emergency_stopped;
+    return emergency_stopped == 1;
 }
 
 /**
@@ -219,7 +220,7 @@ int CFG_GetEmergencyStopped()
  */
 int CFG_GetFMSCommunications()
 {
-    return fms_communications;
+    return fms_communications == 1;
 }
 
 /**
@@ -228,7 +229,7 @@ int CFG_GetFMSCommunications()
  */
 int CFG_GetRadioCommunications()
 {
-    return radio_communications;
+    return radio_communications == 1;
 }
 
 /**
@@ -237,7 +238,7 @@ int CFG_GetRadioCommunications()
  */
 int CFG_GetRobotCommunications()
 {
-    return robot_communications;
+    return robot_communications == 1;
 }
 
 /**
@@ -256,9 +257,11 @@ DS_ControlMode CFG_GetControlMode()
  */
 void CFG_SetRobotCode (const int code)
 {
-    robot_code = to_boolean (code);
-    create_robot_event (DS_ROBOT_CODE_CHANGED);
-    create_robot_event (DS_STATUS_STRING_CHANGED);
+    if (robot_code != to_boolean (code)) {
+        robot_code = to_boolean (code);
+        create_robot_event (DS_ROBOT_CODE_CHANGED);
+        create_robot_event (DS_STATUS_STRING_CHANGED);
+    }
 }
 
 /**
@@ -275,10 +278,11 @@ void CFG_SetTeamNumber (const int number)
  */
 void CFG_SetRobotEnabled (const int enabled)
 {
-    robot_enabled = to_boolean (enabled) && !CFG_GetEmergencyStopped();
-
-    create_robot_event (DS_ROBOT_ENABLED_CHANGED);
-    create_robot_event (DS_STATUS_STRING_CHANGED);
+    if (robot_enabled != to_boolean (enabled)) {
+        robot_enabled = to_boolean (enabled) && !CFG_GetEmergencyStopped();
+        create_robot_event (DS_ROBOT_ENABLED_CHANGED);
+        create_robot_event (DS_STATUS_STRING_CHANGED);
+    }
 }
 
 /**
@@ -287,8 +291,10 @@ void CFG_SetRobotEnabled (const int enabled)
  */
 void CFG_SetRobotCPUUsage (const int percent)
 {
-    cpu_usage = respect_range (percent, 0, 100);
-    create_robot_event (DS_ROBOT_CPU_INFO_CHANGED);
+    if (cpu_usage != percent) {
+        cpu_usage = respect_range (percent, 0, 100);
+        create_robot_event (DS_ROBOT_CPU_INFO_CHANGED);
+    }
 }
 
 /**
@@ -297,8 +303,10 @@ void CFG_SetRobotCPUUsage (const int percent)
  */
 void CFG_SetRobotRAMUsage (const int percent)
 {
-    ram_usage = respect_range (percent, 0, 100);
-    create_robot_event (DS_ROBOT_RAM_INFO_CHANGED);
+    if (ram_usage != percent) {
+        ram_usage = respect_range (percent, 0, 100);
+        create_robot_event (DS_ROBOT_RAM_INFO_CHANGED);
+    }
 }
 
 /**
@@ -307,8 +315,10 @@ void CFG_SetRobotRAMUsage (const int percent)
  */
 void CFG_SetRobotDiskUsage (const int percent)
 {
-    disk_usage = respect_range (percent, 0, 100);
-    create_robot_event (DS_ROBOT_DISK_INFO_CHANGED);
+    if (disk_usage != percent) {
+        disk_usage = respect_range (percent, 0, 100);
+        create_robot_event (DS_ROBOT_DISK_INFO_CHANGED);
+    }
 }
 
 /**
@@ -316,8 +326,10 @@ void CFG_SetRobotDiskUsage (const int percent)
  */
 void CFG_SetRobotVoltage (const double voltage)
 {
-    robot_voltage = roundf (voltage * 100) / 100;
-    create_robot_event (DS_ROBOT_VOLTAGE_CHANGED);
+    if (robot_voltage != voltage) {
+        robot_voltage = roundf (voltage * 100) / 100;
+        create_robot_event (DS_ROBOT_VOLTAGE_CHANGED);
+    }
 }
 
 /**
@@ -325,9 +337,11 @@ void CFG_SetRobotVoltage (const double voltage)
  */
 void CFG_SetEmergencyStopped (const int stopped)
 {
-    emergency_stopped = to_boolean (stopped);
-    create_robot_event (DS_ROBOT_ESTOP_CHANGED);
-    create_robot_event (DS_STATUS_STRING_CHANGED);
+    if (emergency_stopped != to_boolean (stopped)) {
+        emergency_stopped = to_boolean (stopped);
+        create_robot_event (DS_ROBOT_ESTOP_CHANGED);
+        create_robot_event (DS_STATUS_STRING_CHANGED);
+    }
 }
 
 /**
@@ -335,8 +349,10 @@ void CFG_SetEmergencyStopped (const int stopped)
  */
 void CFG_SetAlliance (const DS_Alliance alliance)
 {
-    robot_alliance = alliance;
-    create_robot_event (DS_ROBOT_STATION_CHANGED);
+    if (robot_alliance != alliance) {
+        robot_alliance = alliance;
+        create_robot_event (DS_ROBOT_STATION_CHANGED);
+    }
 }
 
 /**
@@ -344,8 +360,10 @@ void CFG_SetAlliance (const DS_Alliance alliance)
  */
 void CFG_SetPosition (const DS_Position position)
 {
-    robot_position = position;
-    create_robot_event (DS_ROBOT_STATION_CHANGED);
+    if (robot_position != position) {
+        robot_position = position;
+        create_robot_event (DS_ROBOT_STATION_CHANGED);
+    }
 }
 
 /**
@@ -353,8 +371,10 @@ void CFG_SetPosition (const DS_Position position)
  */
 void CFG_SetCANUtilization (const int utilization)
 {
-    can_utilization = utilization;
-    create_robot_event (DS_ROBOT_CAN_UTIL_CHANGED);
+    if (can_utilization != utilization) {
+        can_utilization = utilization;
+        create_robot_event (DS_ROBOT_CAN_UTIL_CHANGED);
+    }
 }
 
 /**
@@ -362,9 +382,11 @@ void CFG_SetCANUtilization (const int utilization)
  */
 void CFG_SetControlMode (const DS_ControlMode mode)
 {
-    control_mode = mode;
-    create_robot_event (DS_ROBOT_MODE_CHANGED);
-    create_robot_event (DS_STATUS_STRING_CHANGED);
+    if (control_mode != mode) {
+        control_mode = mode;
+        create_robot_event (DS_ROBOT_MODE_CHANGED);
+        create_robot_event (DS_STATUS_STRING_CHANGED);
+    }
 }
 
 /**
@@ -372,12 +394,14 @@ void CFG_SetControlMode (const DS_ControlMode mode)
  */
 void CFG_SetFMSCommunications (const int communications)
 {
-    fms_communications = to_boolean (communications);
+    if (fms_communications != to_boolean (communications)) {
+        fms_communications = to_boolean (communications);
 
-    DS_Event event;
-    event.fms.type = DS_FMS_COMMS_CHANGED;
-    event.fms.connected = fms_communications;
-    DS_AddEvent (&event);
+        DS_Event event;
+        event.fms.type = DS_FMS_COMMS_CHANGED;
+        event.fms.connected = fms_communications;
+        DS_AddEvent (&event);
+    }
 }
 
 /**
@@ -385,12 +409,14 @@ void CFG_SetFMSCommunications (const int communications)
  */
 void CFG_SetRadioCommunications (const int communications)
 {
-    radio_communications = to_boolean (communications);
+    if (radio_communications != to_boolean (communications)) {
+        radio_communications = to_boolean (communications);
 
-    DS_Event event;
-    event.radio.type = DS_RADIO_COMMS_CHANGED;
-    event.radio.connected = fms_communications;
-    DS_AddEvent (&event);
+        DS_Event event;
+        event.radio.type = DS_RADIO_COMMS_CHANGED;
+        event.radio.connected = fms_communications;
+        DS_AddEvent (&event);
+    }
 }
 
 /**
@@ -398,9 +424,11 @@ void CFG_SetRadioCommunications (const int communications)
  */
 void CFG_SetRobotCommunications (const int communications)
 {
-    robot_communications = to_boolean (communications);
-    create_robot_event (DS_ROBOT_COMMS_CHANGED);
-    create_robot_event (DS_STATUS_STRING_CHANGED);
+    if (robot_communications != communications) {
+        robot_communications = to_boolean (communications);
+        create_robot_event (DS_ROBOT_COMMS_CHANGED);
+        create_robot_event (DS_STATUS_STRING_CHANGED);
+    }
 }
 
 /**
@@ -408,10 +436,7 @@ void CFG_SetRobotCommunications (const int communications)
  */
 void CFG_FMSWatchdogExpired()
 {
-    /* Reset communications */
     CFG_SetFMSCommunications (0);
-
-    /* Force the sockets to perform another lookup */
     CFG_ReconfigureAddresses (RECONFIGURE_FMS);
 }
 
@@ -420,10 +445,7 @@ void CFG_FMSWatchdogExpired()
  */
 void CFG_RadioWatchdogExpired()
 {
-    /* Reset communications */
     CFG_SetRadioCommunications (0);
-
-    /* Force the sockets to perform another lookup */
     CFG_ReconfigureAddresses (RECONFIGURE_RADIO);
 }
 

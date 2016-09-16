@@ -154,15 +154,9 @@ static void* create_socket (void* data)
     DS_Socket* ptr = (DS_Socket*) data;
 
     /* Make the address 0.0.0.0 if it is empty */
-    if (DS_StringIsEmpty (ptr->address)) {
+    if (DS_StringIsEmpty (ptr->address) || ptr->broadcast == 1) {
         DS_FREESTR (ptr->address);
         ptr->address = sdsnew ("0.0.0.0");
-    }
-
-    /* Set broadcast address */
-    if (ptr->broadcast == 1) {
-        DS_FREESTR (ptr->address);
-        ptr->address = sdsnew ("255.255.255.255");
     }
 
     /* Set service strings */
@@ -194,8 +188,9 @@ static void* create_socket (void* data)
     ptr->info.client_init = (ptr->info.sock_out > 0);
 
     /* Start server loop */
-    pthread_create (&ptr->info.server_thread,
-                    NULL, &server_loop, (void*) ptr);
+    pthread_t thread;
+    pthread_create (&thread, NULL, &server_loop, (void*) ptr);
+    ptr->info.server_thread = thread;
 
     /* Exit */
     return NULL;
@@ -273,8 +268,9 @@ void DS_SocketOpen (DS_Socket* ptr)
         return;
 
     /* Initialize the socket in another thread */
-    pthread_create (&ptr->info.create_thread,
-                    NULL, &create_socket, (void*) ptr);
+    pthread_t thread;
+    pthread_create (&thread, NULL, &create_socket, (void*) ptr);
+    ptr->info.create_thread = thread;
 }
 
 /**
@@ -384,10 +380,8 @@ void DS_SocketChangeAddress (DS_Socket* ptr, sds address)
     DS_SocketClose (ptr);
 
     /* Re-assign the address */
-    if (strcmp (ptr->address, address) != 0) {
-        DS_FREESTR (ptr->address);
+    if (strcmp (ptr->address, address) != 0)
         ptr->address = sdsdup (address);
-    }
 
     /* Re-configure the socket */
     DS_SocketOpen (ptr);

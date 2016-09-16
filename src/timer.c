@@ -21,11 +21,11 @@
  * DEALINGS IN THE SOFTWARE.
  */
 
+#include "DS_Utils.h"
 #include "DS_Array.h"
 #include "DS_Timer.h"
 
 #include <stdio.h>
-#include <pthread.h>
 
 #if defined _WIN32
     #include <windows.h>
@@ -177,15 +177,16 @@ int DS_TimerInit (DS_Timer* timer, const int time, const int precision)
         timer->precision = precision;
 
         /* Configure the thread */
-        int error = pthread_create (&timer->thread, NULL,
-                                    &update_timer, (void*) timer);
+        pthread_t thread;
+        int e = pthread_create (&thread, NULL, &update_timer, (void*) timer);
+        timer->thread = thread;
 
         /* Report thread creation errors */
-        if (error)
-            fprintf (stderr, "Cannot create timer thread, error %d\n", error);
+        if (e)
+            fprintf (stderr, "Cannot create timer thread, error %d\n", e);
 
         /* Return 1 if there are no errors */
-        return (error == 0);
+        return (e == 0);
     }
 
     return 0;

@@ -128,6 +128,14 @@ static int set_socket_options (int sfd)
                               SOL_SOCKET,
                               SO_REUSEADDR,
                               &val, sizeof (val));
+#elif defined __ANDROID__
+        int val = 1;
+
+        /* Set the SO_REUSEADDR option */
+        int err = setsockopt (sfd,
+                              SOL_SOCKET,
+                              SO_REUSEADDR,
+                              &val, sizeof (val));
 #else
         int val = 1;
 
