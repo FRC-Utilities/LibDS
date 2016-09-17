@@ -45,13 +45,6 @@ extern "C" {
 #define DS_FREE(ptr)    if (ptr != NULL) { free    (ptr); ptr = NULL; }
 #define DS_FREESTR(str) if (str != NULL) { sdsfree (str); str = NULL; }
 
-/*
- * pthread_cancel() is not implemented in Android
- */
-#if defined __ANDROID__
-#define pthread_cancel(x) pthread_kill(x,0);
-#endif
-
 extern uint32_t DS_CRC32 (uint32_t crc, const void* buf, size_t size);
 
 extern sds DS_Append (sds string, char data);

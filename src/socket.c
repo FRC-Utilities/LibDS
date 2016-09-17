@@ -136,6 +136,7 @@ static void* server_loop (void* ptr)
     }
 
     /* Exit */
+    pthread_exit (0);
     return NULL;
 }
 
@@ -190,9 +191,9 @@ static void* create_socket (void* data)
     /* Start server loop */
     pthread_t thread;
     pthread_create (&thread, NULL, &server_loop, (void*) ptr);
-    ptr->info.server_thread = thread;
 
     /* Exit */
+    pthread_exit (0);
     return NULL;
 }
 
@@ -208,8 +209,6 @@ DS_Socket DS_SocketEmpty()
     info.sock_out = -1;
     info.server_init = 0;
     info.client_init = 0;
-    info.create_thread = 0;
-    info.server_thread = 0;
     info.buffer = sdsempty();
     info.in_service = sdsempty();
     info.out_service = sdsempty();
@@ -270,7 +269,6 @@ void DS_SocketOpen (DS_Socket* ptr)
     /* Initialize the socket in another thread */
     pthread_t thread;
     pthread_create (&thread, NULL, &create_socket, (void*) ptr);
-    ptr->info.create_thread = thread;
 }
 
 /**
@@ -285,19 +283,13 @@ void DS_SocketClose (DS_Socket* ptr)
     if (!ptr)
         return;
 
-    /* Destroy sockets */
-    socket_close (ptr->info.sock_in);
-    socket_close (ptr->info.sock_out);
-
     /* Reset socket properties */
     ptr->info.server_init = 0;
     ptr->info.client_init = 0;
 
-    /* Close socket threads */
-    pthread_cancel (ptr->info.server_thread);
-    pthread_cancel (ptr->info.create_thread);
-    pthread_join (ptr->info.server_thread, NULL);
-    pthread_join (ptr->info.create_thread, NULL);
+    /* Close sockets */
+    socket_close (ptr->info.sock_in);
+    socket_close (ptr->info.sock_out);
 
     /* Clear data buffers */
     DS_FREESTR (ptr->info.buffer);

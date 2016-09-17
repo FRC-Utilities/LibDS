@@ -61,6 +61,7 @@ static void* update_timer (void* ptr)
         DS_Sleep (timer->precision);
     }
 
+    pthread_exit (0);
     return NULL;
 }
 
@@ -80,21 +81,7 @@ void Timers_Init()
  */
 void Timers_Close()
 {
-    /* Stop timer loops */
     running = 0;
-
-    /* Stop all timer threads */
-    int timer;
-    for (timer = 0; timer < (int) timers.used; ++timer) {
-        DS_Timer* ptr = (DS_Timer*) timers.data [timer];
-
-        if (ptr != NULL) {
-            pthread_cancel (ptr->thread);
-            pthread_join (ptr->thread, NULL);
-        }
-    }
-
-    /* Delete all the timers */
     DS_ArrayFree (&timers);
 }
 
@@ -178,15 +165,15 @@ int DS_TimerInit (DS_Timer* timer, const int time, const int precision)
 
         /* Configure the thread */
         pthread_t thread;
-        int e = pthread_create (&thread, NULL, &update_timer, (void*) timer);
-        timer->thread = thread;
+        int error = pthread_create (&thread,
+                                    NULL, &update_timer, (void*) timer);
 
         /* Report thread creation errors */
-        if (e)
-            fprintf (stderr, "Cannot create timer thread, error %d\n", e);
+        if (error)
+            fprintf (stderr, "Cannot create timer thread, error %d\n", error);
 
         /* Return 1 if there are no errors */
-        return (e == 0);
+        return (error == 0);
     }
 
     return 0;

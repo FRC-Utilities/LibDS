@@ -40,7 +40,6 @@ typedef struct _timer {
     int elapsed;      /**< Number of milliseconds elapsed since last reset */
     int precision;    /**< The update interval (in milliseconds) */
     int initialized;  /**< Set to \c 1 if the timer has been initialized */
-    pthread_t thread; /**< Timer thread ID */
 } DS_Timer;
 
 extern void Timers_Init();

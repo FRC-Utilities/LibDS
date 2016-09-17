@@ -65,10 +65,6 @@ int main()
         DS_Sleep (20);
     }
 
-    /* Close the input thread */
-    pthread_cancel (user_input_thread);
-    pthread_join (user_input_thread, NULL);
-
     /* Close the DS and the application modules */
     DS_Close();
     close_interface();
@@ -159,6 +155,7 @@ static void* get_user_input()
         DS_Sleep (20);
     }
 
+    pthread_exit (0);
     return NULL;
 }
 
