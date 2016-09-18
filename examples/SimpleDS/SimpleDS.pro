@@ -1,5 +1,6 @@
 QT += gui
 QT += widgets
+QT += network
 
 CONFIG += c++11
 
@@ -17,7 +18,7 @@ SOURCES += \
   $$PWD/src/main.cpp \
   $$PWD/src/Window.cpp \
   $$PWD/src/VirtualJoystick.cpp \
-    src/DriverStation.cpp
+  $$PWD/src/DriverStation.cpp
 
 FORMS += \
   $$PWD/src/Window.ui

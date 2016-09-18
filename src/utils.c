@@ -28,6 +28,51 @@
 #include <stdlib.h>
 
 /**
+ * Kills the given \a thread and reports possible errors
+ */
+int DS_StopThread (pthread_t thread)
+{
+    int error = 0;
+
+    /* Stop the thread */
+#if defined __ANDROID__
+    error = pthread_kill (thread, 0);
+#else
+    error = pthread_cancel (thread);
+#endif
+
+    /* Something went wrong while stopping the thread */
+    if (error) {
+        fprintf (stderr,
+                 "Thread %d:\n"
+                 "\t Message: Cannot stop thread\n"
+                 "\t Error Code: %d\n"
+                 "\t Error Desc: %s\n",
+                 (int) thread, error, strerror (error));
+
+        return error;
+    }
+
+    /* Join child thread to main thread */
+    error = pthread_join (thread, NULL);
+
+    /* Something went wrong while joining the thread */
+    if (error) {
+        fprintf (stderr,
+                 "Thread %d:\n"
+                 "\t Message: Cannot join thread to main\n"
+                 "\t Error Code: %d\n"
+                 "\t Error Desc: %s\n",
+                 (int) thread, error, strerror (error));
+
+        return error;
+    }
+
+    /* Return error code (should be 0) */
+    return error;
+}
+
+/**
  * Appends the given \a data to the \a string
  *
  * \param string the original string
@@ -71,6 +116,20 @@ int DS_StringIsEmpty (const sds string)
     }
 
     return 1;
+}
+
+/**
+ * Returns a single byte value that represents the ratio between the
+ * given \a value and the maximum number specified.
+ */
+uint8_t DS_GetFByte (double value, double max)
+{
+    if (value != 0 && max != 0 && value <= max) {
+        int percent = (value / max) * (0xFF / 2);
+        return (uint8_t) (percent & 0xFF);
+    }
+
+    return 0;
 }
 
 /**

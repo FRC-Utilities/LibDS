@@ -29,6 +29,7 @@ extern "C" {
 #endif
 
 #include <sds.h>
+#include <pthread.h>
 
 #include "DS_Types.h"
 
@@ -44,6 +45,8 @@ typedef struct {
     int sock_out;            /**< Client socket file descriptor */
     int client_init;         /**< Set to \c 1 if client socket is initialized */
     int server_init;         /**< Set to \c 1 if server socket is initialized */
+    pthread_t create_thread; /**< Holds the TID of the socket creator thread */
+    pthread_t server_thread; /**< Holds the TID of the server process thread */
 } DS_SocketInfo;
 
 /**

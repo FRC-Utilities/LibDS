@@ -136,7 +136,6 @@ static void* server_loop (void* ptr)
     }
 
     /* Exit */
-    pthread_exit (0);
     return NULL;
 }
 
@@ -191,9 +190,9 @@ static void* create_socket (void* data)
     /* Start server loop */
     pthread_t thread;
     pthread_create (&thread, NULL, &server_loop, (void*) ptr);
+    ptr->info.server_thread = thread;
 
     /* Exit */
-    pthread_exit (0);
     return NULL;
 }
 
@@ -203,23 +202,25 @@ static void* create_socket (void* data)
 DS_Socket DS_SocketEmpty()
 {
     DS_Socket socket;
-    DS_SocketInfo info;
 
-    info.sock_in = -1;
-    info.sock_out = -1;
-    info.server_init = 0;
-    info.client_init = 0;
-    info.buffer = sdsempty();
-    info.in_service = sdsempty();
-    info.out_service = sdsempty();
-
-    socket.info = info;
+    /* Fill basic data */
     socket.in_port = 0;
     socket.out_port = 0;
     socket.disabled = 0;
     socket.broadcast = 0;
     socket.address = sdsempty();
     socket.type = DS_SOCKET_UDP;
+
+    /* Fill socket info structure */
+    socket.info.sock_in = 0;
+    socket.info.sock_out = 0;
+    socket.info.buffer = NULL;
+    socket.info.server_init = 0;
+    socket.info.client_init = 0;
+    socket.info.create_thread = 0;
+    socket.info.server_thread = 0;
+    socket.info.in_service = NULL;
+    socket.info.out_service = NULL;
 
     return socket;
 }
@@ -269,6 +270,7 @@ void DS_SocketOpen (DS_Socket* ptr)
     /* Initialize the socket in another thread */
     pthread_t thread;
     pthread_create (&thread, NULL, &create_socket, (void*) ptr);
+    ptr->info.create_thread = thread;
 }
 
 /**
@@ -287,14 +289,26 @@ void DS_SocketClose (DS_Socket* ptr)
     ptr->info.server_init = 0;
     ptr->info.client_init = 0;
 
+#if !defined __ANDROID__
     /* Close sockets */
     socket_close (ptr->info.sock_in);
     socket_close (ptr->info.sock_out);
+
+    /* Stop threads */
+    DS_StopThread (ptr->info.create_thread);
+    DS_StopThread (ptr->info.server_thread);
+#endif
 
     /* Clear data buffers */
     DS_FREESTR (ptr->info.buffer);
     DS_FREESTR (ptr->info.in_service);
     DS_FREESTR (ptr->info.out_service);
+
+    /* Reset socket information structure */
+    ptr->info.sock_in = -1;
+    ptr->info.sock_out = -1;
+    ptr->info.create_thread = 0;
+    ptr->info.server_thread = 0;
 }
 
 /**
@@ -372,7 +386,7 @@ void DS_SocketChangeAddress (DS_Socket* ptr, sds address)
     DS_SocketClose (ptr);
 
     /* Re-assign the address */
-    if (strcmp (ptr->address, address) != 0)
+    if (sdscmp (ptr->address, address) != 0)
         ptr->address = sdsdup (address);
 
     /* Re-configure the socket */

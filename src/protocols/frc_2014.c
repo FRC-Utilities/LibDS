@@ -223,7 +223,7 @@ static sds get_joystick_data()
     for (i = 0; i < max_joysticks; ++i) {
         /* Add axis data */
         for (j = 0; j < max_axes; ++j)
-            buf = DS_Append (buf, (uint8_t) (DS_GetJoystickAxis (i, j) * 127));
+            buf = DS_Append (buf, DS_GetFByte (DS_GetJoystickAxis (i, j), 1));
 
         /* Generate button data */
         uint16_t button_flags = 0;

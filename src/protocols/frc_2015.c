@@ -329,7 +329,7 @@ static sds get_joystick_data()
         /* Add axis data */
         data = DS_Append (data, DS_GetJoystickNumAxes (i));
         for (j = 0; j < DS_GetJoystickNumAxes (i); ++j)
-            data = DS_Append (data, (uint8_t) (DS_GetJoystickAxis (i, j) * 127));
+            data = DS_Append (data, DS_GetFByte (DS_GetJoystickAxis (i, j), 1));
 
         /* Generate button data */
         uint16_t button_flags = 0;
@@ -608,13 +608,20 @@ static int read_robot_packet (const sds data)
     if (sdslen (data) < 7)
         return 0;
 
+    // Ping 00 51
+    // Comm Version 01
+    // Control 00
+    // Battery 31 00
+    // Request 01
+    // 00 51 01 00 31 00 01 00
+
     /* Read robot packet */
     uint8_t control = data [3];
-    uint8_t status  = data [4];
+    uint8_t rstatus = data [4];
     uint8_t request = data [7];
 
     /* Update client information */
-    CFG_SetRobotCode (status & cRobotHasCode);
+    CFG_SetRobotCode (rstatus & cRobotHasCode);
     CFG_SetEmergencyStopped (control & cEmergencyStop);
 
     /* Update date/time request flag */

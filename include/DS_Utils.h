@@ -47,8 +47,10 @@ extern "C" {
 
 extern uint32_t DS_CRC32 (uint32_t crc, const void* buf, size_t size);
 
+extern int DS_StopThread (pthread_t thread);
 extern sds DS_Append (sds string, char data);
 extern int DS_StringIsEmpty (const sds string);
+extern uint8_t DS_GetFByte (double val, double max);
 extern sds DS_GetStaticIP (const int net, const int team, const int host);
 
 #ifdef __cplusplus

@@ -32,7 +32,7 @@
 /*
  * These variables hold the state(s) of the LibDS and its modules
  */
-static int team = -1;
+static int team = 0;
 static int cpu_usage = -1;
 static int ram_usage = -1;
 static int disk_usage = -1;
@@ -269,8 +269,10 @@ void CFG_SetRobotCode (const int code)
  */
 void CFG_SetTeamNumber (const int number)
 {
-    team = number;
-    CFG_ReconfigureAddresses (RECONFIGURE_ALL);
+    if (team != number) {
+        team = number;
+        CFG_ReconfigureAddresses (RECONFIGURE_ALL);
+    }
 }
 
 /**
@@ -424,7 +426,7 @@ void CFG_SetRadioCommunications (const int communications)
  */
 void CFG_SetRobotCommunications (const int communications)
 {
-    if (robot_communications != communications) {
+    if (robot_communications != to_boolean (communications)) {
         robot_communications = to_boolean (communications);
         create_robot_event (DS_ROBOT_COMMS_CHANGED);
         create_robot_event (DS_STATUS_STRING_CHANGED);
