@@ -35,10 +35,8 @@ int DS_StopThread (pthread_t thread)
     int error = 0;
 
     /* Thread is invalid */
-    if (thread <= 0) {
-        fprintf (stderr, "Invalid thread ID (%d) specified\n", (int) thread);
+    if (thread <= 0)
         return 1;
-    }
 
     /* Stop the thread */
 #if defined __ANDROID__
@@ -48,7 +46,7 @@ int DS_StopThread (pthread_t thread)
 #endif
 
     /* Something went wrong while stopping the thread */
-    if (error) {
+    if (error != 0) {
         fprintf (stderr,
                  "Thread %d:\n"
                  "\t Message: Cannot stop thread\n"
@@ -63,7 +61,7 @@ int DS_StopThread (pthread_t thread)
     error = pthread_join (thread, NULL);
 
     /* Something went wrong while joining the thread */
-    if (error) {
+    if (error != 0) {
         fprintf (stderr,
                  "Thread %d:\n"
                  "\t Message: Cannot join thread to main\n"
