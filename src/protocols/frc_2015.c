@@ -275,7 +275,7 @@ static sds get_timezone_data()
     sds data = sdsnewlen (NULL, 12);
 
     /* Get current time */
-    time_t rt;
+    time_t rt = 0;
     struct tm* timeinfo = localtime (&rt);
 
     /* Get timezone */
@@ -689,7 +689,7 @@ static void restart_robot_code()
 DS_Protocol* DS_GetProtocolFRC_2015()
 {
     /* Initialize pointers */
-    DS_Protocol* protocol = calloc (1, sizeof (DS_Protocol));
+    DS_Protocol* protocol = (DS_Protocol*) malloc (sizeof (DS_Protocol));
 
     /* Set address functions */
     protocol->fms_address = &fms_address;

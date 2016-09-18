@@ -91,52 +91,44 @@ static void read_socket (DS_Socket* ptr)
  *
  * \param ptr a pointer to a \c DS_Socket structure
  */
-static void* server_loop (void* ptr)
+static void server_loop (DS_Socket* ptr)
 {
-    /* Pointer is NULL */
-    if (!ptr)
-        return NULL;
-
-    /* Cast the generic pointer into a socket */
-    DS_Socket* sock = (DS_Socket*) ptr;
-
-    /* Set a 5-ms timeout on Windows */
+    if (ptr) {
+        /* Set a 5-ms timeout on Windows */
 #if defined _WIN32
-    struct timeval tv;
-    tv.tv_sec = 0;
-    tv.tv_usec = 5000;
+        struct timeval tv;
+        tv.tv_sec = 0;
+        tv.tv_usec = 5000;
 #endif
 
-    /* Make the socket non-blocking on Windows */
+        /* Make the socket non-blocking on Windows */
 #if defined _WIN32
-    set_socket_block (sock->info.sock_in, 0);
+        set_socket_block (ptr->info.sock_in, 0);
 #endif
 
-    /* Periodicaly check if there is data available on the socket */
-    while (sock->info.server_init == 1) {
-        int rc = -1;
+        /* Periodicaly check if there is data available on the socket */
+        while (ptr->info.server_init == 1) {
+            int rc;
 
-        /* Set the file descriptor */
-        fd_set set;
-        FD_ZERO (&set);
-        FD_SET (sock->info.sock_in, &set);
+            /* Set the file descriptor */
+            fd_set set;
+            FD_ZERO (&set);
+            FD_SET (ptr->info.sock_in, &set);
 
-        /* Run select */
+            /* Run select */
 #if defined _WIN32
-        rc = select (0, &set, NULL, NULL, &tv);
+            rc = select (0, &set, NULL, NULL, &tv);
 #else
-        rc = select (sock->info.sock_in + 1, &set, NULL, NULL, NULL);
+            rc = select (ptr->info.sock_in + 1, &set, NULL, NULL, NULL);
 #endif
 
-        /* Data is available, read it */
-        if (rc > 0) {
-            if (FD_ISSET (sock->info.sock_in, &set))
-                read_socket (sock);
+            /* Data is available, read it */
+            if (rc > 0) {
+                if (FD_ISSET (ptr->info.sock_in, &set))
+                    read_socket (ptr);
+            }
         }
     }
-
-    /* Exit */
-    return NULL;
 }
 
 /**
@@ -188,9 +180,7 @@ static void* create_socket (void* data)
     ptr->info.client_init = (ptr->info.sock_out > 0);
 
     /* Start server loop */
-    pthread_t thread;
-    pthread_create (&thread, NULL, &server_loop, (void*) ptr);
-    ptr->info.server_thread = thread;
+    server_loop (ptr);
 
     /* Exit */
     return NULL;
@@ -217,8 +207,7 @@ DS_Socket DS_SocketEmpty()
     socket.info.buffer = NULL;
     socket.info.server_init = 0;
     socket.info.client_init = 0;
-    socket.info.create_thread = 0;
-    socket.info.server_thread = 0;
+    socket.info.socket_thread = 0;
     socket.info.in_service = NULL;
     socket.info.out_service = NULL;
 
@@ -270,7 +259,7 @@ void DS_SocketOpen (DS_Socket* ptr)
     /* Initialize the socket in another thread */
     pthread_t thread;
     pthread_create (&thread, NULL, &create_socket, (void*) ptr);
-    ptr->info.create_thread = thread;
+    ptr->info.socket_thread = thread;
 }
 
 /**
@@ -289,15 +278,12 @@ void DS_SocketClose (DS_Socket* ptr)
     ptr->info.server_init = 0;
     ptr->info.client_init = 0;
 
-#if !defined __ANDROID__
     /* Close sockets */
     socket_close (ptr->info.sock_in);
     socket_close (ptr->info.sock_out);
 
     /* Stop threads */
-    DS_StopThread (ptr->info.create_thread);
-    DS_StopThread (ptr->info.server_thread);
-#endif
+    DS_StopThread (ptr->info.socket_thread);
 
     /* Clear data buffers */
     DS_FREESTR (ptr->info.buffer);
@@ -307,8 +293,7 @@ void DS_SocketClose (DS_Socket* ptr)
     /* Reset socket information structure */
     ptr->info.sock_in = -1;
     ptr->info.sock_out = -1;
-    ptr->info.create_thread = 0;
-    ptr->info.server_thread = 0;
+    ptr->info.socket_thread = 0;
 }
 
 /**

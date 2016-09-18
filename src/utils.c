@@ -34,6 +34,12 @@ int DS_StopThread (pthread_t thread)
 {
     int error = 0;
 
+    /* Thread is invalid */
+    if (thread <= 0) {
+        fprintf (stderr, "Invalid thread ID (%d) specified\n", (int) thread);
+        return 1;
+    }
+
     /* Stop the thread */
 #if defined __ANDROID__
     error = pthread_kill (thread, 0);
