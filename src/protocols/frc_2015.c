@@ -608,13 +608,6 @@ static int read_robot_packet (const sds data)
     if (sdslen (data) < 7)
         return 0;
 
-    // Ping 00 51
-    // Comm Version 01
-    // Control 00
-    // Battery 31 00
-    // Request 01
-    // 00 51 01 00 31 00 01 00
-
     /* Read robot packet */
     uint8_t control = data [3];
     uint8_t rstatus = data [4];
