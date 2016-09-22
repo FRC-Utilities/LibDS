@@ -216,7 +216,12 @@ static void refresh_windows()
  */
 void init_interface()
 {
-    clear();
+#if defined __WIN32
+    system ("CLS");
+#else
+    system ("clear");
+#endif
+
     init_strings();
     window = initscr();
 
@@ -242,7 +247,11 @@ void close_interface()
     refresh();
     close_strings();
 
-    clear();
+#if defined __WIN32
+    system ("CLS");
+#else
+    system ("clear");
+#endif
 }
 
 /**
