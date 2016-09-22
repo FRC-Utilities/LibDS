@@ -5,20 +5,19 @@ QT += network
 CONFIG += c++11
 
 include ($$PWD/../../LibDS.pri)
+include ($$PWD/../../wrappers/Qt/LibDS-Qt.pri)
 
 TEMPLATE = app
 TARGET = SimpleDS
 
 HEADERS += \
   $$PWD/src/Window.h \
-  $$PWD/src/VirtualJoystick.h \
-    src/DriverStation.h
+  $$PWD/src/VirtualJoystick.h
 
 SOURCES += \
   $$PWD/src/main.cpp \
   $$PWD/src/Window.cpp \
-  $$PWD/src/VirtualJoystick.cpp \
-  $$PWD/src/DriverStation.cpp
+  $$PWD/src/VirtualJoystick.cpp
 
 FORMS += \
   $$PWD/src/Window.ui

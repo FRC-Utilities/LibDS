@@ -21,9 +21,9 @@
  */
 
 #include "Window.h"
-#include "DriverStation.h"
 
 #include <QMessageBox>
+#include <DriverStation.h>
 
 /**
  * Initializes the window and its widgets.

@@ -24,7 +24,6 @@
 #define _VIRTUAL_JOYSTICK_H
 
 #include <QKeyEvent>
-#include <QApplication>
 
 class VirtualJoystick : public QObject
 {

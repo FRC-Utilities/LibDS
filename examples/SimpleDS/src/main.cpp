@@ -21,9 +21,10 @@
  */
 
 #include <LibDS.h>
+#include <EventLogger.h>
+#include <DriverStation.h>
 
 #include "Window.h"
-#include "DriverStation.h"
 #include "VirtualJoystick.h"
 
 int main (int argc, char* argv[])
@@ -32,6 +33,7 @@ int main (int argc, char* argv[])
 
     /* Initialize the Driver Station */
     DriverStation::getInstance()->start();
+    DSEventLogger::getInstance()->start();
 
     /* Initialize the main window */
     Window window;

@@ -20,8 +20,10 @@
  * DEALINGS IN THE SOFTWARE.
  */
 
-#include "DriverStation.h"
 #include "VirtualJoystick.h"
+
+#include <QApplication>
+#include <DriverStation.h>
 
 /**
  * Initialize the event filter and register a joystick
