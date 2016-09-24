@@ -1,9 +1,15 @@
-# LibDS C
+# LibDS
 
 [![Build Status](https://img.shields.io/travis/FRC-Utilities/LibDS-C.svg?style=flat-square)](https://travis-ci.org/FRC-Utilities/LibDS-C)
 [![Donate button](https://img.shields.io/badge/bitcoin-donate-brightgreen.svg?style=flat-square)](https://blockchain.info/address/1K85yLxjuqUmhkjP839R7C23XFhSxrefMx "Donate once-off to this project using BitCoin")
 
-This is a re-implementation of LibDS in plain C (with [SDS](https://github.com/antirez/sds) for dynamic string handling). This library implements all the features of LibDS, including (but not limited to):
+The DriverStation library allows you to connect and manage a robot easily by providing an abstraction layer between an application and the network comununications between the robot and the host computer.
+
+The library is written in C, allowing it to be used in many platforms and/or programming languages (using wrappers).
+
+### Features
+
+LibDS implements the following features:
 
 - Modular design
 - Dynamic protocol loading
