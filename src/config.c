@@ -39,7 +39,7 @@ static int disk_usage = -1;
 static int robot_code = -1;
 static int robot_enabled = -1;
 static int can_utilization = -1;
-static double robot_voltage = -1;
+static float robot_voltage = -1;
 static int emergency_stopped = -1;
 static int fms_communications = -1;
 static int radio_communications = -1;
@@ -180,7 +180,7 @@ int CFG_GetRobotDiskUsage()
 /**
  * Returns the current voltage of the robot
  */
-double CFG_GetRobotVoltage()
+float CFG_GetRobotVoltage()
 {
     return DS_Max (robot_voltage, 0);
 }
@@ -326,7 +326,7 @@ void CFG_SetRobotDiskUsage (const int percent)
 /**
  * Updates the robot's \a voltage, there are no range limits
  */
-void CFG_SetRobotVoltage (const double voltage)
+void CFG_SetRobotVoltage (const float voltage)
 {
     if (robot_voltage != voltage) {
         robot_voltage = roundf (voltage * 100) / 100;

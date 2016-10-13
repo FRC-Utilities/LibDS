@@ -271,7 +271,7 @@ int DS_GetRobotDiskUsage()
 /**
  * Returns the current voltage of the robot
  */
-double DS_GetRobotVoltage()
+float DS_GetRobotVoltage()
 {
     return CFG_GetRobotVoltage();
 }

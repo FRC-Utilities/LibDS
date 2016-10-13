@@ -774,7 +774,7 @@ void DriverStation::setJoystickHat (int joystick, int hat, int angle)
  *
  * \note the \a value must have a range from \c -1 to \c 1
  */
-void DriverStation::setJoystickAxis (int joystick, int axis, double value)
+void DriverStation::setJoystickAxis (int joystick, int axis, float value)
 {
     DS_SetJoystickAxis (joystick, axis, value);
 }

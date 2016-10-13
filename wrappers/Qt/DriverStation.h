@@ -124,7 +124,7 @@ public slots:
 
     void addJoystick (int axes, int hats, int buttons);
     void setJoystickHat (int joystick, int hat, int angle);
-    void setJoystickAxis (int joystick, int axis, double value);
+    void setJoystickAxis (int joystick, int axis, float value);
     void setJoystickButton (int joystick, int button, bool pressed);
 
 private slots:
@@ -144,7 +144,7 @@ signals:
     void enabledChanged (bool enabled);
     void teamNumberChanged (int number);
     void statusChanged (QString status);
-    void voltageChanged (double voltage);
+    void voltageChanged (float voltage);
     void robotCodeChanged (bool robotCode);
     void controlModeChanged (Control mode);
     void allianceChanged (Alliance alliance);

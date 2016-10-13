@@ -44,7 +44,7 @@ private slots:
     void onDiskUsageChanged (int usage);
     void onEnabledChanged (bool enabled);
     void onTeamNumberChanged (int number);
-    void onVoltageChanged (double voltage);
+    void onVoltageChanged (float voltage);
     void onRobotCodeChanged (bool robotCode);
     void onFMSCommunicationsChanged (bool connected);
     void onRadioCommunicationsChanged (bool connected);

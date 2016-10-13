@@ -33,7 +33,7 @@
  */
 typedef struct _joystick {
     int* hats;       /**< An array with the hat angles */
-    double* axes;    /**< An array with the axis values */
+    float* axes;    /**< An array with the axis values */
     int* buttons;    /**< An array with the button states */
     int num_axes;    /**< The number of axes of the joystick */
     int num_hats;    /**< The number of hats of the joystick */
@@ -168,7 +168,7 @@ int DS_GetJoystickHat (int joystick, int hat)
  *       a neutral value if the robot is disabled. This is for additional
  *       safety!
  */
-double DS_GetJoystickAxis (int joystick, int axis)
+float DS_GetJoystickAxis (int joystick, int axis)
 {
     if (CFG_GetRobotEnabled() && joystick_exists (joystick)) {
         DS_Joystick* stick = get_joystick (joystick);
@@ -234,7 +234,7 @@ void DS_JoysticksAdd (const int axes, const int hats, const int buttons)
 
     /* Set joystick value arrays */
     joystick->hats = calloc (hats, sizeof (int));
-    joystick->axes = calloc (axes, sizeof (double));
+    joystick->axes = calloc (axes, sizeof (float));
     joystick->buttons = calloc (buttons, sizeof (int));
 
     /* Register the new joystick in the joystick list */
@@ -247,6 +247,7 @@ void DS_JoysticksAdd (const int axes, const int hats, const int buttons)
 /**
  * Updates the \a angle of the given \a hat in the given \a joystick
  */
+#include <stdio.h>
 void DS_SetJoystickHat (int joystick, int hat, int angle)
 {
     if (joystick_exists (joystick)) {
@@ -260,7 +261,7 @@ void DS_SetJoystickHat (int joystick, int hat, int angle)
 /**
  * Updates the \a value of the given \a axis in the given \a joystick
  */
-void DS_SetJoystickAxis (int joystick, int axis, double value)
+void DS_SetJoystickAxis (int joystick, int axis, float value)
 {
     if (joystick_exists (joystick)) {
         DS_Joystick* stick = get_joystick (joystick);

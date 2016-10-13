@@ -49,7 +49,7 @@ void DS_ArrayFree (DS_Array* array)
 
 /**
  * Inserts the given \a element in the \a array. If there is no memory left
- * in the array, then this function will double the size of the array and
+ * in the array, then this function will float the size of the array and
  * insert the item.
  *
  * \param array the array object in which to insert the given element

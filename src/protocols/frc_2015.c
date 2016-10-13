@@ -80,17 +80,17 @@ static int reboot = 0;
 static int restart_code = 0;
 
 /**
- * Obtains the voltage double from the given \a upper and \a lower bytes
+ * Obtains the voltage float from the given \a upper and \a lower bytes
  */
-static double decode_voltage (uint8_t upper, uint8_t lower)
+static float decode_voltage (uint8_t upper, uint8_t lower)
 {
-    return ((double) upper) + ((double) lower / 0xff);
+    return ((float) upper) + ((float) lower / 0xff);
 }
 
 /**
- * Encodes the \a voltage double in the given \a upper and \a lower bytes
+ * Encodes the \a voltage float in the given \a upper and \a lower bytes
  */
-static void encode_voltage (double voltage, uint8_t* upper, uint8_t* lower)
+static void encode_voltage (float voltage, uint8_t* upper, uint8_t* lower)
 {
     if (upper && lower) {
         upper[0] = (uint8_t) (voltage);

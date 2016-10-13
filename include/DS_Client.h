@@ -61,7 +61,7 @@ extern int DS_GetRobotEnabled();
 extern int DS_GetRobotCPUUsage();
 extern int DS_GetRobotRAMUsage();
 extern int DS_GetRobotDiskUsage();
-extern double DS_GetRobotVoltage();
+extern float DS_GetRobotVoltage();
 extern DS_Alliance DS_GetAlliance();
 extern DS_Position DS_GetPosition();
 extern int DS_GetEmergencyStopped();

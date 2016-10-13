@@ -207,7 +207,7 @@ static uint8_t get_digital_inputs()
  * value (\c 0.00 for axes, \c 0 for buttons).
  *
  * Axis value range is -127 to 128, the robot program will then adjust those
- * values to a double range from -1 to 1.
+ * values to a float range from -1 to 1.
  *
  * Button states are stored in a similar way as enumerated flags in a C/C++
  * program.
@@ -421,8 +421,8 @@ int read_robot_packet (const sds data)
     uint8_t upper = ((uint8_t) data [1] * 12) / 0x12;
     uint8_t lower = ((uint8_t) data [2] * 12) / 0x12;
 
-    /* Construct the voltage double */
-    double voltage = ((double) upper) + ((double) lower / 0xff);
+    /* Construct the voltage float */
+    float voltage = ((float) upper) + ((float) lower / 0xff);
     CFG_SetRobotVoltage (voltage);
 
     /* Check if robot is e-stopped */

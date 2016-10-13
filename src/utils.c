@@ -126,7 +126,7 @@ int DS_StringIsEmpty (const sds string)
  * Returns a single byte value that represents the ratio between the
  * given \a value and the maximum number specified.
  */
-uint8_t DS_GetFByte (double value, double max)
+uint8_t DS_GetFByte (float value, float max)
 {
     if (value != 0 && max != 0 && value <= max) {
         int percent = (value / max) * (0xFF / 2);

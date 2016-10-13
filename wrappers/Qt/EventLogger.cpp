@@ -120,7 +120,7 @@ void DSEventLogger::onTeamNumberChanged (int number)
 /**
  * Called when the DS reports a change in the robot voltage
  */
-void DSEventLogger::onVoltageChanged (double voltage)
+void DSEventLogger::onVoltageChanged (float voltage)
 {
     Q_UNUSED (voltage);
 }

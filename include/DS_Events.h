@@ -87,7 +87,7 @@ typedef struct {
     int estopped;        /**< Set to \c 1 if robot is emergency stopped */
     int connected;       /**< Set to \c 1 if robot is connected */
     int disk_usage;      /**< Represents the disk usage (from 0 to 100) */
-    double voltage;      /**< Holds the current robot voltage */
+    float voltage;      /**< Holds the current robot voltage */
     DS_ControlMode mode; /**< Represents the current control mode */
 } DS_RobotEvent;
 
