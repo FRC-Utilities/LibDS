@@ -93,7 +93,10 @@ sds DS_GetCustomRobotAddress()
  */
 sds DS_GetDefaultFMSAddress()
 {
-    return DS_CurrentProtocol()->fms_address();
+    if (DS_CurrentProtocol())
+        return DS_CurrentProtocol()->fms_address();
+
+    return sdsempty();
 }
 
 /**
@@ -103,7 +106,10 @@ sds DS_GetDefaultFMSAddress()
  */
 sds DS_GetDefaultRadioAddress()
 {
-    return DS_CurrentProtocol()->radio_address();
+    if (DS_CurrentProtocol())
+        return DS_CurrentProtocol()->radio_address();
+
+    return sdsempty();
 }
 
 /**
@@ -113,7 +119,10 @@ sds DS_GetDefaultRadioAddress()
  */
 sds DS_GetDefaultRobotAddress()
 {
-    return DS_CurrentProtocol()->robot_address();
+    if (DS_CurrentProtocol())
+        return DS_CurrentProtocol()->robot_address();
+
+    return sdsempty();
 }
 
 /**
@@ -231,8 +240,8 @@ int DS_GetRobotCode()
 int DS_GetCanBeEnabled()
 {
     return DS_GetRobotCode()
-           && !DS_GetEmergencyStopped()
-           && DS_GetRobotCommunications();
+            && !DS_GetEmergencyStopped()
+            && DS_GetRobotCommunications();
 }
 
 /**
@@ -327,6 +336,14 @@ int DS_GetRobotCommunications()
 }
 
 /**
+ * Returns the current CAN utilization of the robot
+ */
+int DS_GetRobotCANUtilization()
+{
+    return CFG_GetCANUtilization();
+}
+
+/**
  * Returns the current control mode of the robot
  */
 DS_ControlMode DS_GetControlMode()
@@ -335,11 +352,23 @@ DS_ControlMode DS_GetControlMode()
 }
 
 /**
+ * Returns the maximum battery voltage specified by the current protocol
+ */
+float DS_GetMaximumBatteryVoltage()
+{
+    if (DS_CurrentProtocol())
+        return DS_CurrentProtocol()->max_battery_voltage;
+
+    return 0.0;
+}
+
+/**
  * Instructs the current protocol to reboot the robot
  */
 void DS_RebootRobot()
 {
-    DS_CurrentProtocol()->reboot_robot();
+    if (DS_CurrentProtocol())
+        DS_CurrentProtocol()->reboot_robot();
 }
 
 /**
@@ -347,7 +376,8 @@ void DS_RebootRobot()
  */
 void DS_RestartRobotCode()
 {
-    DS_CurrentProtocol()->restart_robot_code();
+    if (DS_CurrentProtocol())
+        DS_CurrentProtocol()->restart_robot_code();
 }
 
 /**

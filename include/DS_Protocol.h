@@ -58,6 +58,7 @@ typedef struct _protocol {
     int max_axis_count;
     int max_hat_count;
     int max_button_count;
+    float max_battery_voltage;
 
     DS_Socket fms_socket;
     DS_Socket radio_socket;
@@ -68,6 +69,14 @@ typedef struct _protocol {
 extern void Protocols_Init();
 extern void Protocols_Close();
 extern void DS_ConfigureProtocol (DS_Protocol* ptr);
+
+extern int DS_SentFMSPackets();
+extern int DS_SentRadioPackets();
+extern int DS_SentRobotPackets();
+
+extern int DS_ReceivedFMSPackets();
+extern int DS_ReceivedRadioPackets();
+extern int DS_ReceivedRobotPackets();
 
 extern DS_Protocol* DS_CurrentProtocol();
 

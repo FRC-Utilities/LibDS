@@ -66,8 +66,7 @@ struct sdshdr_h_ {
 #  define INLINE inline
 #endif
 
-static INLINE size_t sdslen (const sds s)
-{
+static INLINE size_t sdslen (const sds s) {
     struct sdshdr_h_ *sh = (struct sdshdr_h_*)
                            (s - (int)offsetof (struct sdshdr_h_, buf));
 
@@ -75,8 +74,7 @@ static INLINE size_t sdslen (const sds s)
     return sh->len;
 }
 
-static INLINE size_t sdsavail (const sds s)
-{
+static INLINE size_t sdsavail (const sds s) {
     struct sdshdr_h_ *sh = (struct sdshdr_h_*)
                            (s - (int)offsetof (struct sdshdr_h_, buf));
 
@@ -107,7 +105,8 @@ void sdsrange (sds s, int start, int end);
 void sdsupdatelen (sds s);
 void sdsclear (sds s);
 int sdscmp (const sds s1, const sds s2);
-sds* sdssplitlen (const char* s, int len, const char* sep, int seplen, int* count)
+sds* sdssplitlen (const char* s, int len, const char* sep, int seplen,
+                  int* count)
 __attribute__ ((warn_unused_result));
 void sdsfreesplitres (sds* tokens, int count);
 void sdstolower (sds s);

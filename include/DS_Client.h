@@ -68,7 +68,9 @@ extern int DS_GetEmergencyStopped();
 extern int DS_GetFMSCommunications();
 extern int DS_GetRadioCommunications();
 extern int DS_GetRobotCommunications();
+extern int DS_GetRobotCANUtilization();
 extern DS_ControlMode DS_GetControlMode();
+extern float DS_GetMaximumBatteryVoltage();
 
 /* Setters */
 extern void DS_RebootRobot();

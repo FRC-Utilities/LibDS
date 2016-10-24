@@ -30,8 +30,7 @@
  * Finally, this function also configures the respective signal/slot connections
  * between the window's widgets and the driver station class.
  */
-Window::Window (QWidget* parent) : QMainWindow (parent)
-{
+Window::Window (QWidget* parent) : QMainWindow (parent) {
     ui = new Ui::Window;
     ui->setupUi (this);
 
@@ -102,8 +101,7 @@ Window::Window (QWidget* parent) : QMainWindow (parent)
 /**
  * Destroys the window's widgets
  */
-Window::~Window()
-{
+Window::~Window() {
     delete ui;
 }
 
@@ -115,8 +113,7 @@ Window::~Window()
  *
  * \param unused unused value (which is needed for the singal/slot connection)
  */
-void Window::updateEnabled (int unused)
-{
+void Window::updateEnabled (int unused) {
     Q_UNUSED (unused);
 
     /* User wants to enable the robot under safe conditions */
@@ -143,8 +140,7 @@ void Window::updateEnabled (int unused)
  * Ensures that the check-state of the buttons is the same as the enabled-state
  * reported by the Driver Station
  */
-void Window::syncButtons (bool enabled)
-{
+void Window::syncButtons (bool enabled) {
     ui->Enable->setChecked (enabled);
     ui->Disable->setChecked (!enabled);
 }
@@ -154,8 +150,7 @@ void Window::syncButtons (bool enabled)
  *
  * \param unused unused value (which is needed for the singal/slot connection)
  */
-void Window::updateControlMode (int unused)
-{
+void Window::updateControlMode (int unused) {
     Q_UNUSED (unused);
 
     /* Switch to test mode */
@@ -177,8 +172,7 @@ void Window::updateControlMode (int unused)
  *
  * \param voltage the voltage detected by the Driver Station
  */
-void Window::setVoltage (double voltage)
-{
+void Window::setVoltage (double voltage) {
     if (ds->connectedToRobot())
         ui->Voltage->setText (QString ("%1 V").arg (voltage));
 

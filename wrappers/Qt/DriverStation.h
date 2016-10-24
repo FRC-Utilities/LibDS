@@ -26,11 +26,10 @@
 #include <QObject>
 #include <DS_Protocol.h>
 
-class DriverStation : public QObject
-{
+class DriverStation : public QObject {
     Q_OBJECT
 
-public:
+  public:
     static DriverStation* getInstance();
 
     enum Control {
@@ -66,7 +65,15 @@ public:
     };
 
     Q_INVOKABLE int teamNumber() const;
+
     Q_INVOKABLE int joystickCount() const;
+    Q_INVOKABLE int getNumAxes (const int joystick) const;
+    Q_INVOKABLE int getNumHats (const int joystick) const;
+    Q_INVOKABLE int getNumButtons (const int joystick) const;
+
+    Q_INVOKABLE int fmsPacketLoss() const;
+    Q_INVOKABLE int radioPacketLoss() const;
+    Q_INVOKABLE int robotPacketLoss() const;
 
     Q_INVOKABLE bool isEnabled() const;
     Q_INVOKABLE bool isTestMode() const;
@@ -78,6 +85,9 @@ public:
     Q_INVOKABLE bool connectedToRadio() const;
     Q_INVOKABLE bool connectedToRobot() const;
     Q_INVOKABLE bool emergencyStopped() const;
+
+    Q_INVOKABLE qreal voltage() const;
+    Q_INVOKABLE qreal maximumBatteryVoltage() const;
 
     Q_INVOKABLE Control controlMode() const;
     Q_INVOKABLE Station teamStation() const;
@@ -100,7 +110,7 @@ public:
     Q_INVOKABLE QStringList stations() const;
     Q_INVOKABLE QStringList protocols() const;
 
-public slots:
+  public slots:
     void start();
     void rebootRobot();
     void resetJoysticks();
@@ -127,32 +137,34 @@ public slots:
     void setJoystickAxis (int joystick, int axis, float value);
     void setJoystickButton (int joystick, int button, bool pressed);
 
-private slots:
+  private slots:
     void quitDS();
     void processEvents();
 
-private:
-    bool addressIsValid (const QString address);
+  private:
+    bool addressIsValid (const QString& address);
 
-signals:
+  signals:
     void protocolChanged();
-    void canUsageChanged (int usage);
-    void cpuUsageChanged (int usage);
-    void ramUsageChanged (int usage);
-    void newMessage (QString message);
-    void diskUsageChanged (int usage);
-    void enabledChanged (bool enabled);
-    void teamNumberChanged (int number);
-    void statusChanged (QString status);
-    void voltageChanged (float voltage);
-    void robotCodeChanged (bool robotCode);
-    void controlModeChanged (Control mode);
-    void allianceChanged (Alliance alliance);
-    void positionChanged (Position position);
-    void fmsCommunicationsChanged (bool connected);
-    void radioCommunicationsChanged (bool connected);
-    void robotCommunicationsChanged (bool connected);
-    void emergencyStoppedChanged (bool emergencyStopped);
+    void joystickCountChanged();
+    void canUsageChanged (const int usage);
+    void cpuUsageChanged (const int usage);
+    void ramUsageChanged (const int usage);
+    void diskUsageChanged (const int usage);
+    void enabledChanged (const bool enabled);
+    void newMessage (const QString& message);
+    void teamNumberChanged (const int number);
+    void statusChanged (const QString& status);
+    void voltageChanged (const float voltage);
+    void robotCodeChanged (const bool robotCode);
+    void controlModeChanged (const Control mode);
+    void allianceChanged (const Alliance alliance);
+    void positionChanged (const Position position);
+    void elapsedTimeChanged (const QString& string);
+    void fmsCommunicationsChanged (const bool connected);
+    void radioCommunicationsChanged (const bool connected);
+    void robotCommunicationsChanged (const bool connected);
+    void emergencyStoppedChanged (const bool emergencyStopped);
 };
 
 #endif

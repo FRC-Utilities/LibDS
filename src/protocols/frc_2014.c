@@ -509,6 +509,7 @@ DS_Protocol* DS_GetProtocolFRC_2014()
     protocol->reset_robot = &reset_robot;
 
     /* Set misc. functions */
+    protocol->max_battery_voltage = 13;
     protocol->reboot_robot = &reboot_robot;
     protocol->restart_robot_code = &restart_robot_code;
 

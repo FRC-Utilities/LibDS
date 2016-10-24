@@ -34,21 +34,20 @@ class Window;
 
 class DriverStation;
 
-class Window : public QMainWindow
-{
+class Window : public QMainWindow {
     Q_OBJECT
 
-public:
+  public:
     explicit Window (QWidget* parent = 0);
     ~Window();
 
-public slots:
+  public slots:
     void updateEnabled (int unused);
     void setVoltage (double voltage);
     void syncButtons (bool enabled);
     void updateControlMode (int unused);
 
-private:
+  private:
     Ui::Window* ui;
     DriverStation* ds;
 };

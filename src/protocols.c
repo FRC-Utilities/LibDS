@@ -77,6 +77,16 @@ static sds robot_data = NULL;
 static sds netcs_data = NULL;
 
 /*
+ * Holds the sent/received packets
+ */
+static int sent_fms_packets = 1;
+static int sent_radio_packets = 1;
+static int sent_robot_packets = 1;
+static int received_fms_packets = 1;
+static int received_radio_packets = 1;
+static int received_robot_packets = 1;
+
+/*
  * The thread ID for the protocol event loop
  */
 static pthread_t event_thread;
@@ -87,6 +97,7 @@ static pthread_t event_thread;
  */
 static void send_fms_data()
 {
+    ++sent_fms_packets;
     sds data = protocol->create_fms_packet();
     DS_SocketSend (&protocol->fms_socket, data);
     DS_FREESTR (data);
@@ -98,6 +109,7 @@ static void send_fms_data()
  */
 static void send_radio_data()
 {
+    ++sent_radio_packets;
     sds data = protocol->create_radio_packet();
     DS_SocketSend (&protocol->radio_socket, data);
     DS_FREESTR (data);
@@ -109,6 +121,7 @@ static void send_radio_data()
  */
 static void send_robot_data()
 {
+    ++sent_robot_packets;
     sds data = protocol->create_robot_packet();
     DS_SocketSend (&protocol->robot_socket, data);
     DS_FREESTR (data);
@@ -175,18 +188,21 @@ static void recv_data()
 
     /* Read FMS packet */
     if (fms_data) {
+        ++received_fms_packets;
         fms_read = protocol->read_fms_packet (fms_data);
         CFG_SetFMSCommunications (fms_read);
     }
 
     /* Read radio packet */
     if (radio_data) {
+        ++received_radio_packets;
         radio_read = protocol->read_radio_packet (radio_data);
         CFG_SetRadioCommunications (radio_read);
     }
 
     /* Read robot packet */
     if (robot_data) {
+        ++received_robot_packets;
         robot_read = protocol->read_robot_packet (robot_data);
         CFG_SetRobotCommunications (robot_read);
     }
@@ -373,4 +389,46 @@ void DS_ConfigureProtocol (DS_Protocol* ptr)
     DS_TimerStart (&radio_recv_timer);
     DS_TimerStart (&robot_send_timer);
     DS_TimerStart (&robot_recv_timer);
+}
+
+/**
+ * Returns the number of sent FMS packets
+ */
+int DS_SentFMSPackets() {
+    return sent_fms_packets;
+}
+
+/**
+ * Returns the number of sent radio packets
+ */
+int DS_SentRadioPackets() {
+    return sent_radio_packets;
+}
+
+/**
+ * Returns the number of sent robot packets
+ */
+int DS_SentRobotPackets() {
+    return sent_robot_packets;
+}
+
+/**
+ * Returns the number of received FMS packets
+ */
+int DS_ReceivedFMSPackets() {
+    return received_fms_packets;
+}
+
+/**
+ * Returns the number of received radio packets
+ */
+int DS_ReceivedRadioPackets() {
+    return received_radio_packets;
+}
+
+/**
+ * Returns the number of received robot packets
+ */
+int DS_ReceivedRobotPackets() {
+    return received_robot_packets;
 }
