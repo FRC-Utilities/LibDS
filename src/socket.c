@@ -157,8 +157,7 @@ static void* create_socket (void* data)
 
     /* Open TCP socket */
     if (ptr->type == DS_SOCKET_TCP) {
-        ptr->info.sock_in = create_server_tcp (ptr->address,
-                                               ptr->info.in_service,
+        ptr->info.sock_in = create_server_tcp (ptr->info.in_service,
                                                SOCKY_IPv4, 0);
 
         ptr->info.sock_out = create_client_tcp (ptr->address,
@@ -168,8 +167,7 @@ static void* create_socket (void* data)
 
     /* Open UDP socket */
     else if (ptr->type == DS_SOCKET_UDP) {
-        ptr->info.sock_in = create_server_udp (ptr->address,
-                                               ptr->info.in_service,
+        ptr->info.sock_in = create_server_udp (ptr->info.in_service,
                                                SOCKY_IPv4, 0);
 
         ptr->info.sock_out = create_client_udp (SOCKY_IPv4, 0);

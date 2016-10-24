@@ -163,7 +163,6 @@ static int set_socket_options (int sfd)
 /**
  * Configures a new server socket with the given properties
  *
- * \param host the host to bind to
  * \param port the port/service string to bind to
  * \param family the address family (IPv4 or IPv6)
  * \param socktype the socket type (UDP or TCP)
@@ -171,19 +170,12 @@ static int set_socket_options (int sfd)
  *
  * \returns -1 on error, socket file descriptor on success
  */
-static int create_server (const char* host, const char* port,
-                          const int family, const int socktype,
-                          const int flags)
+static int create_server (const char* port, const int family,
+                          const int socktype, const int flags)
 {
     int sfd;
     struct addrinfo* info = NULL;
-
-#if defined _WIN32
-    struct addrinfo* addr = get_address_info (host, port, socktype, family);
-#else
-    (void) host;
     struct addrinfo* addr = get_address_info (NULL, port, socktype, family);
-#endif
 
     /* Obtained address info is NULL */
     if (addr == NULL)
@@ -428,33 +420,29 @@ int create_client_tcp (const char* host, const char* port,
 /**
  * Configures a new UDP server socket with the given properties
  *
- * \param host the host to bind to
  * \param port the port/service string to bind to
  * \param family the address family (IPv4 or IPv6)
  * \param flags any additional flags that you may need to use
  *
  * \returns -1 on error, socket file descriptor on success
  */
-int create_server_udp (const char* host, const char* port,
-                       const int family, const int flags)
+int create_server_udp (const char* port, const int family, const int flags)
 {
-    return create_server (host, port, family, SOCKY_UDP, flags);
+    return create_server (port, family, SOCKY_UDP, flags);
 }
 
 /**
  * Configures a new TCP server socket with the given properties
  *
- * \param host the host to bind to
  * \param port the port/service string to bind to
  * \param family the address family (IPv4 or IPv6)
  * \param flags any additional flags that you may need to use
  *
  * \returns -1 on error, socket file descriptor on success
  */
-int create_server_tcp (const char* host, const char* port,
-                       const int family, const int flags)
+int create_server_tcp (const char* port, const int family, const int flags)
 {
-    return create_server (host, port, family, SOCKY_TCP, flags);
+    return create_server (port, family, SOCKY_TCP, flags);
 }
 
 /**

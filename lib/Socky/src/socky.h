@@ -71,10 +71,10 @@ extern struct addrinfo* get_address_info (const char* host,
 extern int create_client_udp (const int family, const int flags);
 extern int create_client_tcp (const char* host, const char* port,
                               const int family, const int flags);
-extern int create_server_udp (const char* host, const char* port,
-                              const int family, const int flags);
-extern int create_server_tcp (const char* host, const char* port,
-                              const int family, const int flags);
+extern int create_server_udp (const char* port, const int family,
+                              const int flags);
+extern int create_server_tcp (const char* port, const int family,
+                              const int flags);
 
 /* Socket closing functions */
 extern int socket_close    (const int sfd);
