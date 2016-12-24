@@ -694,6 +694,8 @@ void DriverStation::setControlMode (const Control mode)
 
     if (isEnabled() && mode != controlMode())
         setEnabled (false);
+    if (mode != controlMode())
+        resetElapsedTime();
 
     switch (mode) {
     case ControlTest:
