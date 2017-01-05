@@ -38,13 +38,13 @@ extern "C" {
  * to operate with the data provided by a \c DS_Socket structure
  */
 typedef struct {
-    bstring buffer;          /**< Holds received data */
-    bstring in_service;      /**< Input port string */
-    bstring out_service;     /**< Output port string */
-    int sock_in;             /**< Server socket file descriptor */
-    int sock_out;            /**< Client socket file descriptor */
-    int client_init;         /**< Set to \c 1 if client socket is initialized */
-    int server_init;         /**< Set to \c 1 if server socket is initialized */
+    bstring buffer;      /**< Holds received data */
+    bstring in_service;  /**< Input port string */
+    bstring out_service; /**< Output port string */
+    int sock_in;         /**< Server socket file descriptor */
+    int sock_out;        /**< Client socket file descriptor */
+    int client_init;     /**< Set to \c 1 if client socket is initialized */
+    int server_init;     /**< Set to \c 1 if server socket is initialized */
 } DS_SocketInfo;
 
 /**
