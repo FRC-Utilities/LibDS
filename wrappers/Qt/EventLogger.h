@@ -20,7 +20,9 @@
  * DEALINGS IN THE SOFTWARE.
  */
 
+#include <QList>
 #include <QObject>
+#include <QElapsedTimer>
 
 #include "DriverStation.h"
 
@@ -31,12 +33,24 @@ class DSEventLogger : public QObject
 public:
     static DSEventLogger* getInstance();
 
+    QString logsPath() const;
+    static void messageHandler (QtMsgType type,
+                                const QMessageLogContext& context,
+                                const QString& data);
+
 private:
     DSEventLogger();
     ~DSEventLogger();
 
+    void handleMessage (const QtMsgType type, const QString& data);
+
+public slots:
+    void init();
+    void openLogsPath();
+    void openCurrentLog();
+
 private slots:
-    void saveData();
+    void saveDataLoop();
     void onCANUsageChanged (int usage);
     void onCPUUsageChanged (int usage);
     void onRAMUsageChanged (int usage);
@@ -55,5 +69,27 @@ private slots:
     void onPositionChanged (DriverStation::Position position);
 
 private:
+    void saveData();
     void connectSlots();
+    qint64 currentTime();
+
+private:
+    bool m_init;
+    FILE* m_dump;
+    QString m_currentLog;
+    QElapsedTimer m_timer;
+
+    QList<QPair<qint64, int>> m_canUsageLog;
+    QList<QPair<qint64, int>> m_cpuUsageLog;
+    QList<QPair<qint64, int>> m_ramUsageLog;
+    QList<QPair<qint64, bool>> m_enabledLog;
+    QList<QPair<qint64, int>> m_diskUsageLog;
+    QList<QPair<qint64, float>> m_voltageLog;
+    QList<QPair<qint64, bool>> m_fmsCommsLog;
+    QList<QPair<qint64, bool>> m_robotCodeLog;
+    QList<QPair<qint64, bool>> m_radioCommsLog;
+    QList<QPair<qint64, bool>> m_robotCommsLog;
+    QList<QPair<qint64, int>> m_controlModeLog;
+    QList<QPair<qint64, QString>> m_messagesLog;
+    QList<QPair<qint64, bool>> m_emergencyStopLog;
 };
