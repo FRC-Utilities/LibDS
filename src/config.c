@@ -103,8 +103,9 @@ static void create_robot_event (const DS_EventType type)
 void CFG_AddNotification (bstring msg)
 {
     if (msg) {
-        bstring notification = bfromcstr ("<font color=#0f0>LibDS: </font>");
-        bconcat (notification, msg);
+        bstring notification = bfromcstr ("<font color=#aaa>** LibDS: ");
+        bconcat (notification, msg),
+                bconcat (notification, bfromcstr ("</font>"));
         CFG_AddNetConsoleMessage (notification);
     }
 }
@@ -134,18 +135,24 @@ void CFG_ReconfigureAddresses (const int flags)
 {
     if (DS_CurrentProtocol()) {
         if (flags & RECONFIGURE_FMS) {
+            bstring address = DS_GetAppliedFMSAddress();
             DS_SocketChangeAddress (DS_CurrentProtocol()->fms_socket,
-                                    DS_GetAppliedFMSAddress());
+                                    address);
+            DS_FREESTR (address);
         }
 
         if (flags & RECONFIGURE_RADIO) {
+            bstring address = DS_GetAppliedRadioAddress();
             DS_SocketChangeAddress (DS_CurrentProtocol()->radio_socket,
-                                    DS_GetAppliedRadioAddress());
+                                    address);
+            DS_FREESTR (address);
         }
 
         if (flags & RECONFIGURE_ROBOT) {
+            bstring address = DS_GetAppliedRobotAddress();
             DS_SocketChangeAddress (DS_CurrentProtocol()->robot_socket,
-                                    DS_GetAppliedRobotAddress());
+                                    address);
+            DS_FREESTR (address);
         }
     }
 }
