@@ -97,8 +97,8 @@ static float decode_voltage (uint8_t upper, uint8_t lower)
 static void encode_voltage (float voltage, uint8_t* upper, uint8_t* lower)
 {
     if (upper && lower) {
-        upper[0] = (uint8_t) (voltage);
-        lower[0] = (uint8_t) (voltage - (int) voltage) * 100;
+        *upper = (uint8_t) (voltage);
+        *lower = (uint8_t) (voltage - (int) voltage) * 100;
     }
 }
 
@@ -325,6 +325,8 @@ static bstring get_timezone_data()
     /* Add timezone string */
     bconcat (data, tz);
     DS_FREESTR (tz);
+
+    /* DO NOT free timeinfo! */
 
     /* Return the obtained data */
     return data;

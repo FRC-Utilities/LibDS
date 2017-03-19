@@ -105,8 +105,6 @@ static void server_loop (DS_Socket* ptr)
         rc = select (fd, &set, NULL, NULL, &tv);
         if (rc > 0 && FD_ISSET (ptr->info.sock_in, &set))
             read_socket (ptr);
-
-        fsync (ptr->info.sock_in);
     }
 }
 
@@ -247,8 +245,13 @@ void DS_SocketClose (DS_Socket* ptr)
     ptr->info.client_init = 0;
 
     /* Close sockets */
+#ifdef __ANDROID
     socket_close_threaded (ptr->info.sock_in, NULL);
     socket_close_threaded (ptr->info.sock_out, NULL);
+#else
+    socket_close (ptr->info.sock_in);
+    socket_close (ptr->info.sock_out);
+#endif
 
     /* Clear data buffers */
     DS_FREESTR (ptr->info.buffer);
@@ -343,20 +346,19 @@ void DS_SocketChangeAddress (DS_Socket* ptr, const bstring address)
     /* Re-assign the address only if its different from input IP */
     if (ptr->address) {
         if (bstrcmp (ptr->address, ip) != 0) {
-            DS_SocketClose (ptr);
             DS_FREESTR (ptr->address);
             ptr->address = ip;
-            DS_SocketOpen (ptr);
         }
 
         else
             DS_FREESTR (ip);
     }
 
-    /* Socket address is empty, remplaze it directly */
-    else {
-        DS_SocketClose (ptr);
+    /* Socket address is empty, remplace it directly */
+    else
         ptr->address = ip;
-        DS_SocketOpen (ptr);
-    }
+
+    /* Re-open the socket */
+    DS_SocketClose (ptr);
+    DS_SocketOpen (ptr);
 }
