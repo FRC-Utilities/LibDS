@@ -40,11 +40,13 @@ extern "C" {
 typedef struct {
     int sock_in;
     int sock_out;
-    bstring buffer;
     int client_init;
     int server_init;
-    bstring in_service;
-    bstring out_service;
+    int buffer_size;
+    pthread_t thread;
+    char buffer [2048];
+    char in_service [8];
+    char out_service [8];
 } DS_SocketInfo;
 
 /**

@@ -96,8 +96,8 @@ bstring DS_GetDefaultFMSAddress (void)
 {
     if (DS_CurrentProtocol())
         return bstrcpy (DS_CurrentProtocol()->fms_address());
-
-    return DS_FallBackAddress;
+    else
+        return DS_FallBackAddress;
 }
 
 /**
@@ -109,8 +109,8 @@ bstring DS_GetDefaultRadioAddress (void)
 {
     if (DS_CurrentProtocol())
         return bstrcpy (DS_CurrentProtocol()->radio_address());
-
-    return DS_FallBackAddress;
+    else
+        return DS_FallBackAddress;
 }
 
 /**
@@ -122,8 +122,8 @@ bstring DS_GetDefaultRobotAddress (void)
 {
     if (DS_CurrentProtocol())
         return bstrcpy (DS_CurrentProtocol()->robot_address());
-
-    return DS_FallBackAddress;
+    else
+        return DS_FallBackAddress;
 }
 
 /**
@@ -136,8 +136,8 @@ bstring DS_GetAppliedFMSAddress (void)
 {
     if (DS_StringIsEmpty (custom_fms_address))
         return DS_GetDefaultFMSAddress();
-
-    return DS_GetCustomFMSAddress();
+    else
+        return DS_GetCustomFMSAddress();
 }
 
 /**
@@ -150,8 +150,8 @@ bstring DS_GetAppliedRadioAddress (void)
 {
     if (DS_StringIsEmpty (custom_radio_address))
         return DS_GetDefaultRadioAddress();
-
-    return DS_GetCustomRadioAddress();
+    else
+        return DS_GetCustomRadioAddress();
 }
 
 /**
@@ -164,8 +164,8 @@ bstring DS_GetAppliedRobotAddress (void)
 {
     if (DS_StringIsEmpty (custom_robot_address))
         return DS_GetDefaultRobotAddress();
-
-    return DS_GetCustomRobotAddress();
+    else
+        return DS_GetCustomRobotAddress();
 }
 
 /**
