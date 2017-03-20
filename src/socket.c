@@ -169,7 +169,7 @@ static void* create_socket (void* data)
 /**
  * Returns an empty socket for safe initialization
  */
-DS_Socket* DS_SocketEmpty()
+DS_Socket* DS_SocketEmpty (void)
 {
     DS_Socket* socket = calloc (1, sizeof (DS_Socket));
 
@@ -196,7 +196,7 @@ DS_Socket* DS_SocketEmpty()
 /**
  * Initializes the sockets module and its event system
  */
-void Sockets_Init()
+void Sockets_Init (void)
 {
     sockets_init (1);
 }
@@ -204,7 +204,7 @@ void Sockets_Init()
 /**
  * Stops the event loops and closes all socket structures
  */
-void Sockets_Close()
+void Sockets_Close (void)
 {
     sockets_exit();
 }

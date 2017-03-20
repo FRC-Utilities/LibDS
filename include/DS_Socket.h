@@ -62,11 +62,11 @@ typedef struct {
 } DS_Socket;
 
 /* For socket initialization */
-extern DS_Socket* DS_SocketEmpty();
+extern DS_Socket* DS_SocketEmpty (void);
 
 /* Module functions */
-extern void Sockets_Init();
-extern void Sockets_Close();
+extern void Sockets_Init (void);
+extern void Sockets_Close (void);
 
 /* Socket initializer and destructor functions */
 extern void DS_SocketOpen (DS_Socket* ptr);
