@@ -27,6 +27,14 @@
 #include <socky.h>
 #include <assert.h>
 
+#define SPRINTF_S snprintf
+#ifdef _WIN32
+    #ifndef __MINGW32__
+        #undef  SPRINTF_S
+        #define SPRINTF_S sprintf_s
+    #endif
+#endif
+
 /**
  * Copies the received data from the socket in its data buffer
  */
@@ -119,8 +127,9 @@ static void* create_socket (void* data)
     memset (ptr->info.out_service, 0, sizeof (ptr->info.out_service));
 
     /* Set service strings */
-    sprintf (ptr->info.in_service, "%d", ptr->in_port);
-    sprintf (ptr->info.out_service, "%d", ptr->out_port);
+    int len = sizeof (ptr->info.in_service);
+    SPRINTF_S (ptr->info.in_service, len, "%d", ptr->in_port);
+    SPRINTF_S (ptr->info.out_service, len, "%d", ptr->out_port);
 
     /* Open TCP socket */
     if (ptr->type == DS_SOCKET_TCP) {
@@ -161,7 +170,6 @@ DS_Socket* DS_SocketEmpty (void)
     socket->type = DS_SOCKET_UDP;
 
     /* Fill socket info structure */
-    socket->info.thread = 0;
     socket->info.sock_in = 0;
     socket->info.sock_out = 0;
     socket->info.buffer_size = 0;
@@ -209,13 +217,9 @@ void DS_SocketOpen (DS_Socket* ptr)
     if (ptr->disabled)
         return;
 
-    /* Stop the current thread (if any) */
-    if (ptr->info.thread)
-        DS_StopThread (&ptr->info.thread);
-
     /* Initialize the socket in another thread */
-    ptr->info.thread = 0;
-    int error = pthread_create (&ptr->info.thread, NULL,
+    pthread_t thread;
+    int error = pthread_create (&thread, NULL,
                                 &create_socket, (void*) ptr);
 
     /* Warn the user when the socket cannot start */
@@ -241,9 +245,6 @@ void DS_SocketClose (DS_Socket* ptr)
 {
     /* Check arguments */
     assert (ptr);
-
-    /* Stop the socket thread (if any) */
-    DS_StopThread (&ptr->info.thread);
 
     /* Reset socket properties */
     ptr->info.server_init = 0;

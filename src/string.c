@@ -29,6 +29,14 @@
 #include <stdlib.h>
 #include <string.h>
 
+#define SPRINTF_S snprintf
+#ifdef _WIN32
+    #ifndef __MINGW32__
+        #undef  SPRINTF_S
+        #define SPRINTF_S sprintf_s
+    #endif
+#endif
+
 /**
  * Returns the length of the given \a string
  * \warning The program will quit if \a string is \c NULL
@@ -36,7 +44,7 @@
 int DS_StrLen (const DS_String* string)
 {
     assert (string);
-    return string->len;
+    return (int) string->len;
 }
 
 /**
@@ -336,10 +344,10 @@ DS_String DS_StrNew (const char* string)
 /**
  * Returns a 0-filled string with the given \a length
  */
-DS_String DS_StrNewLen (const int length)
+DS_String DS_StrNewLen (const size_t length)
 {
     DS_String string;
-    string.len = abs (length);
+    string.len = length;
     string.buf = (char*) calloc (string.len, sizeof (char));
     return string;
 }
@@ -414,15 +422,15 @@ DS_String DS_StrFormat (const char* format, ...)
 
                 /* Get the representation of the number */
                 if (next == 'u')
-                    sprintf (str, "%u", (unsigned int) va_arg (args, unsigned int));
+                    SPRINTF_S (str, sizeof (str), "%u", (unsigned int) va_arg (args, unsigned int));
                 else if (next == 'd')
-                    sprintf (str, "%d", (int) va_arg (args, int));
+                    SPRINTF_S (str, sizeof (str), "%d", (int) va_arg (args, int));
                 else if (next == 'f')
-                    sprintf (str, "%.2f", (double) va_arg (args, double));
+                    SPRINTF_S (str, sizeof (str), "%.2f", (double) va_arg (args, double));
 
                 /* Append every character to the string */
                 int i = 0;
-                int len = strlen (str);
+                int len = (int) strlen (str);
                 for (i = 0; i < len; ++i)
                     DS_StrAppend (&string, str [i]);
             }
@@ -434,7 +442,7 @@ DS_String DS_StrFormat (const char* format, ...)
             /* Handle strings */
             else if (next == 's') {
                 char* str = (char*) va_arg (args, char*);
-                int len = strlen (str);
+                int len = (int) strlen (str);
 
                 /* Append every character to the string */
                 int i = 0;

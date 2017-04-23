@@ -1,28 +1,15 @@
 language: cpp
 compiler: gcc
+
 dist: trusty
 sudo: required
 
-env:
-  global:
-   - secure: "jEw1vlyZor0sR62AFFJX9gDSoIz+FOv0LMaT2fzodMlUwTaukUwpCDggWeT/QjNdos8cTpR/YNNcV2Lgu5dq7+kDF5tpO7Zte/7Y98uMUcW0N2y75WQ8NF20OvR3SQO3TDDjEY1kgiTcji1YYLfnN6Xlay+/9byRplNMg3nS45RMvU+1abayIqXi8VtT9zUO2az71SW0RXLEpqr8HZGod7zqMqN3Y7s3aCcJZGZKwSsxMEkkzPXgHq+kAMouPebbWRJsVduDksstESa1Z5uXYpZ95OfiUEeVZSdLazM2EMi771/jzI+kVxGntPPK70pRtMnpXow82SnOOYVM6F/oUHWw65ubEuUF3qrBQkkx/xzAx9L5x0m+otA9/uIYtoqbnLnBveV02P1PjaWqsFxwoktr+1+UkpSyBrcEqHGOV88Y/PKGqJ0A55HuJ7Elf8uBQA/G3ZtC2VJRRrI5VKG5fzR01h5BXWHf4wicUCc87MjZUCD2IlbY9jndcyjMQOPrJuGh/CeXbCuCN9gjgQ86gzDBj6pUn4GL2OUOyqBzsdjULQS7cDDMVgb2fEo9burrU7y4ZjjEeU7SZ7DrCDhYlD/6Q1wWsUyPgL0DiEOl49PO0eAc+dlyCAHabce2fvSq5r8h6p1rLGoFV1q56O5z79wvxycrpx6JLHPePNn6EH8="
-
 before_install:
-      - sudo apt-get update -qq
-      - echo -n | openssl s_client -connect scan.coverity.com:443 | sed -ne '/-BEGIN CERTIFICATE-/,/-END CERTIFICATE-/p' | sudo tee -a /etc/ssl/certs/ca-
+    - sudo apt-get update -qq
 
 install:
     - sudo apt-get install -y build-essential qt4-qmake
     
-addons:
-  coverity_scan:
-    project:
-      name: "FRC-Utilities/LibDS"
-      description: "Build submitted via Travis CI"
-    build_command_prepend: "qmake LibDS.pro; make clean"
-    build_command:   "make -j4"
-    branch_pattern: coverity_scan
-    
 script:
     - qmake LibDS.pro
-    - make -j4
+    - make

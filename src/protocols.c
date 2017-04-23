@@ -263,7 +263,6 @@ static void* run_event_loop()
         send_data();
         recv_data();
         update_watchdogs();
-
         DS_Sleep (5);
     }
 
@@ -357,7 +356,6 @@ void Protocols_Close()
     running = 0;
     close_protocol();
     clear_recv_data();
-    DS_StopThread (&event_thread);
 }
 
 /**
