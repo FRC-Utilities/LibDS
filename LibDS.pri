@@ -1,5 +1,13 @@
 INCLUDEPATH += $$PWD/include
 
+include.path = /usr/local/include
+include.files = $$HEADERS
+
+target.path = /usr/local/lib
+
+INSTALLS += target
+INSTALLS += include
+
 !macx* {
     LIBS += -pthread
 }
