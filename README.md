@@ -177,3 +177,13 @@ The base protocol is implemented in the [`DS_Protocol`](https://github.com/FRC-U
 Instead of manually initializing a socket for each target, data direction and protocol type (UDP and TCP). The LibDS will use the [`DS_Socket`](https://github.com/FRC-Utilities/LibDS-C/blob/master/include/DS_Socket.h#L56) object to define ports, protocol type and remote targets. 
 
 All the logic code is in [`socket.c`](https://github.com/FRC-Utilities/LibDS-C/blob/master/src/socket.c), which will be in charge of managing the system sockets with the information given by a [`DS_Socket`](https://github.com/FRC-Utilities/LibDS-C/blob/master/include/DS_Socket.h#L56) object.
+
+### Compilation instructions
+
+To compile the project, navigate to the project root and run the following commands
+
+* qmake
+* make
+
+To install compiled library files, and headers to the correct locations in /usr/local, use this command
+* sudo make install
