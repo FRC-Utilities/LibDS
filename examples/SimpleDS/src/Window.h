@@ -42,7 +42,8 @@ public:
     explicit Window (QWidget* parent = 0);
     ~Window();
 
-public slots:
+private slots:
+    void updateAddressPlaceholder();
     void updateEnabled (int unused);
     void syncButtons (bool enabled);
     void setProtocol (int protocol);

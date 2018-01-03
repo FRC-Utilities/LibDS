@@ -36,6 +36,9 @@
              <property name="pixmap">
               <pixmap resource="../resources/resources.qrc">:/pixmaps/frc-logo.png</pixmap>
              </property>
+             <property name="scaledContents">
+              <bool>false</bool>
+             </property>
              <property name="alignment">
               <set>Qt::AlignCenter</set>
              </property>
@@ -224,6 +227,16 @@
               </size>
              </property>
             </spacer>
+           </item>
+           <item row="3" column="0">
+            <widget class="QLabel" name="RobotIPLabel">
+             <property name="text">
+              <string>Robot IP Address</string>
+             </property>
+            </widget>
+           </item>
+           <item row="3" column="2">
+            <widget class="QLineEdit" name="RobotIP"/>
            </item>
           </layout>
          </widget>
@@ -448,7 +461,7 @@
  </resources>
  <connections/>
  <buttongroups>
-  <buttongroup name="ModesGroup"/>
   <buttongroup name="StatusGroup"/>
+  <buttongroup name="ModesGroup"/>
  </buttongroups>
 </ui>

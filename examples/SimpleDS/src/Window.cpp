@@ -95,6 +95,14 @@ Window::Window (QWidget* parent) : QMainWindow (parent)
     connect (ds,        SIGNAL (newMessage (QString)),
              ui->Console, SLOT (append (QString)));
 
+    /* Update the placeholder of the robot IP field */
+    connect (ds, SIGNAL (robotAddressChanged()),
+             this, SLOT (updateAddressPlaceholder()));
+
+    /* Changes the robot IP when the user changes the robot IP text */
+    connect (ui->RobotIP, SIGNAL (textChanged (QString)),
+             ds,            SLOT (setCustomRobotAddress (QString)));
+
     /* Initialize the DS with the 2016 protocol */
     ds->setProtocol (DriverStation::Protocol2016);
 }
@@ -105,6 +113,15 @@ Window::Window (QWidget* parent) : QMainWindow (parent)
 Window::~Window()
 {
     delete ui;
+}
+
+/**
+ * Changes the placeholder of the robot IP address, called
+ * when the user or LibDS changes the robot address for some reason.
+ */
+void Window::updateAddressPlaceholder()
+{
+    ui->RobotIP->setPlaceholderText (ds->defaultRobotAddress());
 }
 
 /**
