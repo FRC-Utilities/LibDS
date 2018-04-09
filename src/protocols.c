@@ -382,7 +382,7 @@ static void close_protocol()
     /* Reset sent/recv packets */
     DS_ResetFMSPackets();
     DS_ResetRadioPackets();
-    DS_ResetRadioPackets();
+    DS_ResetRobotPackets();
 
     /* Create notification string */
     char* name = DS_StrToChar (&protocol.name);
