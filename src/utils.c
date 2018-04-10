@@ -42,7 +42,7 @@
 uint8_t DS_FloatToByte (const float value, const float max)
 {
     if (value != 0 && max != 0 && value <= max) {
-        int percent = (int) (value / max) * (0xFF / 2);
+        int percent = (int) ((value / max) * (0xFF / 2));
         return (uint8_t) (percent & 0xFF);
     }
 
