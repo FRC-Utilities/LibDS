@@ -74,19 +74,19 @@ static DS_String robot_address (void)
 // DS to Robot/Radio/FMS packet generation                                    //
 //----------------------------------------------------------------------------//
 
-DS_String create_fms_packet (void)
+static DS_String create_fms_packet (void)
 {
     /* Return empty (0-length) string */
     return DS_StrNewLen (0);
 }
 
-DS_String create_radio_packet (void)
+static DS_String create_radio_packet (void)
 {
     /* Return empty (0-length) string */
     return DS_StrNewLen (0);
 }
 
-DS_String create_robot_packet (void)
+static DS_String create_robot_packet (void)
 {
     /* Return empty (0-length) string */
     return DS_StrNewLen (0);
@@ -96,7 +96,7 @@ DS_String create_robot_packet (void)
 // Robot/Radio/FMS to DS packet reading & interpretation                      //
 //----------------------------------------------------------------------------//
 
-int read_fms_packet (const DS_String* data)
+static int read_fms_packet (const DS_String* data)
 {
     /* Check if data pointer is valid */
     if (!data)
@@ -114,7 +114,7 @@ int read_fms_packet (const DS_String* data)
     return 0;
 }
 
-int read_radio_packet (const DS_String* data)
+static int read_radio_packet (const DS_String* data)
 {
     /* Check if data pointer is valid */
     if (!data)
@@ -132,7 +132,7 @@ int read_radio_packet (const DS_String* data)
     return 0;
 }
 
-int read_robot_packet (const DS_String* data)
+static int read_robot_packet (const DS_String* data)
 {
     /* Check if data pointer is valid */
     if (!data)
@@ -158,11 +158,11 @@ int read_robot_packet (const DS_String* data)
 // functions.                                                                 //
 //----------------------------------------------------------------------------//
 
-void reset_fms (void) {}
-void reset_radio (void) {}
-void reset_robot (void) {}
-void reboot_robot (void) {}
-void restart_robot_code (void) {}
+static void reset_fms (void) {}
+static void reset_radio (void) {}
+static void reset_robot (void) {}
+static void reboot_robot (void) {}
+static void restart_robot_code (void) {}
 
 //----------------------------------------------------------------------------//
 // Finally, to use the protocol with the rest of LibDS, create a DS_Protocol  //
