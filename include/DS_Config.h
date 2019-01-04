@@ -28,6 +28,7 @@
 
 #include "DS_Types.h"
 #include "DS_Socket.h"
+#include "DS_String.h"
 
 /*
  * WARNING:
@@ -62,6 +63,7 @@ extern int CFG_GetRobotRAMUsage (void);
 extern int CFG_GetCANUtilization (void);
 extern int CFG_GetRobotDiskUsage (void);
 extern float CFG_GetRobotVoltage (void);
+extern DS_String* CFG_GetGameData (void);
 extern DS_Alliance CFG_GetAlliance (void);
 extern DS_Position CFG_GetPosition (void);
 extern int CFG_GetEmergencyStopped (void);
@@ -72,6 +74,7 @@ extern DS_ControlMode CFG_GetControlMode (void);
 
 /* Setters */
 extern void CFG_SetRobotCode (const int code);
+extern void CFG_SetGameData (const char* data);
 extern void CFG_SetTeamNumber (const int number);
 extern void CFG_SetRobotEnabled (const int enabled);
 extern void CFG_SetRobotCPUUsage (const int percent);

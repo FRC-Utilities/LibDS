@@ -433,6 +433,14 @@ DriverStation::Position DriverStation::teamPosition() const
 }
 
 /**
+ * Returns the game data string used by LibDS
+ */
+QString DriverStation::gameData() const
+{
+    return QString::fromUtf8 (DS_GetGameData());
+}
+
+/**
  * Returns the internet address that the Driver Station is using to communicate
  * with the Field Management System.
  */
@@ -726,6 +734,16 @@ void DriverStation::setTeamNumber (const int number)
     emit radioAddressChanged();
     emit robotAddressChanged();
     emit teamNumberChanged (number);
+}
+
+/**
+ * Changes the game \a data string of the LibDS
+ */
+void DriverStation::setGameData (const QString& data)
+{
+    DS_SetGameData (data.toStdString().c_str());
+    LOG << "Game Data set to" << DS_GetGameData();
+    emit gameDataChanged();
 }
 
 /**

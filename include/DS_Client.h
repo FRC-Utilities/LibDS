@@ -49,6 +49,9 @@ extern char* DS_GetAppliedFMSAddress (void);
 extern char* DS_GetAppliedRadioAddress (void);
 extern char* DS_GetAppliedRobotAddress (void);
 
+/* Game data */
+extern char* DS_GetGameData (void);
+
 /* Status string */
 extern char* DS_GetStatusString (void);
 
@@ -74,6 +77,7 @@ extern float DS_GetMaximumBatteryVoltage (void);
 /* Setters */
 extern void DS_RebootRobot (void);
 extern void DS_RestartRobotCode (void);
+extern void DS_SetGameData (const char* data);
 extern void DS_SetTeamNumber (const int team);
 extern void DS_SetRobotEnabled (const int enabled);
 extern void DS_SetEmergencyStopped (const int stop);

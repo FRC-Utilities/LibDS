@@ -48,6 +48,8 @@ void Client_Init (void)
     custom_fms_address = DS_StrNew (DS_FallBackAddress);
     custom_radio_address = DS_StrNew (DS_FallBackAddress);
     custom_robot_address = DS_StrNew (DS_FallBackAddress);
+
+    DS_SetGameData ("");
 }
 
 /**
@@ -217,6 +219,14 @@ char* DS_GetStatusString (void)
     }
 
     return "Status Error";
+}
+
+/**
+ * Returns the current game data string
+ */
+char* DS_GetGameData (void)
+{
+    return DS_StrToChar (CFG_GetGameData());
 }
 
 /**
@@ -392,6 +402,14 @@ void DS_RestartRobotCode (void)
         CFG_AddNotification (&str);
         DS_StrRmBuf (&str);
     }
+}
+
+/**
+ * Updates the game \a data string
+ */
+void DS_SetGameData (const char* data)
+{
+    CFG_SetGameData (data);
 }
 
 /**

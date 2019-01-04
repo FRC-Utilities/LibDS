@@ -39,6 +39,7 @@ static int cpu_usage = -1;
 static int ram_usage = -1;
 static int disk_usage = -1;
 static int robot_code = -1;
+static DS_String game_data;
 static int robot_enabled = -1;
 static int can_utilization = -1;
 static float robot_voltage = -1;
@@ -230,6 +231,14 @@ float CFG_GetRobotVoltage (void)
 }
 
 /**
+ * Returns the current game data string
+ */
+DS_String* CFG_GetGameData (void)
+{
+    return &game_data;
+}
+
+/**
  * Returns the current alliance of the robot, possible values are:
  *    - \c DS_ALLIANCE_RED
  *    - \c DS_ALLIANCE_BLUE
@@ -306,6 +315,19 @@ void CFG_SetRobotCode (const int code)
         create_robot_event (DS_ROBOT_CODE_CHANGED);
         create_robot_event (DS_STATUS_STRING_CHANGED);
     }
+}
+
+/**
+ * Updates the game \a data string
+ */
+void CFG_SetGameData (const char* data)
+{
+    /* Check arguments */
+    assert (data);
+
+    /* Update game data */
+    DS_StrRmBuf (&game_data);
+    game_data = DS_StrNew (data);
 }
 
 /**

@@ -167,6 +167,10 @@ class DriverStation : public QObject
                 NOTIFY controlModeChanged)
     Q_PROPERTY (bool canBeEnabled
                 READ canBeEnabled)
+    Q_PROPERTY (QString gameData
+                READ gameData
+                WRITE setGameData
+                NOTIFY gameDataChanged)
 
 public:
     static DriverStation* getInstance();
@@ -252,6 +256,8 @@ public:
     Alliance teamAlliance() const;
     Position teamPosition() const;
 
+    QString gameData() const;
+
     QString appliedFMSAddress() const;
     QString appliedRadioAddress() const;
     QString appliedRobotAddress() const;
@@ -287,6 +293,7 @@ public slots:
     void restartRobotCode();
     void setEnabled (const bool enabled);
     void setTeamNumber (const int number);
+    void setGameData (const QString& data);
     void loadProtocol (const DS_Protocol& protocol);
     void setControlMode (const Control mode);
     void setProtocol (const Protocol protocol);
@@ -315,6 +322,7 @@ private:
 
 signals:
     void stationChanged();
+    void gameDataChanged();
     void protocolChanged();
     void fmsAddressChanged();
     void radioAddressChanged();
