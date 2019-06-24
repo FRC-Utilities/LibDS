@@ -21,7 +21,7 @@
  * DEALINGS IN THE SOFTWARE.
  */
 
- // LibDS 2019 FRC protocol developed by Riviera Robotics <team@rivierarobotics.org>
+ /* LibDS updated for 2019 FRC protocol by Riviera Robotics <team@rivierarobotics.org> */
 
 #include <math.h>
 
@@ -31,9 +31,14 @@
 #include "DS_Joysticks.h"
 #include "DS_DefaultProtocols.h"
 
+#if defined _WIN32
+    #include <windows.h>
+#endif
+
 /*
  * Protocol bytes
  */
+ //TODO make sure these correct (wireshark observations)
 static const uint8_t cTest               = 0x01;
 static const uint8_t cEnabled            = 0x04;
 static const uint8_t cAutonomous         = 0x02;
@@ -57,10 +62,9 @@ static const uint8_t cRequestTime        = 0x01;
 static const uint8_t cRobotHasCode       = 0x20;
 
 /*
- * Sent robot and FMS packet counters
+ * Sent robot packet counters
  */
 static unsigned int send_time_data = 0;
-static unsigned int sent_fms_packets = 0;
 static unsigned int sent_robot_packets = 0;
 
 /*
@@ -152,15 +156,14 @@ static uint8_t get_request_code (void)
 
     /* Robot has comms, check if we need to send additional flags */
     if (CFG_GetRobotCommunications()) {
-        if (reboot)
-            code = cRequestReboot;
-        else if (restart_code)
-            code = cRequestRestartCode;
+      if (reboot) {
+        code = cRequestReboot;
+      } else if (restart_code) {
+        code = cRequestRestartCode;
+      }
+    } else {
+      code = cRequestUnconnected;
     }
-
-    /* Send disconnected state flag (may trigger resync) */
-    else
-        code = cRequestUnconnected;
 
     return code;
 }
@@ -191,6 +194,75 @@ static uint8_t get_station_code (void)
     return cRed1;
 }
 
+/**
+ * Returns information regarding the current date and time and the timezone
+ * of the client computer.
+ *
+ * The robot may ask for this information in some cases (e.g. when initializing
+ * the robot code).
+ */
+static DS_String get_timezone_data (void)
+{
+    DS_String data = DS_StrNewLen (14);
+
+    /* Get current time */
+    time_t rt = 0;
+    uint32_t ms = 0;
+    struct tm timeinfo;
+
+#if defined _WIN32
+    localtime_s (&timeinfo, &rt);
+#else
+    localtime_r (&rt, &timeinfo);
+#endif
+
+#if defined _WIN32
+    /* Get timezone information */
+    TIME_ZONE_INFORMATION info;
+    GetTimeZoneInformation (&info);
+
+    /* Convert the wchar to a standard string */
+    size_t len = wcslen (info.StandardName) + 1;
+    char* str = calloc (len, sizeof (char));
+    wcstombs_s (NULL, str, len, info.StandardName, wcslen (info.StandardName));
+
+    /* Convert the obtained cstring to a bstring */
+    DS_String tz = DS_StrNew (str);
+    free (str);
+
+    /* Get milliseconds */
+    GetSystemTime (&info.StandardDate);
+    ms = (uint32_t) info.StandardDate.wMilliseconds;
+#else
+    /* Timezone is stored directly in time_t structure */
+    DS_String tz = DS_StrNew (timeinfo.tm_zone);
+#endif
+
+    /* Encode date/time in datagram */
+    DS_StrSetChar (&data, 0,  (uint8_t) 0x0b);
+    DS_StrSetChar (&data, 1,  (uint8_t) cTagDate);
+    DS_StrSetChar (&data, 2,  (uint8_t) (ms >> 24));
+    DS_StrSetChar (&data, 3,  (uint8_t) (ms >> 16));
+    DS_StrSetChar (&data, 4,  (uint8_t) (ms >> 8));
+    DS_StrSetChar (&data, 5,  (uint8_t) (ms));
+    DS_StrSetChar (&data, 6,  (uint8_t) timeinfo.tm_sec);
+    DS_StrSetChar (&data, 7,  (uint8_t) timeinfo.tm_min);
+    DS_StrSetChar (&data, 8,  (uint8_t) timeinfo.tm_hour);
+    DS_StrSetChar (&data, 9,  (uint8_t) timeinfo.tm_yday);
+    DS_StrSetChar (&data, 10, (uint8_t) timeinfo.tm_mon);
+    DS_StrSetChar (&data, 11, (uint8_t) timeinfo.tm_year);
+
+    /* Add timezone length and tag */
+    DS_StrSetChar (&data, 12, DS_StrLen (&tz));
+    DS_StrSetChar (&data, 13, cTagTimezone);
+
+    /* Add timezone string */
+    DS_StrJoin (&data, &tz);
+
+    /* Return the obtained data */
+    return data;
+}
+
 //----------------------------------------------------------------------------//
 // DS to Robot/Radio/FMS packet generation                                    //
 //----------------------------------------------------------------------------//
@@ -208,6 +280,7 @@ static DS_String create_radio_packet (void)
     return DS_StrNewLen (0);
 }
 
+//TODO rework this method based on wireshark observations (this is 2015, look at 2014 for reference)
 static DS_String create_robot_packet (void)
 {
     DS_String data = DS_StrNewLen (6);
@@ -249,19 +322,6 @@ static DS_String create_robot_packet (void)
 /* Ignore FMS for now */
 static int read_fms_packet (const DS_String* data)
 {
-    /* Check if data pointer is valid */
-    if (!data)
-        return 0;
-
-    /* NOTES:
-     * - You can verify packet length with DS_StrLen() function
-     * - This function should update global variables accordingly, check
-     *   previous FRC Comm. protocol implementations for more info, you should
-     *   use LibDS functions that start with "CFG_" to update these variables.
-     * - If the packet is read and interpreted successfully, this function
-     *   should return 1 (considered as "true" in C), otherwise, just
-     *   return 0 if you find any error
-     */
     return 0;
 }
 
@@ -320,8 +380,8 @@ static void reset_radio (void) {}
 
 static void reset_robot (void) {
 	reboot = 0;
-    restart_code = 0;
-    send_time_data = 0;
+  restart_code = 0;
+  send_time_data = 0;
 }
 
 static void reboot_robot (void) {
@@ -343,7 +403,7 @@ static void restart_robot_code (void) {
 //----------------------------------------------------------------------------//
 
 /**
- * Initializes and configures the FRC 2018 communication protocol
+ * Initializes and configures the FRC 2019 communication protocol
  */
 DS_Protocol DS_GetProtocolFRC_2019 (void)
 {
@@ -391,10 +451,7 @@ DS_Protocol DS_GetProtocolFRC_2019 (void)
 
     /* Define FMS socket properties */
     protocol.fms_socket = *DS_SocketEmpty();
-    protocol.fms_socket.disabled = 0;
-    protocol.fms_socket.in_port = 1120;
-    protocol.fms_socket.out_port = 1160;
-    protocol.fms_socket.type = DS_SOCKET_UDP;
+    protocol.fms_socket.disabled = 1;
 
     /* Define radio socket properties */
     protocol.radio_socket = *DS_SocketEmpty();
@@ -403,8 +460,8 @@ DS_Protocol DS_GetProtocolFRC_2019 (void)
     /* Define robot socket properties */
     protocol.robot_socket = *DS_SocketEmpty();
     protocol.robot_socket.disabled = 0;
-    protocol.robot_socket.in_port = 1150;
-    protocol.robot_socket.out_port = 1110;
+    protocol.robot_socket.in_port = 1130;
+    protocol.robot_socket.out_port = 1140;
     protocol.robot_socket.type = DS_SOCKET_UDP;
 
     /* Define netconsole socket properties */
