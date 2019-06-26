@@ -23,7 +23,10 @@
 
  /* LibDS updated for 2019 FRC protocol by Riviera Robotics <team@rivierarobotics.org> */
 
+#include <time.h>
 #include <math.h>
+#include <stdio.h>
+#include <string.h>
 
 #include "DS_Utils.h"
 #include "DS_Config.h"
@@ -39,27 +42,27 @@
  * Protocol bytes
  */
  //TODO make sure these correct (wireshark observations)
-static const uint8_t cTest               = 0x01;
-static const uint8_t cEnabled            = 0x04;
-static const uint8_t cAutonomous         = 0x02;
-static const uint8_t cTeleoperated       = 0x00;
-static const uint8_t cEmergencyStop      = 0x80;
-static const uint8_t cRequestReboot      = 0x08;
-static const uint8_t cRequestNormal      = 0x80;
-static const uint8_t cRequestUnconnected = 0x00;
-static const uint8_t cRequestRestartCode = 0x04;
-static const uint8_t cTagDate            = 0x0f;
-static const uint8_t cTagGeneral         = 0x01;
-static const uint8_t cTagJoystick        = 0x0c;
-static const uint8_t cTagTimezone        = 0x10;
-static const uint8_t cRed1               = 0x00;
-static const uint8_t cRed2               = 0x01;
-static const uint8_t cRed3               = 0x02;
-static const uint8_t cBlue1              = 0x03;
-static const uint8_t cBlue2              = 0x04;
-static const uint8_t cBlue3              = 0x05;
-static const uint8_t cRequestTime        = 0x01;
-static const uint8_t cRobotHasCode       = 0x20;
+static const uint8_t cTest               = 0x01; //pos 4 udp1110 - 1
+static const uint8_t cEnabled            = 0x04; //pos 4 replaced udp1110 - 4
+static const uint8_t cAutonomous         = 0x02; //pos 4 udp1110 - 2
+static const uint8_t cTeleoperated       = 0x00; //pos 4 udp1110 - 0
+static const uint8_t cEmergencyStop      = 0x80; //pos 4 replaced udp1110 - 128
+static const uint8_t cRequestReboot      = 0x08; //
+static const uint8_t cRequestNormal      = 0x30; //pos 5 udp1110 - 48
+static const uint8_t cRequestUnconnected = 0x00; //
+static const uint8_t cRequestRestartCode = 0x10; //pos 5 udp1110 - 16
+static const uint8_t cTagDate            = 0x0f; //
+static const uint8_t cTagGeneral         = 0x01; //pos 3 udp1110 - 1
+static const uint8_t cTagJoystick        = 0x0c; //
+static const uint8_t cTagTimezone        = 0x10; //
+static const uint8_t cRed1               = 0x00; //pos 6 udp1110 - 0
+static const uint8_t cRed2               = 0x01; //pos 6 udp1110 - 1
+static const uint8_t cRed3               = 0x02; //pos 6 udp1110 - 2
+static const uint8_t cBlue1              = 0x03; //pos 6 udp1110 - 3
+static const uint8_t cBlue2              = 0x04; //pos 6 udp1110 - 4
+static const uint8_t cBlue3              = 0x05; //pos 6 udp1110 - 5
+static const uint8_t cRequestTime        = 0x01; //
+static const uint8_t cRobotHasCode       = 0x20; //
 
 /*
  * Sent robot packet counters
@@ -107,11 +110,13 @@ static DS_String radio_address (void)
 }
 
 /**
- * The 2016+ control system assigns the robot address at roboRIO-TEAM-frc.local,
+ * The 2016+ control system assigns the robot address at roboRIO-TEAM-frc.local via mDNS
+ * Using 10.TE.AM.2 for now as it doesn't rely on the mDNS working
  */
 static DS_String robot_address (void)
 {
-    return DS_StrFormat ("roboRIO-%d-frc.local", CFG_GetTeamNumber());
+    return DS_GetStaticIP (10, CFG, GetTeamNumber(), 2);
+    //return DS_StrFormat ("roboRIO-%d-frc.local", CFG_GetTeamNumber());
 }
 
 /**
@@ -460,8 +465,8 @@ DS_Protocol DS_GetProtocolFRC_2019 (void)
     /* Define robot socket properties */
     protocol.robot_socket = *DS_SocketEmpty();
     protocol.robot_socket.disabled = 0;
-    protocol.robot_socket.in_port = 1130;
-    protocol.robot_socket.out_port = 1140;
+    protocol.robot_socket.in_port = 1150;
+    protocol.robot_socket.out_port = 1110;
     protocol.robot_socket.type = DS_SOCKET_UDP;
 
     /* Define netconsole socket properties */
