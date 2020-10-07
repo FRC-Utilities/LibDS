@@ -183,7 +183,6 @@ public:
     Q_ENUMS (Control)
 
     enum Protocol {
-        Protocol2018,
         Protocol2016,
         Protocol2015,
         Protocol2014,

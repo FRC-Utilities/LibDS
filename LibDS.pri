@@ -38,7 +38,6 @@ SOURCES += \
     $$PWD/src/protocols/frc_2014.c \
     $$PWD/src/protocols/frc_2015.c \
     $$PWD/src/protocols/frc_2016.c \
-    $$PWD/src/protocols/frc_2018.c \
     $$PWD/src/client.c \
     $$PWD/src/config.c \
     $$PWD/src/events.c \
