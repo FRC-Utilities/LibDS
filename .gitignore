@@ -1,0 +1,34 @@
+# Compiled Object files
+*.slo
+*.lo
+*.o
+*.obj
+
+# Precompiled Headers
+*.gch
+*.pch
+
+# Fortran module files
+*.mod
+
+# Executables
+*.exe
+*.out
+*.app
+
+# Other build artifacts
+moc
+qrc
+.qmake.stash
+
+# The makefile--duh.
+Makefile
+
+# Idea projects
+.idea
+
+# Qt creator junk
+*.pro.user
+
+# macOS junk
+*.DS_Store
