@@ -165,7 +165,8 @@ static uint8_t fms_control_code (void)
 static float extract_float (const DS_String* data, const int start)
 {
     char c[4];
-    for (size_t i = 0; i < 4; i++) {
+    int i;
+    for (i = 0; i < 4; i++) {
         c[i] = DS_StrCharAt (data, (int) i + start);
     }
     float f;
@@ -412,7 +413,8 @@ static void read_extended (const DS_String* data, const int offset) {
     } else if (tag == cRTagCPUInfo) {
         /* Get CPU usage */
         double cpu_percent = 0;
-        for (int i = 0; i < 2; i++) {
+        int i;
+        for (i = 0; i < 2; i++) {
             float t_crit = extract_float (data, offset + 6 + (i * 4));
             float t_above = extract_float (data, offset + 10 + (i * 4));
             float t_norm = extract_float (data, offset + 14 + (i * 4));
