@@ -1,7 +1,4 @@
-# LibDS
-
-[![Build Status](https://img.shields.io/travis/FRC-Utilities/LibDS.svg?style=flat-square)](https://travis-ci.org/FRC-Utilities/LibDS)
-[![Donate button](https://img.shields.io/badge/bitcoin-donate-brightgreen.svg?style=flat-square)](https://blockchain.info/address/1K85yLxjuqUmhkjP839R7C23XFhSxrefMx "Donate once-off to this project using BitCoin")
+# LibDS-Legacy
 
 The DriverStation library allows you to connect and manage a robot easily by providing an abstraction layer between an application and the network comununications between the robot and the host computer.
 

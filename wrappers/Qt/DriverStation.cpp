@@ -575,7 +575,6 @@ QStringList DriverStation::protocols() const
 {
     QStringList list;
 
-    list.append (tr ("FRC 2018"));
     list.append (tr ("FRC 2016"));
     list.append (tr ("FRC 2015"));
     list.append (tr ("FRC 2014"));
@@ -811,10 +810,6 @@ void DriverStation::setProtocol (const Protocol protocol)
     case Protocol2016:
         loadProtocol (DS_GetProtocolFRC_2016());
         LOG << "Switched to FRC 2016 Protocol";
-        break;
-    case Protocol2018:
-        loadProtocol (DS_GetProtocolFRC_2018());
-        LOG << "Switched to FRC 2018 Protocol";
         break;
     default:
         break;
