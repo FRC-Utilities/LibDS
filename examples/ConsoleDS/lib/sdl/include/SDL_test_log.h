@@ -34,33 +34,33 @@
  */
 
 #ifndef _SDL_test_log_h
-#define _SDL_test_log_h
+#   define _SDL_test_log_h
 
-#include "begin_code.h"
+#   include "begin_code.h"
 /* Set up for C function definitions, even when using C++ */
-#ifdef __cplusplus
+#   ifdef __cplusplus
 extern "C" {
-#endif
+#   endif
 
 /**
  * \brief Prints given message with a timestamp in the TEST category and INFO priority.
  *
  * \param fmt Message to be logged
  */
-void SDLTest_Log (const char* fmt, ...);
+void SDLTest_Log(const char *fmt, ...);
 
 /**
  * \brief Prints given message with a timestamp in the TEST category and the ERROR priority.
  *
  * \param fmt Message to be logged
  */
-void SDLTest_LogError (const char* fmt, ...);
+void SDLTest_LogError(const char *fmt, ...);
 
 /* Ends C function definitions when using C++ */
-#ifdef __cplusplus
+#   ifdef __cplusplus
 }
-#endif
-#include "close_code.h"
+#   endif
+#   include "close_code.h"
 
 #endif /* _SDL_test_log_h */
 

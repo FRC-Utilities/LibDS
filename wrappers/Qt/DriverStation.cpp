@@ -39,10 +39,10 @@
  *
  * \returns the only instance of this class
  */
-DriverStation* DriverStation::getInstance()
+DriverStation *DriverStation::getInstance()
 {
-    static DriverStation instance;
-    return &instance;
+   static DriverStation instance;
+   return &instance;
 }
 
 /**
@@ -50,7 +50,7 @@ DriverStation* DriverStation::getInstance()
  */
 int DriverStation::cpuUsage() const
 {
-    return DS_GetRobotCPUUsage();
+   return DS_GetRobotCPUUsage();
 }
 
 /**
@@ -58,7 +58,7 @@ int DriverStation::cpuUsage() const
  */
 int DriverStation::canUsage() const
 {
-    return DS_GetRobotCANUtilization();
+   return DS_GetRobotCANUtilization();
 }
 
 /**
@@ -66,7 +66,7 @@ int DriverStation::canUsage() const
  */
 int DriverStation::ramUsage() const
 {
-    return DS_GetRobotRAMUsage();
+   return DS_GetRobotRAMUsage();
 }
 
 /**
@@ -74,7 +74,7 @@ int DriverStation::ramUsage() const
  */
 int DriverStation::diskUsage() const
 {
-    return DS_GetRobotDiskUsage();
+   return DS_GetRobotDiskUsage();
 }
 
 /**
@@ -82,13 +82,13 @@ int DriverStation::diskUsage() const
  */
 int DriverStation::fmsPacketLoss() const
 {
-    qreal sent = (qreal) DS_SentFMSPackets();
-    qreal recv = (qreal) DS_ReceivedFMSPackets();
+   qreal sent = (qreal)DS_SentFMSPackets();
+   qreal recv = (qreal)DS_ReceivedFMSPackets();
 
-    if (sent > 0)
-        return (1 - (recv / sent)) * 100;
+   if (sent > 0)
+      return (1 - (recv / sent)) * 100;
 
-    return 100;
+   return 100;
 }
 
 /**
@@ -96,13 +96,13 @@ int DriverStation::fmsPacketLoss() const
  */
 int DriverStation::radioPacketLoss() const
 {
-    qreal sent = (qreal) DS_SentRadioPackets();
-    qreal recv = (qreal) DS_ReceivedRadioPackets();
+   qreal sent = (qreal)DS_SentRadioPackets();
+   qreal recv = (qreal)DS_ReceivedRadioPackets();
 
-    if (sent > 0)
-        return (1 - (recv / sent)) * 100;
+   if (sent > 0)
+      return (1 - (recv / sent)) * 100;
 
-    return 100;
+   return 100;
 }
 
 /**
@@ -110,13 +110,13 @@ int DriverStation::radioPacketLoss() const
  */
 int DriverStation::robotPacketLoss() const
 {
-    qreal sent = (qreal) DS_SentRobotPackets();
-    qreal recv = (qreal) DS_ReceivedRobotPackets();
+   qreal sent = (qreal)DS_SentRobotPackets();
+   qreal recv = (qreal)DS_ReceivedRobotPackets();
 
-    if (sent > 0)
-        return (1 - (recv / sent)) * 100;
+   if (sent > 0)
+      return (1 - (recv / sent)) * 100;
 
-    return 100;
+   return 100;
 }
 
 /**
@@ -124,7 +124,7 @@ int DriverStation::robotPacketLoss() const
  */
 QString DriverStation::buildDate()
 {
-    return QString (DS_GetBuildDate());
+   return QString(DS_GetBuildDate());
 }
 
 /**
@@ -132,7 +132,7 @@ QString DriverStation::buildDate()
  */
 QString DriverStation::buildTime()
 {
-    return QString (DS_GetBuildTime());
+   return QString(DS_GetBuildTime());
 }
 
 /**
@@ -140,7 +140,7 @@ QString DriverStation::buildTime()
  */
 QString DriverStation::libDSVersion()
 {
-    return QString (DS_GetVersion());
+   return QString(DS_GetVersion());
 }
 
 /**
@@ -149,7 +149,7 @@ QString DriverStation::libDSVersion()
  */
 int DriverStation::teamNumber() const
 {
-    return DS_GetTeamNumber();
+   return DS_GetTeamNumber();
 }
 
 /**
@@ -157,7 +157,7 @@ int DriverStation::teamNumber() const
  */
 int DriverStation::joystickCount() const
 {
-    return DS_GetJoystickCount();
+   return DS_GetJoystickCount();
 }
 
 /**
@@ -166,7 +166,7 @@ int DriverStation::joystickCount() const
  */
 bool DriverStation::isEnabled() const
 {
-    return DS_GetRobotEnabled();
+   return DS_GetRobotEnabled();
 }
 
 /**
@@ -177,7 +177,7 @@ bool DriverStation::isEnabled() const
  */
 bool DriverStation::isTestMode() const
 {
-    return (controlMode() == ControlTest);
+   return (controlMode() == ControlTest);
 }
 
 /**
@@ -189,7 +189,7 @@ bool DriverStation::isTestMode() const
  */
 bool DriverStation::canBeEnabled() const
 {
-    return DS_GetCanBeEnabled();
+   return DS_GetCanBeEnabled();
 }
 
 /**
@@ -197,7 +197,7 @@ bool DriverStation::canBeEnabled() const
  */
 bool DriverStation::hasRobotCode() const
 {
-    return DS_GetRobotCode();
+   return DS_GetRobotCode();
 }
 
 /**
@@ -208,7 +208,7 @@ bool DriverStation::hasRobotCode() const
  */
 bool DriverStation::isAutonomous() const
 {
-    return (controlMode() == ControlAutonomous);
+   return (controlMode() == ControlAutonomous);
 }
 
 /**
@@ -219,7 +219,7 @@ bool DriverStation::isAutonomous() const
  */
 bool DriverStation::isTeleoperated() const
 {
-    return (controlMode() == ControlTeleoperated);
+   return (controlMode() == ControlTeleoperated);
 }
 
 /**
@@ -227,7 +227,7 @@ bool DriverStation::isTeleoperated() const
  */
 bool DriverStation::connectedToFMS() const
 {
-    return DS_GetFMSCommunications();
+   return DS_GetFMSCommunications();
 }
 
 /**
@@ -235,7 +235,7 @@ bool DriverStation::connectedToFMS() const
  */
 bool DriverStation::connectedToRadio() const
 {
-    return DS_GetRadioCommunications();
+   return DS_GetRadioCommunications();
 }
 
 /**
@@ -243,7 +243,7 @@ bool DriverStation::connectedToRadio() const
  */
 bool DriverStation::connectedToRobot() const
 {
-    return DS_GetRobotCommunications();
+   return DS_GetRobotCommunications();
 }
 
 /**
@@ -254,7 +254,7 @@ bool DriverStation::connectedToRobot() const
  */
 bool DriverStation::emergencyStopped() const
 {
-    return DS_GetEmergencyStopped();
+   return DS_GetEmergencyStopped();
 }
 
 /**
@@ -262,7 +262,7 @@ bool DriverStation::emergencyStopped() const
  */
 qreal DriverStation::voltage() const
 {
-    return (qreal) DS_GetRobotVoltage();
+   return (qreal)DS_GetRobotVoltage();
 }
 
 /**
@@ -272,27 +272,27 @@ qreal DriverStation::voltage() const
  */
 QString DriverStation::voltageString() const
 {
-    /* Round voltage to two decimal places */
-    qreal volt = roundf (voltage() * 100) / 100;
+   /* Round voltage to two decimal places */
+   qreal volt = roundf(voltage() * 100) / 100;
 
-    /* Avoid this: http://i.imgur.com/iAAi1bX.png */
-    if (volt > maximumBatteryVoltage())
-        volt = maximumBatteryVoltage();
+   /* Avoid this: http://i.imgur.com/iAAi1bX.png */
+   if (volt > maximumBatteryVoltage())
+      volt = maximumBatteryVoltage();
 
-    /* Separate voltage into natural and decimal numbers */
-    int integer = static_cast<int> (volt);
-    int decimal = static_cast<qreal> (volt - integer) * 100;
+   /* Separate voltage into natural and decimal numbers */
+   int integer = static_cast<int>(volt);
+   int decimal = static_cast<qreal>(volt - integer) * 100;
 
-    /* Convert the obtained numbers into strings */
-    QString integer_str = QString::number (integer);
-    QString decimal_str = QString::number (decimal);
+   /* Convert the obtained numbers into strings */
+   QString integer_str = QString::number(integer);
+   QString decimal_str = QString::number(decimal);
 
-    /* Prepend a 0 to the decimal numbers if required */
-    if (decimal < 10)
-        decimal_str.prepend ("0");
+   /* Prepend a 0 to the decimal numbers if required */
+   if (decimal < 10)
+      decimal_str.prepend("0");
 
-    /* Construct final string */
-    return integer_str + "." + decimal_str + " V";
+   /* Construct final string */
+   return integer_str + "." + decimal_str + " V";
 }
 
 /**
@@ -301,7 +301,7 @@ QString DriverStation::voltageString() const
  */
 qreal DriverStation::maximumBatteryVoltage() const
 {
-    return (qreal) DS_GetMaximumBatteryVoltage();
+   return (qreal)DS_GetMaximumBatteryVoltage();
 }
 
 /**
@@ -313,20 +313,21 @@ qreal DriverStation::maximumBatteryVoltage() const
  */
 DriverStation::Control DriverStation::controlMode() const
 {
-    switch (DS_GetControlMode()) {
-    case DS_CONTROL_TEST:
-        return ControlTest;
-        break;
-    case DS_CONTROL_AUTONOMOUS:
-        return ControlAutonomous;
-        break;
-    case DS_CONTROL_TELEOPERATED:
-        return ControlTeleoperated;
-        break;
-    default:
-        return ControlTeleoperated;
-        break;
-    }
+   switch (DS_GetControlMode())
+   {
+      case DS_CONTROL_TEST:
+         return ControlTest;
+         break;
+      case DS_CONTROL_AUTONOMOUS:
+         return ControlAutonomous;
+         break;
+      case DS_CONTROL_TELEOPERATED:
+         return ControlTeleoperated;
+         break;
+      default:
+         return ControlTeleoperated;
+         break;
+   }
 }
 
 /**
@@ -345,39 +346,43 @@ DriverStation::Control DriverStation::controlMode() const
  */
 DriverStation::Station DriverStation::teamStation() const
 {
-    if (teamAlliance() == AllianceRed) {
-        switch (teamPosition()) {
-        case Position1:
+   if (teamAlliance() == AllianceRed)
+   {
+      switch (teamPosition())
+      {
+         case Position1:
             return StationRed1;
             break;
-        case Position2:
+         case Position2:
             return StationRed2;
             break;
-        case Position3:
+         case Position3:
             return StationRed3;
             break;
-        default:
+         default:
             return StationRed1;
             break;
-        }
-    }
+      }
+   }
 
-    else {
-        switch (teamPosition()) {
-        case Position1:
+   else
+   {
+      switch (teamPosition())
+      {
+         case Position1:
             return StationBlue1;
             break;
-        case Position2:
+         case Position2:
             return StationBlue2;
             break;
-        case Position3:
+         case Position3:
             return StationBlue3;
             break;
-        default:
+         default:
             return StationBlue1;
             break;
-        }
-    }
+      }
+   }
 }
 
 /**
@@ -391,17 +396,18 @@ DriverStation::Station DriverStation::teamStation() const
  */
 DriverStation::Alliance DriverStation::teamAlliance() const
 {
-    switch (DS_GetAlliance()) {
-    case DS_ALLIANCE_RED:
-        return AllianceRed;
-        break;
-    case DS_ALLIANCE_BLUE:
-        return AllianceBlue;
-        break;
-    default:
-        return AllianceRed;
-        break;
-    }
+   switch (DS_GetAlliance())
+   {
+      case DS_ALLIANCE_RED:
+         return AllianceRed;
+         break;
+      case DS_ALLIANCE_BLUE:
+         return AllianceBlue;
+         break;
+      default:
+         return AllianceRed;
+         break;
+   }
 }
 
 /**
@@ -416,20 +422,21 @@ DriverStation::Alliance DriverStation::teamAlliance() const
  */
 DriverStation::Position DriverStation::teamPosition() const
 {
-    switch (DS_GetPosition()) {
-    case DS_POSITION_1:
-        return Position1;
-        break;
-    case DS_POSITION_2:
-        return Position2;
-        break;
-    case DS_POSITION_3:
-        return Position3;
-        break;
-    default:
-        return Position1;
-        break;
-    }
+   switch (DS_GetPosition())
+   {
+      case DS_POSITION_1:
+         return Position1;
+         break;
+      case DS_POSITION_2:
+         return Position2;
+         break;
+      case DS_POSITION_3:
+         return Position3;
+         break;
+      default:
+         return Position1;
+         break;
+   }
 }
 
 /**
@@ -437,7 +444,7 @@ DriverStation::Position DriverStation::teamPosition() const
  */
 QString DriverStation::gameData() const
 {
-    return QString::fromUtf8 (DS_GetGameData());
+   return QString::fromUtf8(DS_GetGameData());
 }
 
 /**
@@ -446,7 +453,7 @@ QString DriverStation::gameData() const
  */
 QString DriverStation::appliedFMSAddress() const
 {
-    return QString::fromUtf8 (DS_GetAppliedFMSAddress());
+   return QString::fromUtf8(DS_GetAppliedFMSAddress());
 }
 
 /**
@@ -455,7 +462,7 @@ QString DriverStation::appliedFMSAddress() const
  */
 QString DriverStation::appliedRadioAddress() const
 {
-    return QString::fromUtf8 (DS_GetAppliedRadioAddress());
+   return QString::fromUtf8(DS_GetAppliedRadioAddress());
 }
 
 /**
@@ -464,7 +471,7 @@ QString DriverStation::appliedRadioAddress() const
  */
 QString DriverStation::appliedRobotAddress() const
 {
-    return QString::fromUtf8 (DS_GetAppliedRobotAddress());
+   return QString::fromUtf8(DS_GetAppliedRobotAddress());
 }
 
 /**
@@ -472,7 +479,7 @@ QString DriverStation::appliedRobotAddress() const
  */
 QString DriverStation::defaultFMSAddress() const
 {
-    return QString::fromUtf8 (DS_GetDefaultFMSAddress());
+   return QString::fromUtf8(DS_GetDefaultFMSAddress());
 }
 
 /**
@@ -480,7 +487,7 @@ QString DriverStation::defaultFMSAddress() const
  */
 QString DriverStation::defaultRadioAddress() const
 {
-    return QString::fromUtf8 (DS_GetDefaultRadioAddress());
+   return QString::fromUtf8(DS_GetDefaultRadioAddress());
 }
 
 /**
@@ -488,7 +495,7 @@ QString DriverStation::defaultRadioAddress() const
  */
 QString DriverStation::defaultRobotAddress() const
 {
-    return QString::fromUtf8 (DS_GetDefaultRobotAddress());
+   return QString::fromUtf8(DS_GetDefaultRobotAddress());
 }
 
 /**
@@ -496,10 +503,10 @@ QString DriverStation::defaultRobotAddress() const
  */
 QString DriverStation::elapsedTime()
 {
-    if (m_elapsedTime.isEmpty())
-        m_elapsedTime = "00:00.0";
+   if (m_elapsedTime.isEmpty())
+      m_elapsedTime = "00:00.0";
 
-    return m_elapsedTime;
+   return m_elapsedTime;
 }
 
 /**
@@ -517,7 +524,7 @@ QString DriverStation::elapsedTime()
  */
 QString DriverStation::generalStatus() const
 {
-    return QString::fromUtf8 (DS_GetStatusString());
+   return QString::fromUtf8(DS_GetStatusString());
 }
 
 /**
@@ -526,7 +533,7 @@ QString DriverStation::generalStatus() const
  */
 QString DriverStation::customFMSAddress() const
 {
-    return QString::fromUtf8 (DS_GetCustomFMSAddress());
+   return QString::fromUtf8(DS_GetCustomFMSAddress());
 }
 
 /**
@@ -535,7 +542,7 @@ QString DriverStation::customFMSAddress() const
  */
 QString DriverStation::customRadioAddress() const
 {
-    return QString::fromUtf8 (DS_GetCustomRadioAddress());
+   return QString::fromUtf8(DS_GetCustomRadioAddress());
 }
 
 /**
@@ -544,7 +551,7 @@ QString DriverStation::customRadioAddress() const
  */
 QString DriverStation::customRobotAddress() const
 {
-    return QString::fromUtf8 (DS_GetCustomRobotAddress());
+   return QString::fromUtf8(DS_GetCustomRobotAddress());
 }
 
 /**
@@ -554,16 +561,16 @@ QString DriverStation::customRobotAddress() const
  */
 QStringList DriverStation::stations() const
 {
-    QStringList list;
+   QStringList list;
 
-    list.append (tr ("Red 1"));
-    list.append (tr ("Red 2"));
-    list.append (tr ("Red 3"));
-    list.append (tr ("Blue 1"));
-    list.append (tr ("Blue 2"));
-    list.append (tr ("Blue 3"));
+   list.append(tr("Red 1"));
+   list.append(tr("Red 2"));
+   list.append(tr("Red 3"));
+   list.append(tr("Blue 1"));
+   list.append(tr("Blue 2"));
+   list.append(tr("Blue 3"));
 
-    return list;
+   return list;
 }
 
 /**
@@ -573,13 +580,14 @@ QStringList DriverStation::stations() const
  */
 QStringList DriverStation::protocols() const
 {
-    QStringList list;
+   QStringList list;
 
-    list.append (tr ("FRC 2016"));
-    list.append (tr ("FRC 2015"));
-    list.append (tr ("FRC 2014"));
+   list.append(tr("FRC 2020"));
+   list.append(tr("FRC 2016"));
+   list.append(tr("FRC 2015"));
+   list.append(tr("FRC 2014"));
 
-    return list;
+   return list;
 }
 
 /**
@@ -588,7 +596,7 @@ QStringList DriverStation::protocols() const
  */
 unsigned long DriverStation::sentFMSBytes() const
 {
-    return DS_SentFMSBytes();
+   return DS_SentFMSBytes();
 }
 
 /**
@@ -597,7 +605,7 @@ unsigned long DriverStation::sentFMSBytes() const
  */
 unsigned long DriverStation::sentRadioBytes() const
 {
-    return DS_SentRadioBytes();
+   return DS_SentRadioBytes();
 }
 
 /**
@@ -606,7 +614,7 @@ unsigned long DriverStation::sentRadioBytes() const
  */
 unsigned long DriverStation::sentRobotBytes() const
 {
-    return DS_SentRobotBytes();
+   return DS_SentRobotBytes();
 }
 
 /**
@@ -615,7 +623,7 @@ unsigned long DriverStation::sentRobotBytes() const
  */
 unsigned long DriverStation::receivedFMSBytes() const
 {
-    return DS_ReceivedFMSBytes();
+   return DS_ReceivedFMSBytes();
 }
 
 /**
@@ -624,7 +632,7 @@ unsigned long DriverStation::receivedFMSBytes() const
  */
 unsigned long DriverStation::receivedRadioBytes() const
 {
-    return DS_ReceivedRadioBytes();
+   return DS_ReceivedRadioBytes();
 }
 
 /**
@@ -633,34 +641,34 @@ unsigned long DriverStation::receivedRadioBytes() const
  */
 unsigned long DriverStation::receivedRobotBytes() const
 {
-    return DS_ReceivedRobotBytes();
+   return DS_ReceivedRobotBytes();
 }
 
 /**
  * Returns the number of axes that the given \a joystick has.
  * If the joystick does not exist, this function will return \c 0
  */
-int DriverStation::getNumAxes (const int joystick) const
+int DriverStation::getNumAxes(const int joystick) const
 {
-    return DS_GetJoystickNumAxes (joystick);
+   return DS_GetJoystickNumAxes(joystick);
 }
 
 /**
  * Returns the number of hats that the given \a joystick has.
  * If the joystick does not exist, this function will return \c 0
  */
-int DriverStation::getNumHats (const int joystick) const
+int DriverStation::getNumHats(const int joystick) const
 {
-    return DS_GetJoystickNumHats (joystick);
+   return DS_GetJoystickNumHats(joystick);
 }
 
 /**
  * Returns the number of buttons that the given \a joystick has.
  * If the joystick does not exist, this function will return \c 0
  */
-int DriverStation::getNumButtons (const int joystick) const
+int DriverStation::getNumButtons(const int joystick) const
 {
-    return DS_GetJoystickNumButtons (joystick);
+   return DS_GetJoystickNumButtons(joystick);
 }
 
 /**
@@ -669,13 +677,14 @@ int DriverStation::getNumButtons (const int joystick) const
  */
 void DriverStation::start()
 {
-    if (!DS_Initialized()) {
-        DS_Init();
-        processEvents();
-        updateElapsedTime();
-        emit statusChanged (generalStatus());
-        connect (qApp, SIGNAL (aboutToQuit()), this, SLOT (quitDS()));
-    }
+   if (!DS_Initialized())
+   {
+      DS_Init();
+      processEvents();
+      updateElapsedTime();
+      emit statusChanged(generalStatus());
+      connect(qApp, SIGNAL(aboutToQuit()), this, SLOT(quitDS()));
+   }
 }
 
 /**
@@ -683,8 +692,8 @@ void DriverStation::start()
  */
 void DriverStation::rebootRobot()
 {
-    LOG << "Requesting robot reboot...";
-    DS_RebootRobot();
+   LOG << "Requesting robot reboot...";
+   DS_RebootRobot();
 }
 
 /**
@@ -692,9 +701,9 @@ void DriverStation::rebootRobot()
  */
 void DriverStation::resetJoysticks()
 {
-    LOG << "Resetting joysticks...";
-    DS_JoysticksReset();
-    emit joystickCountChanged();
+   LOG << "Resetting joysticks...";
+   DS_JoysticksReset();
+   emit joystickCountChanged();
 }
 
 /**
@@ -702,21 +711,21 @@ void DriverStation::resetJoysticks()
  */
 void DriverStation::restartRobotCode()
 {
-    LOG << "Requesting robot code restart...";
-    DS_RestartRobotCode();
+   LOG << "Requesting robot code restart...";
+   DS_RestartRobotCode();
 }
 
 /**
  * Disables or enables the robot
  */
-void DriverStation::setEnabled (const bool enabled)
+void DriverStation::setEnabled(const bool enabled)
 {
-    LOG << "Setting enabled state to" << enabled;
+   LOG << "Setting enabled state to" << enabled;
 
-    if (enabled)
-        resetElapsedTime();
+   if (enabled)
+      resetElapsedTime();
 
-    DS_SetRobotEnabled (enabled);
+   DS_SetRobotEnabled(enabled);
 }
 
 /**
@@ -724,25 +733,25 @@ void DriverStation::setEnabled (const bool enabled)
  * \note Changing the team number will trigger a refresh in the internet
  *       addresses used to communicate with the FMS, radio and robot.
  */
-void DriverStation::setTeamNumber (const int number)
+void DriverStation::setTeamNumber(const int number)
 {
-    LOG << "Changing team number to" << number;
-    DS_SetTeamNumber (number);
+   LOG << "Changing team number to" << number;
+   DS_SetTeamNumber(number);
 
-    emit fmsAddressChanged();
-    emit radioAddressChanged();
-    emit robotAddressChanged();
-    emit teamNumberChanged (number);
+   emit fmsAddressChanged();
+   emit radioAddressChanged();
+   emit robotAddressChanged();
+   emit teamNumberChanged(number);
 }
 
 /**
  * Changes the game \a data string of the LibDS
  */
-void DriverStation::setGameData (const QString& data)
+void DriverStation::setGameData(const QString &data)
 {
-    DS_SetGameData (data.toStdString().c_str());
-    LOG << "Game Data set to" << DS_GetGameData();
-    emit gameDataChanged();
+   DS_SetGameData(data.toStdString().c_str());
+   LOG << "Game Data set to" << DS_GetGameData();
+   emit gameDataChanged();
 }
 
 /**
@@ -750,44 +759,45 @@ void DriverStation::setGameData (const QString& data)
  *
  * \param protocol the new communication protocol to use
  */
-void DriverStation::loadProtocol (const DS_Protocol& protocol)
+void DriverStation::loadProtocol(const DS_Protocol &protocol)
 {
-    DS_ConfigureProtocol (&protocol);
+   DS_ConfigureProtocol(&protocol);
 
-    setCustomFMSAddress (customFMSAddress());
-    setCustomRadioAddress (customRadioAddress());
-    setCustomRobotAddress (customRobotAddress());
+   setCustomFMSAddress(customFMSAddress());
+   setCustomRadioAddress(customRadioAddress());
+   setCustomRobotAddress(customRobotAddress());
 
-    emit protocolChanged();
-    emit statusChanged (QString::fromUtf8 (DS_GetStatusString()));
+   emit protocolChanged();
+   emit statusChanged(QString::fromUtf8(DS_GetStatusString()));
 }
 
 /**
  * Changes the control \a mode of the robot
  */
-void DriverStation::setControlMode (const Control mode)
+void DriverStation::setControlMode(const Control mode)
 {
-    LOG << "Setting control mode to" << mode;
+   LOG << "Setting control mode to" << mode;
 
-    if (isEnabled() && mode != controlMode())
-        setEnabled (false);
-    if (mode != controlMode())
-        resetElapsedTime();
+   if (isEnabled() && mode != controlMode())
+      setEnabled(false);
+   if (mode != controlMode())
+      resetElapsedTime();
 
-    switch (mode) {
-    case ControlTest:
-        DS_SetControlMode (DS_CONTROL_TEST);
-        break;
-    case ControlAutonomous:
-        DS_SetControlMode (DS_CONTROL_AUTONOMOUS);
-        break;
-    case ControlTeleoperated:
-        DS_SetControlMode (DS_CONTROL_TELEOPERATED);
-        break;
-    default:
-        DS_SetControlMode (DS_CONTROL_TELEOPERATED);
-        break;
-    }
+   switch (mode)
+   {
+      case ControlTest:
+         DS_SetControlMode(DS_CONTROL_TEST);
+         break;
+      case ControlAutonomous:
+         DS_SetControlMode(DS_CONTROL_AUTONOMOUS);
+         break;
+      case ControlTeleoperated:
+         DS_SetControlMode(DS_CONTROL_TELEOPERATED);
+         break;
+      default:
+         DS_SetControlMode(DS_CONTROL_TELEOPERATED);
+         break;
+   }
 }
 
 /**
@@ -796,24 +806,28 @@ void DriverStation::setControlMode (const Control mode)
  * \note You can use this function directly with the index values given by the
  *       \c protocols() function
  */
-void DriverStation::setProtocol (const Protocol protocol)
+void DriverStation::setProtocol(const Protocol protocol)
 {
-    switch ((Protocol) protocol) {
-    case Protocol2014:
-        loadProtocol (DS_GetProtocolFRC_2014());
-        LOG << "Switched to FRC 2014 Protocol";
-        break;
-    case Protocol2015:
-        loadProtocol (DS_GetProtocolFRC_2015());
-        LOG << "Switched to FRC 2015 Protocol";
-        break;
-    case Protocol2016:
-        loadProtocol (DS_GetProtocolFRC_2016());
-        LOG << "Switched to FRC 2016 Protocol";
-        break;
-    default:
-        break;
-    }
+   switch ((Protocol)protocol)
+   {
+      case Protocol2014:
+         loadProtocol(DS_GetProtocolFRC_2014());
+         LOG << "Switched to FRC 2014 Protocol";
+         break;
+      case Protocol2015:
+         loadProtocol(DS_GetProtocolFRC_2015());
+         LOG << "Switched to FRC 2015 Protocol";
+         break;
+      case Protocol2016:
+         loadProtocol(DS_GetProtocolFRC_2016());
+         LOG << "Switched to FRC 2016 Protocol";
+         break;
+      case Protocol2020:
+         loadProtocol(DS_GetProtocolFRC_2020());
+         LOG << "Switched to FRC 2020 Protocol";
+      default:
+         break;
+   }
 }
 
 /**
@@ -830,36 +844,37 @@ void DriverStation::setProtocol (const Protocol protocol)
  * \note You can use this function directly with the output given by the \c
  *       \c stations() function
  */
-void DriverStation::setTeamStation (const Station station)
+void DriverStation::setTeamStation(const Station station)
 {
-    switch (station) {
-    case StationRed1:
-        setTeamPosition (Position1);
-        setTeamAlliance (AllianceRed);
-        break;
-    case StationRed2:
-        setTeamPosition (Position2);
-        setTeamAlliance (AllianceRed);
-        break;
-    case StationRed3:
-        setTeamPosition (Position3);
-        setTeamAlliance (AllianceRed);
-        break;
-    case StationBlue1:
-        setTeamPosition (Position1);
-        setTeamAlliance (AllianceBlue);
-        break;
-    case StationBlue2:
-        setTeamPosition (Position2);
-        setTeamAlliance (AllianceBlue);
-        break;
-    case StationBlue3:
-        setTeamPosition (Position3);
-        setTeamAlliance (AllianceBlue);
-        break;
-    default:
-        break;
-    }
+   switch (station)
+   {
+      case StationRed1:
+         setTeamPosition(Position1);
+         setTeamAlliance(AllianceRed);
+         break;
+      case StationRed2:
+         setTeamPosition(Position2);
+         setTeamAlliance(AllianceRed);
+         break;
+      case StationRed3:
+         setTeamPosition(Position3);
+         setTeamAlliance(AllianceRed);
+         break;
+      case StationBlue1:
+         setTeamPosition(Position1);
+         setTeamAlliance(AllianceBlue);
+         break;
+      case StationBlue2:
+         setTeamPosition(Position2);
+         setTeamAlliance(AllianceBlue);
+         break;
+      case StationBlue3:
+         setTeamPosition(Position3);
+         setTeamAlliance(AllianceBlue);
+         break;
+      default:
+         break;
+   }
 }
 
 /**
@@ -867,18 +882,19 @@ void DriverStation::setTeamStation (const Station station)
  *    - \c kAllianceRed (0)
  *    - \c kAllianceBlue (1)
  */
-void DriverStation::setTeamAlliance (const Alliance alliance)
+void DriverStation::setTeamAlliance(const Alliance alliance)
 {
-    LOG << "Setting alliance to" << alliance;
+   LOG << "Setting alliance to" << alliance;
 
-    switch ((Alliance) alliance) {
-    case AllianceRed:
-        DS_SetAlliance (DS_ALLIANCE_RED);
-        break;
-    case AllianceBlue:
-        DS_SetAlliance (DS_ALLIANCE_BLUE);
-        break;
-    }
+   switch ((Alliance)alliance)
+   {
+      case AllianceRed:
+         DS_SetAlliance(DS_ALLIANCE_RED);
+         break;
+      case AllianceBlue:
+         DS_SetAlliance(DS_ALLIANCE_BLUE);
+         break;
+   }
 }
 
 /**
@@ -887,71 +903,72 @@ void DriverStation::setTeamAlliance (const Alliance alliance)
  *    - \c kPosition2 (1)
  *    - \c kPosition3 (2)
  */
-void DriverStation::setTeamPosition (const Position position)
+void DriverStation::setTeamPosition(const Position position)
 {
-    LOG << "Setting position to" << position;
+   LOG << "Setting position to" << position;
 
-    switch ((Position) position) {
-    case Position1:
-        DS_SetPosition (DS_POSITION_1);
-        break;
-    case Position2:
-        DS_SetPosition (DS_POSITION_2);
-        break;
-    case Position3:
-        DS_SetPosition (DS_POSITION_3);
-        break;
-    }
+   switch ((Position)position)
+   {
+      case Position1:
+         DS_SetPosition(DS_POSITION_1);
+         break;
+      case Position2:
+         DS_SetPosition(DS_POSITION_2);
+         break;
+      case Position3:
+         DS_SetPosition(DS_POSITION_3);
+         break;
+   }
 }
 
 /**
  * Changes the emergency stopped state of the robot
  */
-void DriverStation::setEmergencyStopped (const bool stopped)
+void DriverStation::setEmergencyStopped(const bool stopped)
 {
-    LOG << "Setting ESTOP to" << stopped;
-    DS_SetEmergencyStopped (stopped);
+   LOG << "Setting ESTOP to" << stopped;
+   DS_SetEmergencyStopped(stopped);
 }
 
 /**
  * Forces the LibDS to use the given \a address to communicate with the FMS
  */
-void DriverStation::setCustomFMSAddress (const QString& address)
+void DriverStation::setCustomFMSAddress(const QString &address)
 {
-    LOG << "Using new FMS address" << getAddress (address);
-    DS_SetCustomFMSAddress (getAddress (address).toStdString().c_str());
+   LOG << "Using new FMS address" << getAddress(address);
+   DS_SetCustomFMSAddress(getAddress(address).toStdString().c_str());
 
-    emit fmsAddressChanged();
+   emit fmsAddressChanged();
 }
 
 /**
  * Forces the LibDS to use the given \a address to communicate with the radio
  */
-void DriverStation::setCustomRadioAddress (const QString& address)
+void DriverStation::setCustomRadioAddress(const QString &address)
 {
-    LOG << "Using new radio address" << getAddress (address);
-    DS_SetCustomRadioAddress (getAddress (address).toStdString().c_str());
+   LOG << "Using new radio address" << getAddress(address);
+   DS_SetCustomRadioAddress(getAddress(address).toStdString().c_str());
 
-    emit radioAddressChanged();
+   emit radioAddressChanged();
 }
 
 /**
  * Forces the LibDS to use the given \a address to communicate with the robot
  */
-void DriverStation::setCustomRobotAddress (const QString& address)
+void DriverStation::setCustomRobotAddress(const QString &address)
 {
-    LOG << "Using new robot address" << getAddress (address);
-    DS_SetCustomRobotAddress (getAddress (address).toStdString().c_str());
-    emit robotAddressChanged();
+   LOG << "Using new robot address" << getAddress(address);
+   DS_SetCustomRobotAddress(getAddress(address).toStdString().c_str());
+   emit robotAddressChanged();
 }
 
 /**
  * Broadcasts/sends the given \a message to the NetConsole network
  */
-void DriverStation::sendNetConsoleMessage (const QString& message)
+void DriverStation::sendNetConsoleMessage(const QString &message)
 {
-    if (!message.isEmpty())
-        DS_SendNetConsoleMessage (message.toStdString().c_str());
+   if (!message.isEmpty())
+      DS_SendNetConsoleMessage(message.toStdString().c_str());
 }
 
 /**
@@ -961,16 +978,13 @@ void DriverStation::sendNetConsoleMessage (const QString& message)
  * \param hats the number of hats/povs of the new joystick
  * \param buttons the number of buttons of the new joystick
  */
-void DriverStation::addJoystick (int axes, int hats, int buttons)
+void DriverStation::addJoystick(int axes, int hats, int buttons)
 {
-    DS_JoysticksAdd (axes, hats, buttons);
+   DS_JoysticksAdd(axes, hats, buttons);
 
-    LOG << "Registered new joystick with"
-        << axes << "axes,"
-        << hats << "hats and"
-        << buttons << "buttons";
+   LOG << "Registered new joystick with" << axes << "axes," << hats << "hats and" << buttons << "buttons";
 
-    emit joystickCountChanged();
+   emit joystickCountChanged();
 }
 
 /**
@@ -980,9 +994,9 @@ void DriverStation::addJoystick (int axes, int hats, int buttons)
  * \param hat the ID of the hat to update (e.g. 0 for primary hat)
  * \param angle the new angle to apply to the hat
  */
-void DriverStation::setJoystickHat (int joystick, int hat, int angle)
+void DriverStation::setJoystickHat(int joystick, int hat, int angle)
 {
-    DS_SetJoystickHat (joystick, hat, angle);
+   DS_SetJoystickHat(joystick, hat, angle);
 }
 
 /**
@@ -994,9 +1008,9 @@ void DriverStation::setJoystickHat (int joystick, int hat, int angle)
  *
  * \note the \a value must have a range from \c -1 to \c 1
  */
-void DriverStation::setJoystickAxis (int joystick, int axis, float value)
+void DriverStation::setJoystickAxis(int joystick, int axis, float value)
 {
-    DS_SetJoystickAxis (joystick, axis, value);
+   DS_SetJoystickAxis(joystick, axis, value);
 }
 
 /**
@@ -1006,9 +1020,9 @@ void DriverStation::setJoystickAxis (int joystick, int axis, float value)
  * \param button the ID of the button to update (e.g. 0 for A in an Xbox stick)
  * \param pressed the new pressed state of the button
  */
-void DriverStation::setJoystickButton (int joystick, int button, bool pressed)
+void DriverStation::setJoystickButton(int joystick, int button, bool pressed)
 {
-    DS_SetJoystickButton (joystick, button, pressed);
+   DS_SetJoystickButton(joystick, button, pressed);
 }
 
 /**
@@ -1017,11 +1031,12 @@ void DriverStation::setJoystickButton (int joystick, int button, bool pressed)
  */
 void DriverStation::quitDS()
 {
-    if (DS_Initialized()) {
-        LOG << "Stopping DS Engine...";
-        DS_Close();
-        LOG << "DS Engine Stopped";
-    }
+   if (DS_Initialized())
+   {
+      LOG << "Stopping DS Engine...";
+      DS_Close();
+      LOG << "DS Engine Stopped";
+   }
 }
 
 /**
@@ -1030,65 +1045,67 @@ void DriverStation::quitDS()
  */
 void DriverStation::processEvents()
 {
-    DS_Event event;
-    while (DS_PollEvent (&event)) {
-        switch (event.type) {
-        case DS_FMS_COMMS_CHANGED:
+   DS_Event event;
+   while (DS_PollEvent(&event))
+   {
+      switch (event.type)
+      {
+         case DS_FMS_COMMS_CHANGED:
             emit fmsAddressChanged();
-            emit fmsCommunicationsChanged (event.fms.connected);
+            emit fmsCommunicationsChanged(event.fms.connected);
             break;
-        case DS_RADIO_COMMS_CHANGED:
+         case DS_RADIO_COMMS_CHANGED:
             emit radioAddressChanged();
-            emit radioCommunicationsChanged (event.radio.connected);
+            emit radioCommunicationsChanged(event.radio.connected);
             break;
-        case DS_NETCONSOLE_NEW_MESSAGE:
-            emit newMessage (QString::fromUtf8 (event.netconsole.message));
+         case DS_NETCONSOLE_NEW_MESSAGE:
+            emit newMessage(QString::fromUtf8(event.netconsole.message));
             break;
-        case DS_ROBOT_ENABLED_CHANGED:
-            emit enabledChanged (event.robot.enabled);
+         case DS_ROBOT_ENABLED_CHANGED:
+            emit enabledChanged(event.robot.enabled);
             break;
-        case DS_ROBOT_MODE_CHANGED:
-            emit controlModeChanged (controlMode());
+         case DS_ROBOT_MODE_CHANGED:
+            emit controlModeChanged(controlMode());
             break;
-        case DS_ROBOT_COMMS_CHANGED:
+         case DS_ROBOT_COMMS_CHANGED:
             emit robotAddressChanged();
-            emit robotCommunicationsChanged (event.robot.connected);
+            emit robotCommunicationsChanged(event.robot.connected);
             break;
-        case DS_ROBOT_CODE_CHANGED:
-            emit robotCodeChanged (event.robot.code);
+         case DS_ROBOT_CODE_CHANGED:
+            emit robotCodeChanged(event.robot.code);
             break;
-        case DS_ROBOT_VOLTAGE_CHANGED:
-            emit voltageChanged (event.robot.voltage);
+         case DS_ROBOT_VOLTAGE_CHANGED:
+            emit voltageChanged(event.robot.voltage);
             break;
-        case DS_ROBOT_CAN_UTIL_CHANGED:
-            emit canUsageChanged (event.robot.can_util);
+         case DS_ROBOT_CAN_UTIL_CHANGED:
+            emit canUsageChanged(event.robot.can_util);
             break;
-        case DS_ROBOT_CPU_INFO_CHANGED:
-            emit cpuUsageChanged (event.robot.cpu_usage);
+         case DS_ROBOT_CPU_INFO_CHANGED:
+            emit cpuUsageChanged(event.robot.cpu_usage);
             break;
-        case DS_ROBOT_RAM_INFO_CHANGED:
-            emit ramUsageChanged (event.robot.ram_usage);
+         case DS_ROBOT_RAM_INFO_CHANGED:
+            emit ramUsageChanged(event.robot.ram_usage);
             break;
-        case DS_ROBOT_DISK_INFO_CHANGED:
-            emit diskUsageChanged (event.robot.disk_usage);
+         case DS_ROBOT_DISK_INFO_CHANGED:
+            emit diskUsageChanged(event.robot.disk_usage);
             break;
-        case DS_ROBOT_STATION_CHANGED:
+         case DS_ROBOT_STATION_CHANGED:
             emit stationChanged();
-            emit allianceChanged (teamAlliance());
-            emit positionChanged (teamPosition());
+            emit allianceChanged(teamAlliance());
+            emit positionChanged(teamPosition());
             break;
-        case DS_ROBOT_ESTOP_CHANGED:
-            emit emergencyStoppedChanged (event.robot.estopped);
+         case DS_ROBOT_ESTOP_CHANGED:
+            emit emergencyStoppedChanged(event.robot.estopped);
             break;
-        case DS_STATUS_STRING_CHANGED:
-            emit statusChanged (QString::fromUtf8 (DS_GetStatusString()));
+         case DS_STATUS_STRING_CHANGED:
+            emit statusChanged(QString::fromUtf8(DS_GetStatusString()));
             break;
-        default:
+         default:
             break;
-        }
-    }
+      }
+   }
 
-    QTimer::singleShot (5, Qt::CoarseTimer, this, SLOT (processEvents()));
+   QTimer::singleShot(5, Qt::CoarseTimer, this, SLOT(processEvents()));
 }
 
 /**
@@ -1096,9 +1113,9 @@ void DriverStation::processEvents()
  */
 void DriverStation::resetElapsedTime()
 {
-    m_time.restart();
-    m_elapsedTime.clear();
-    emit elapsedTimeChanged (elapsedTime());
+   m_time.restart();
+   m_elapsedTime.clear();
+   emit elapsedTimeChanged(elapsedTime());
 }
 
 /**
@@ -1107,42 +1124,41 @@ void DriverStation::resetElapsedTime()
  */
 void DriverStation::updateElapsedTime()
 {
-    if (isEnabled()) {
-        int milliseconds = m_time.elapsed();
-        int seconds = (milliseconds / 1000);
-        int minutes = (seconds / 60) % 60;
+   if (isEnabled())
+   {
+      int milliseconds = m_time.elapsed();
+      int seconds = (milliseconds / 1000);
+      int minutes = (seconds / 60) % 60;
 
-        seconds = seconds % 60;
-        milliseconds = milliseconds % 1000;
+      seconds = seconds % 60;
+      milliseconds = milliseconds % 1000;
 
-        m_elapsedTime = QString ("%1:%2.%3")
-                        .arg (minutes, 2, 10, QLatin1Char ('0'))
-                        .arg (seconds, 2, 10, QLatin1Char ('0'))
-                        .arg (QString::number (milliseconds).at (0));
+      m_elapsedTime = QString("%1:%2.%3")
+                          .arg(minutes, 2, 10, QLatin1Char('0'))
+                          .arg(seconds, 2, 10, QLatin1Char('0'))
+                          .arg(QString::number(milliseconds).at(0));
 
-        emit elapsedTimeChanged (elapsedTime());
-    }
+      emit elapsedTimeChanged(elapsedTime());
+   }
 
-    QTimer::singleShot (100, Qt::PreciseTimer,
-                        this, SLOT (updateElapsedTime()));
+   QTimer::singleShot(100, Qt::PreciseTimer, this, SLOT(updateElapsedTime()));
 }
 
 /**
  * Returns a valid network \a address
  */
-QString DriverStation::getAddress (const QString& address)
+QString DriverStation::getAddress(const QString &address)
 {
-    if (!address.isEmpty()) {
-        if (address.endsWith (".local", Qt::CaseInsensitive) ||
-            address.endsWith (".lan",   Qt::CaseInsensitive) ||
-            address.endsWith (".com",   Qt::CaseInsensitive) ||
-            address.endsWith (".net",   Qt::CaseInsensitive))
-            return address;
+   if (!address.isEmpty())
+   {
+      if (address.endsWith(".local", Qt::CaseInsensitive) || address.endsWith(".lan", Qt::CaseInsensitive)
+          || address.endsWith(".com", Qt::CaseInsensitive) || address.endsWith(".net", Qt::CaseInsensitive))
+         return address;
 
-        QHostAddress ip (address);
-        if (!ip.isNull())
-            return ip.toString();
-    }
+      QHostAddress ip(address);
+      if (!ip.isNull())
+         return ip.toString();
+   }
 
-    return "";
+   return "";
 }

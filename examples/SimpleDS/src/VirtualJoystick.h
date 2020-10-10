@@ -27,19 +27,19 @@
 
 class VirtualJoystick : public QObject
 {
-    Q_OBJECT
+   Q_OBJECT
 
 public:
-    explicit VirtualJoystick();
+   explicit VirtualJoystick();
 
 private slots:
-    void readAxes (int key, bool pressed);
-    void readPOVs (int key, bool pressed);
-    void readButtons (int key, bool pressed);
-    void processKeyEvent (QKeyEvent* event, bool pressed);
+   void readAxes(int key, bool pressed);
+   void readPOVs(int key, bool pressed);
+   void readButtons(int key, bool pressed);
+   void processKeyEvent(QKeyEvent *event, bool pressed);
 
 protected:
-    bool eventFilter (QObject* object, QEvent* event);
+   bool eventFilter(QObject *object, QEvent *event);
 };
 
 #endif

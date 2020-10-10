@@ -29,24 +29,25 @@
 #include <string.h>
 
 #ifdef _WIN32
-    #include <windows.h>
-    #ifndef __MINGW32__
-        #pragma comment (lib, "user32.lib")
-    #endif
+#   include <windows.h>
+#   ifndef __MINGW32__
+#      pragma comment(lib, "user32.lib")
+#   endif
 #endif
 
 /**
  * Returns a single byte value that represents the ratio between the
  * given \a value and the maximum number specified.
  */
-uint8_t DS_FloatToByte (const float value, const float max)
+uint8_t DS_FloatToByte(const float value, const float max)
 {
-    if (value != 0 && max != 0 && value <= max) {
-        int percent = (int) ((value / max) * (0xFF / 2));
-        return (uint8_t) (percent & 0xFF);
-    }
+   if (value != 0 && max != 0 && value <= max)
+   {
+      int percent = (int)((value / max) * (0xFF / 2));
+      return (uint8_t)(percent & 0xFF);
+   }
 
-    return 0;
+   return 0;
 }
 
 /**
@@ -65,11 +66,11 @@ uint8_t DS_FloatToByte (const float value, const float max)
  * \param team the team number, used in second and third octets
  * \param host the host byte (or the last octet) of the IP
  */
-DS_String DS_GetStaticIP (const int net, const int team, const int host)
+DS_String DS_GetStaticIP(const int net, const int team, const int host)
 {
-    int te = team / 100;
-    int am = team - (te * 100);
-    return DS_StrFormat ("%d.%d.%d.%d", net, te, am, host);
+   int te = team / 100;
+   int am = team - (te * 100);
+   return DS_StrFormat("%d.%d.%d.%d", net, te, am, host);
 }
 
 /**
@@ -78,73 +79,73 @@ DS_String DS_GetStaticIP (const int net, const int team, const int host)
  *
  * Otherwise, this function shall print to \a stderr
  */
-void DS_ShowMessageBox (const DS_String* caption,
-                        const DS_String* message,
-                        const DS_IconType icon)
+void DS_ShowMessageBox(const DS_String *caption, const DS_String *message, const DS_IconType icon)
 {
-    assert (caption);
-    assert (message);
+   assert(caption);
+   assert(message);
 
-    /* Get native strings */
-    char* ccap = DS_StrToChar (caption);
-    char* cmsg = DS_StrToChar (message);
+   /* Get native strings */
+   char *ccap = DS_StrToChar(caption);
+   char *cmsg = DS_StrToChar(message);
 
 #ifdef _WIN32
-    /* Convert strings to wstrings */
-    wchar_t* wcap = calloc (caption->len + 1, sizeof (wchar_t));
-    wchar_t* wmsg = calloc (message->len + 1, sizeof (wchar_t));
-    mbstowcs_s (NULL, wcap, caption->len + 1, ccap, caption->len);
-    mbstowcs_s (NULL, wmsg, message->len + 1, cmsg, message->len);
+   /* Convert strings to wstrings */
+   wchar_t *wcap = calloc(caption->len + 1, sizeof(wchar_t));
+   wchar_t *wmsg = calloc(message->len + 1, sizeof(wchar_t));
+   mbstowcs_s(NULL, wcap, caption->len + 1, ccap, caption->len);
+   mbstowcs_s(NULL, wmsg, message->len + 1, cmsg, message->len);
 
-    /* Get icon type */
-    UINT ico;
-    switch (icon) {
-    case DS_ICON_ERROR:
-        ico = MB_ICONERROR;
-        break;
-    case DS_ICON_INFORMATION:
-        ico = MB_ICONINFORMATION;
-        break;
-    case DS_ICON_WARNING:
-        ico = MB_ICONWARNING;
-        break;
-    default:
-        ico = MB_ICONINFORMATION;
-        break;
-    }
+   /* Get icon type */
+   UINT ico;
+   switch (icon)
+   {
+      case DS_ICON_ERROR:
+         ico = MB_ICONERROR;
+         break;
+      case DS_ICON_INFORMATION:
+         ico = MB_ICONINFORMATION;
+         break;
+      case DS_ICON_WARNING:
+         ico = MB_ICONWARNING;
+         break;
+      default:
+         ico = MB_ICONINFORMATION;
+         break;
+   }
 
-    /* Display message box */
-    MessageBox (NULL, wmsg, wcap, ico | MB_OK);
+   /* Display message box */
+   MessageBox(NULL, wmsg, wcap, ico | MB_OK);
 
-    /* Free buffers */
-    DS_FREE (wcap);
-    DS_FREE (wmsg);
+   /* Free buffers */
+   DS_FREE(wcap);
+   DS_FREE(wmsg);
 #else
-    /* Get icon text */
-    char* cico;
-    switch (icon) {
-    case DS_ICON_ERROR:
-        cico = "ERROR";
-        break;
-    case DS_ICON_INFORMATION:
-        cico = "INFORMATION";
-        break;
-    case DS_ICON_WARNING:
-        cico = "WARNING";
-        break;
-    default:
-        cico = "INFORMATION";
-        break;
-    }
+   /* Get icon text */
+   char *cico;
+   switch (icon)
+   {
+      case DS_ICON_ERROR:
+         cico = "ERROR";
+         break;
+      case DS_ICON_INFORMATION:
+         cico = "INFORMATION";
+         break;
+      case DS_ICON_WARNING:
+         cico = "WARNING";
+         break;
+      default:
+         cico = "INFORMATION";
+         break;
+   }
 
-    /* Log message to stderr */
-    fprintf (stderr, "%s: %s\n", cico, cmsg);
+   /* Log message to stderr */
+   fprintf(stderr, "%s: %s\n", cico, cmsg);
 
-    /* Free icon text memory */
-    DS_FREE (cico);
+   /* Free icon text memory */
+   DS_FREE(cico);
 #endif
 
-    /* Free resources */
-    DS_FREE (ccap);
-    DS_FREE (cmsg);
+   /* Free resources */
+   DS_FREE(ccap);
+   DS_FREE(cmsg);
 }

@@ -31,18 +31,19 @@ static int init = 0;
  * function before your application begins interacting with the different
  * modules of the LibDS.
  */
-void DS_Init (void)
+void DS_Init(void)
 {
-    if (!DS_Initialized()) {
-        init = 1;
+   if (!DS_Initialized())
+   {
+      init = 1;
 
-        Timers_Init();
-        Client_Init();
-        Events_Init();
-        Sockets_Init();
-        Joysticks_Init();
-        Protocols_Init();
-    }
+      Timers_Init();
+      Client_Init();
+      Events_Init();
+      Sockets_Init();
+      Joysticks_Init();
+      Protocols_Init();
+   }
 }
 
 /**
@@ -51,27 +52,28 @@ void DS_Init (void)
  * problems (regardless if you are using the offical DS or not), memory
  * problems and increased CPU usage (due to threads managed by the LibDS)
  */
-void DS_Close (void)
+void DS_Close(void)
 {
-    if (DS_Initialized()) {
-        init = 0;
+   if (DS_Initialized())
+   {
+      init = 0;
 
-        Timers_Close();
-        Sockets_Close();
-        Protocols_Close();
-        Joysticks_Close();
+      Timers_Close();
+      Sockets_Close();
+      Protocols_Close();
+      Joysticks_Close();
 
-        Events_Close();
-        Client_Close();
-    }
+      Events_Close();
+      Client_Close();
+   }
 }
 
 /**
  * Returns \c 1 if the DS is initialized, \c 0 if not
  */
-int DS_Initialized (void)
+int DS_Initialized(void)
 {
-    return init;
+   return init;
 }
 
 /**
@@ -80,23 +82,23 @@ int DS_Initialized (void)
  * importing LibDS as a library (e.g. a DLL) and using non-corresponding
  * header files
  */
-char* DS_GetVersion (void)
+char *DS_GetVersion(void)
 {
-    return "2.2.1";
+   return "2.2.1";
 }
 
 /**
  * Returns the date when the library was compiled
  */
-char* DS_GetBuildDate (void)
+char *DS_GetBuildDate(void)
 {
-    return __DATE__;
+   return __DATE__;
 }
 
 /**
  * Returns the time when the library was compiled
  */
-char* DS_GetBuildTime (void)
+char *DS_GetBuildTime(void)
 {
-    return __TIME__;
+   return __TIME__;
 }

@@ -26,60 +26,59 @@
  */
 
 #ifndef _SDL_touch_h
-#define _SDL_touch_h
+#   define _SDL_touch_h
 
-#include "SDL_stdinc.h"
-#include "SDL_error.h"
-#include "SDL_video.h"
+#   include "SDL_stdinc.h"
+#   include "SDL_error.h"
+#   include "SDL_video.h"
 
-#include "begin_code.h"
+#   include "begin_code.h"
 /* Set up for C function definitions, even when using C++ */
-#ifdef __cplusplus
+#   ifdef __cplusplus
 extern "C" {
-#endif
+#   endif
 
 typedef Sint64 SDL_TouchID;
 typedef Sint64 SDL_FingerID;
 
-typedef struct SDL_Finger {
-    SDL_FingerID id;
-    float x;
-    float y;
-    float pressure;
+typedef struct SDL_Finger
+{
+   SDL_FingerID id;
+   float x;
+   float y;
+   float pressure;
 } SDL_Finger;
 
 /* Used as the device ID for mouse events simulated with touch input */
-#define SDL_TOUCH_MOUSEID ((Uint32)-1)
-
+#   define SDL_TOUCH_MOUSEID ((Uint32)-1)
 
 /* Function prototypes */
 
 /**
  *  \brief Get the number of registered touch devices.
  */
-extern DECLSPEC int SDLCALL SDL_GetNumTouchDevices (void);
+extern DECLSPEC int SDLCALL SDL_GetNumTouchDevices(void);
 
 /**
  *  \brief Get the touch ID with the given index, or 0 if the index is invalid.
  */
-extern DECLSPEC SDL_TouchID SDLCALL SDL_GetTouchDevice (int index);
+extern DECLSPEC SDL_TouchID SDLCALL SDL_GetTouchDevice(int index);
 
 /**
  *  \brief Get the number of active fingers for a given touch device.
  */
-extern DECLSPEC int SDLCALL SDL_GetNumTouchFingers (SDL_TouchID touchID);
+extern DECLSPEC int SDLCALL SDL_GetNumTouchFingers(SDL_TouchID touchID);
 
 /**
  *  \brief Get the finger object of the given touch, with the given index.
  */
-extern DECLSPEC SDL_Finger* SDLCALL SDL_GetTouchFinger (SDL_TouchID touchID,
-        int index);
+extern DECLSPEC SDL_Finger *SDLCALL SDL_GetTouchFinger(SDL_TouchID touchID, int index);
 
 /* Ends C function definitions when using C++ */
-#ifdef __cplusplus
+#   ifdef __cplusplus
 }
-#endif
-#include "close_code.h"
+#   endif
+#   include "close_code.h"
 
 #endif /* _SDL_touch_h */
 

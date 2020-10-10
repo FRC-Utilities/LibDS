@@ -38,32 +38,32 @@
 */
 
 #ifndef _SDL_test_random_h
-#define _SDL_test_random_h
+#   define _SDL_test_random_h
 
-#include "begin_code.h"
+#   include "begin_code.h"
 /* Set up for C function definitions, even when using C++ */
-#ifdef __cplusplus
+#   ifdef __cplusplus
 extern "C" {
-#endif
+#   endif
 
 /* --- Definitions */
 
 /*
  * Macros that return a random number in a specific format.
  */
-#define SDLTest_RandomInt(c)        ((int)SDLTest_Random(c))
+#   define SDLTest_RandomInt(c) ((int)SDLTest_Random(c))
 
 /*
  * Context structure for the random number generator state.
  */
-typedef struct {
-    unsigned int a;
-    unsigned int x;
-    unsigned int c;
-    unsigned int ah;
-    unsigned int al;
+typedef struct
+{
+   unsigned int a;
+   unsigned int x;
+   unsigned int c;
+   unsigned int ah;
+   unsigned int al;
 } SDLTest_RandomContext;
-
 
 /* --- Function prototypes */
 
@@ -78,8 +78,7 @@ typedef struct {
  *  \param ci         integer that defines the random sequence
  *
  */
-void SDLTest_RandomInit (SDLTest_RandomContext* rndContext, unsigned int xi,
-                         unsigned int ci);
+void SDLTest_RandomInit(SDLTest_RandomContext *rndContext, unsigned int xi, unsigned int ci);
 
 /**
  *  \brief Initialize random number generator based on current system time.
@@ -87,8 +86,7 @@ void SDLTest_RandomInit (SDLTest_RandomContext* rndContext, unsigned int xi,
  *  \param rndContext     pointer to context structure
  *
  */
-void SDLTest_RandomInitTime (SDLTest_RandomContext* rndContext);
-
+void SDLTest_RandomInitTime(SDLTest_RandomContext *rndContext);
 
 /**
  *  \brief Initialize random number generator based on current system time.
@@ -101,14 +99,13 @@ void SDLTest_RandomInitTime (SDLTest_RandomContext* rndContext);
  *  \returns A random number (32bit unsigned integer)
  *
  */
-unsigned int SDLTest_Random (SDLTest_RandomContext* rndContext);
-
+unsigned int SDLTest_Random(SDLTest_RandomContext *rndContext);
 
 /* Ends C function definitions when using C++ */
-#ifdef __cplusplus
+#   ifdef __cplusplus
 }
-#endif
-#include "close_code.h"
+#   endif
+#   include "close_code.h"
 
 #endif /* _SDL_test_random_h */
 

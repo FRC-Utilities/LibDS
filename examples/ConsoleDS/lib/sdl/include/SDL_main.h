@@ -20,9 +20,9 @@
 */
 
 #ifndef _SDL_main_h
-#define _SDL_main_h
+#   define _SDL_main_h
 
-#include "SDL_stdinc.h"
+#   include "SDL_stdinc.h"
 
 /**
  *  \file SDL_main.h
@@ -30,39 +30,39 @@
  *  Redefine main() on some platforms so that it is called by SDL.
  */
 
-#ifndef SDL_MAIN_HANDLED
-    #if defined(__WIN32__)
-        /* On Windows SDL provides WinMain(), which parses the command line and passes
-        the arguments to your main function.
+#   ifndef SDL_MAIN_HANDLED
+#      if defined(__WIN32__)
+/* On Windows SDL provides WinMain(), which parses the command line and passes
+the arguments to your main function.
 
-        If you provide your own WinMain(), you may define SDL_MAIN_HANDLED
-        */
-        #define SDL_MAIN_AVAILABLE
+If you provide your own WinMain(), you may define SDL_MAIN_HANDLED
+*/
+#         define SDL_MAIN_AVAILABLE
 
-    #elif defined(__IPHONEOS__)
-        /* On iOS SDL provides a main function that creates an application delegate
-        and starts the iOS application run loop.
+#      elif defined(__IPHONEOS__)
+/* On iOS SDL provides a main function that creates an application delegate
+and starts the iOS application run loop.
 
-        See src/video/uikit/SDL_uikitappdelegate.m for more details.
-        */
-        #define SDL_MAIN_NEEDED
+See src/video/uikit/SDL_uikitappdelegate.m for more details.
+*/
+#         define SDL_MAIN_NEEDED
 
-    #elif defined(__ANDROID__)
-        /* On Android SDL provides a Java class in SDLActivity.java that is the
-        main activity entry point.
+#      elif defined(__ANDROID__)
+/* On Android SDL provides a Java class in SDLActivity.java that is the
+main activity entry point.
 
-        See README-android.txt for more details on extending that class.
-        */
-        #define SDL_MAIN_NEEDED
+See README-android.txt for more details on extending that class.
+*/
+#         define SDL_MAIN_NEEDED
 
-    #endif
-#endif /* SDL_MAIN_HANDLED */
+#      endif
+#   endif /* SDL_MAIN_HANDLED */
 
-#ifdef __cplusplus
-    #define C_LINKAGE   "C"
-#else
-    #define C_LINKAGE
-#endif /* __cplusplus */
+#   ifdef __cplusplus
+#      define C_LINKAGE "C"
+#   else
+#      define C_LINKAGE
+#   endif /* __cplusplus */
 
 /**
  *  \file SDL_main.h
@@ -79,20 +79,19 @@
  *  \endcode
  */
 
-#if defined(SDL_MAIN_NEEDED) || defined(SDL_MAIN_AVAILABLE)
-    #define main    SDL_main
-#endif
+#   if defined(SDL_MAIN_NEEDED) || defined(SDL_MAIN_AVAILABLE)
+#      define main SDL_main
+#   endif
 
 /**
  *  The prototype for the application's main() function
  */
-extern C_LINKAGE int SDL_main (int argc, char* argv[]);
+extern C_LINKAGE int SDL_main(int argc, char *argv[]);
 
-
-#include "begin_code.h"
-#ifdef __cplusplus
+#   include "begin_code.h"
+#   ifdef __cplusplus
 extern "C" {
-#endif
+#   endif
 
 /**
  *  This is called by the real SDL main function to let the rest of the
@@ -101,24 +100,22 @@ extern "C" {
  *  Calling this yourself without knowing what you're doing can cause
  *  crashes and hard to diagnose problems with your application.
  */
-extern DECLSPEC void SDLCALL SDL_SetMainReady (void);
+extern DECLSPEC void SDLCALL SDL_SetMainReady(void);
 
-#ifdef __WIN32__
+#   ifdef __WIN32__
 
 /**
  *  This can be called to set the application class at startup
  */
-extern DECLSPEC int SDLCALL SDL_RegisterApp (char* name, Uint32 style,
-                                             void* hInst);
-extern DECLSPEC void SDLCALL SDL_UnregisterApp (void);
+extern DECLSPEC int SDLCALL SDL_RegisterApp(char *name, Uint32 style, void *hInst);
+extern DECLSPEC void SDLCALL SDL_UnregisterApp(void);
 
-#endif /* __WIN32__ */
+#   endif /* __WIN32__ */
 
-
-#ifdef __cplusplus
+#   ifdef __cplusplus
 }
-#endif
-#include "close_code.h"
+#   endif
+#   include "close_code.h"
 
 #endif /* _SDL_main_h */
 

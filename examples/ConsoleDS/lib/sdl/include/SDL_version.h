@@ -26,15 +26,15 @@
  */
 
 #ifndef _SDL_version_h
-#define _SDL_version_h
+#   define _SDL_version_h
 
-#include "SDL_stdinc.h"
+#   include "SDL_stdinc.h"
 
-#include "begin_code.h"
+#   include "begin_code.h"
 /* Set up for C function definitions, even when using C++ */
-#ifdef __cplusplus
+#   ifdef __cplusplus
 extern "C" {
-#endif
+#   endif
 
 /**
  *  \brief Information the version of SDL in use.
@@ -48,17 +48,18 @@ extern "C" {
  *  \sa SDL_VERSION
  *  \sa SDL_GetVersion
  */
-typedef struct SDL_version {
-    Uint8 major;        /**< major version */
-    Uint8 minor;        /**< minor version */
-    Uint8 patch;        /**< update version */
+typedef struct SDL_version
+{
+   Uint8 major; /**< major version */
+   Uint8 minor; /**< minor version */
+   Uint8 patch; /**< update version */
 } SDL_version;
 
 /* Printable format: "%d.%d.%d", MAJOR, MINOR, PATCHLEVEL
-*/
-#define SDL_MAJOR_VERSION   2
-#define SDL_MINOR_VERSION   0
-#define SDL_PATCHLEVEL      2
+ */
+#   define SDL_MAJOR_VERSION 2
+#   define SDL_MINOR_VERSION 0
+#   define SDL_PATCHLEVEL 2
 
 /**
  *  \brief Macro to determine SDL version program was compiled against.
@@ -75,12 +76,12 @@ typedef struct SDL_version {
  *  \sa SDL_version
  *  \sa SDL_GetVersion
  */
-#define SDL_VERSION(x)                          \
-    {                                   \
-        (x)->major = SDL_MAJOR_VERSION;                 \
-        (x)->minor = SDL_MINOR_VERSION;                 \
-        (x)->patch = SDL_PATCHLEVEL;                    \
-    }
+#   define SDL_VERSION(x)                                                                                              \
+      {                                                                                                                \
+         (x)->major = SDL_MAJOR_VERSION;                                                                               \
+         (x)->minor = SDL_MINOR_VERSION;                                                                               \
+         (x)->patch = SDL_PATCHLEVEL;                                                                                  \
+      }
 
 /**
  *  This macro turns the version numbers into a numeric value:
@@ -90,20 +91,17 @@ typedef struct SDL_version {
  *
  *  This assumes that there will never be more than 100 patchlevels.
  */
-#define SDL_VERSIONNUM(X, Y, Z)                     \
-    ((X)*1000 + (Y)*100 + (Z))
+#   define SDL_VERSIONNUM(X, Y, Z) ((X)*1000 + (Y)*100 + (Z))
 
 /**
  *  This is the version number macro for the current SDL version.
  */
-#define SDL_COMPILEDVERSION \
-    SDL_VERSIONNUM(SDL_MAJOR_VERSION, SDL_MINOR_VERSION, SDL_PATCHLEVEL)
+#   define SDL_COMPILEDVERSION SDL_VERSIONNUM(SDL_MAJOR_VERSION, SDL_MINOR_VERSION, SDL_PATCHLEVEL)
 
 /**
  *  This macro will evaluate to true if compiled with SDL at least X.Y.Z.
  */
-#define SDL_VERSION_ATLEAST(X, Y, Z) \
-    (SDL_COMPILEDVERSION >= SDL_VERSIONNUM(X, Y, Z))
+#   define SDL_VERSION_ATLEAST(X, Y, Z) (SDL_COMPILEDVERSION >= SDL_VERSIONNUM(X, Y, Z))
 
 /**
  *  \brief Get the version of SDL that is linked against your program.
@@ -129,7 +127,7 @@ typedef struct SDL_version {
  *
  *  \sa SDL_VERSION
  */
-extern DECLSPEC void SDLCALL SDL_GetVersion (SDL_version* ver);
+extern DECLSPEC void SDLCALL SDL_GetVersion(SDL_version *ver);
 
 /**
  *  \brief Get the code revision of SDL that is linked against your program.
@@ -138,7 +136,7 @@ extern DECLSPEC void SDLCALL SDL_GetVersion (SDL_version* ver);
  *  exact revision of the SDL library in use, and is only useful in comparing
  *  against other revisions. It is NOT an incrementing number.
  */
-extern DECLSPEC const char* SDLCALL SDL_GetRevision (void);
+extern DECLSPEC const char *SDLCALL SDL_GetRevision(void);
 
 /**
  *  \brief Get the revision number of SDL that is linked against your program.
@@ -147,14 +145,13 @@ extern DECLSPEC const char* SDLCALL SDL_GetRevision (void);
  *  library in use. It is an incrementing number based on commits to
  *  hg.libsdl.org.
  */
-extern DECLSPEC int SDLCALL SDL_GetRevisionNumber (void);
-
+extern DECLSPEC int SDLCALL SDL_GetRevisionNumber(void);
 
 /* Ends C function definitions when using C++ */
-#ifdef __cplusplus
+#   ifdef __cplusplus
 }
-#endif
-#include "close_code.h"
+#   endif
+#   include "close_code.h"
 
 #endif /* _SDL_version_h */
 

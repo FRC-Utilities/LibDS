@@ -28,7 +28,8 @@
 
 #include "ui_Window.h"
 
-namespace Ui {
+namespace Ui
+{
 class Window;
 }
 
@@ -36,24 +37,24 @@ class DriverStation;
 
 class Window : public QMainWindow
 {
-    Q_OBJECT
+   Q_OBJECT
 
 public:
-    explicit Window (QWidget* parent = 0);
-    ~Window();
+   explicit Window(QWidget *parent = 0);
+   ~Window();
 
 private slots:
-    void updateAddressPlaceholder();
-    void updateEnabled (int unused);
-    void syncButtons (bool enabled);
-    void setProtocol (int protocol);
-    void setTeamStation (int station);
-    void updateControlMode (int unused);
-    void setVoltage (const float voltage);
+   void updateAddressPlaceholder();
+   void updateEnabled(int unused);
+   void syncButtons(bool enabled);
+   void setProtocol(int protocol);
+   void setTeamStation(int station);
+   void updateControlMode(int unused);
+   void setVoltage(const float voltage);
 
 private:
-    Ui::Window* ui;
-    DriverStation* ds;
+   Ui::Window *ui;
+   DriverStation *ds;
 };
 
 #endif

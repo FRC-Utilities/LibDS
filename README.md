@@ -1,4 +1,4 @@
-# LibDS-Legacy
+# LibDS
 
 The DriverStation library allows you to connect and manage a robot easily by providing an abstraction layer between an application and the network comununications between the robot and the host computer.
 
@@ -85,6 +85,7 @@ The LibDS has built-in support for the following protocols:
 - FRC 2009-2014
 - FRC 2015
 - FRC 2016 (same as 2015, but with different robot address)
+- FRC 2020 (in development)
 
 To load a protocol, use the `DS_ConfigureProtocol()` function. As a final note, you can also implement your own protocols and instruct the LibDS to use it. 
 

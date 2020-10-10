@@ -29,9 +29,9 @@
 #include <assert.h>
 
 #if defined _WIN32
-    #include <windows.h>
+#   include <windows.h>
 #else
-    #include <unistd.h>
+#   include <unistd.h>
 #endif
 
 static DS_Array timers;
@@ -44,23 +44,25 @@ static int running = 0;
  * easy to understand and efficient. Also, this implementation does not need
  * to play with the kernel/OS to compare elapsed times periodically.
  */
-static void* update_timer (void* ptr)
+static void *update_timer(void *ptr)
 {
-    assert (ptr);
-    DS_Timer* timer = (DS_Timer*) ptr;
+   assert(ptr);
+   DS_Timer *timer = (DS_Timer *)ptr;
 
-    while (running == 1) {
-        if (timer->enabled && timer->time > 0 && !timer->expired) {
-            timer->elapsed += timer->precision;
+   while (running == 1)
+   {
+      if (timer->enabled && timer->time > 0 && !timer->expired)
+      {
+         timer->elapsed += timer->precision;
 
-            if (timer->elapsed >= timer->time)
-                timer->expired = 1;
-        }
+         if (timer->elapsed >= timer->time)
+            timer->expired = 1;
+      }
 
-        DS_Sleep (timer->precision);
-    }
+      DS_Sleep(timer->precision);
+   }
 
-    return NULL;
+   return NULL;
 }
 
 /**
@@ -68,19 +70,19 @@ static void* update_timer (void* ptr)
  * used by the library. We need to do this so that we can terminate each timer
  * thread once the module is closed.
  */
-void Timers_Init (void)
+void Timers_Init(void)
 {
-    running = 1;
-    DS_ArrayInit (&timers, 10);
+   running = 1;
+   DS_ArrayInit(&timers, 10);
 }
 
 /**
  * Breaks all the timer loops and stops every thread used by this module
  */
-void Timers_Close (void)
+void Timers_Close(void)
 {
-    running = 0;
-    DS_ArrayFree (&timers);
+   running = 0;
+   DS_ArrayFree(&timers);
 }
 
 /**
@@ -89,48 +91,48 @@ void Timers_Close (void)
  *
  * We use this function to update each timer based on its precision
  */
-void DS_Sleep (const int millisecs)
+void DS_Sleep(const int millisecs)
 {
 #if defined _WIN32
-    Sleep (millisecs);
+   Sleep(millisecs);
 #else
-    usleep (millisecs * 1000);
+   usleep(millisecs * 1000);
 #endif
 }
 
 /**
  * Resets and disables the given \a timer
  */
-void DS_TimerStop (DS_Timer* timer)
+void DS_TimerStop(DS_Timer *timer)
 {
-    assert (timer);
+   assert(timer);
 
-    timer->enabled = 0;
-    timer->expired = 0;
-    timer->elapsed = 0;
+   timer->enabled = 0;
+   timer->expired = 0;
+   timer->elapsed = 0;
 }
 
 /**
  * Resets and enables the given \a timer
  */
-void DS_TimerStart (DS_Timer* timer)
+void DS_TimerStart(DS_Timer *timer)
 {
-    assert (timer);
+   assert(timer);
 
-    timer->enabled = 1;
-    timer->expired = 0;
-    timer->elapsed = 0;
+   timer->enabled = 1;
+   timer->expired = 0;
+   timer->elapsed = 0;
 }
 
 /**
  * Resets the elapsed time and expired state of the given \a timer
  */
-void DS_TimerReset (DS_Timer* timer)
+void DS_TimerReset(DS_Timer *timer)
 {
-    assert (timer);
+   assert(timer);
 
-    timer->expired = 0;
-    timer->elapsed = 0;
+   timer->expired = 0;
+   timer->elapsed = 0;
 }
 
 /**
@@ -144,28 +146,27 @@ void DS_TimerReset (DS_Timer* timer)
  * result in increased CPU usage, this thing does not have morals and will eat
  * the whole cake if you allow it.
  */
-void DS_TimerInit (DS_Timer* timer, const int time, const int precision)
+void DS_TimerInit(DS_Timer *timer, const int time, const int precision)
 {
-    /* Check if timer pointer is valid */
-    assert (timer);
+   /* Check if timer pointer is valid */
+   assert(timer);
 
-    /* Timer has already been initialized, fuck off */
-    if (timer->initialized)
-        return;
+   /* Timer has already been initialized, fuck off */
+   if (timer->initialized)
+      return;
 
-    /* Configure the timer */
-    timer->enabled = 0;
-    timer->expired = 0;
-    timer->elapsed = 0;
-    timer->time = time;
-    timer->initialized = 1;
-    timer->precision = precision;
+   /* Configure the timer */
+   timer->enabled = 0;
+   timer->expired = 0;
+   timer->elapsed = 0;
+   timer->time = time;
+   timer->initialized = 1;
+   timer->precision = precision;
 
-    /* Configure the thread */
-    pthread_t thread;
-    int error = pthread_create (&thread, NULL,
-                                &update_timer, (void*) timer);
+   /* Configure the thread */
+   pthread_t thread;
+   int error = pthread_create(&thread, NULL, &update_timer, (void *)timer);
 
-    /* Check if thread was started */
-    assert (!error);
+   /* Check if thread was started */
+   assert(!error);
 }

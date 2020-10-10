@@ -26,63 +26,58 @@
  */
 
 #ifndef _SDL_system_h
-#define _SDL_system_h
+#   define _SDL_system_h
 
-#include "SDL_stdinc.h"
-#include "SDL_keyboard.h"
-#include "SDL_render.h"
-#include "SDL_video.h"
+#   include "SDL_stdinc.h"
+#   include "SDL_keyboard.h"
+#   include "SDL_render.h"
+#   include "SDL_video.h"
 
-#include "begin_code.h"
+#   include "begin_code.h"
 /* Set up for C function definitions, even when using C++ */
-#ifdef __cplusplus
+#   ifdef __cplusplus
 extern "C" {
-#endif
-
+#   endif
 
 /* Platform specific functions for Windows */
-#ifdef __WIN32__
+#   ifdef __WIN32__
 
 /* Returns the D3D9 adapter index that matches the specified display index.
    This adapter index can be passed to IDirect3D9::CreateDevice and controls
    on which monitor a full screen application will appear.
 */
-extern DECLSPEC int SDLCALL SDL_Direct3D9GetAdapterIndex ( int displayIndex );
+extern DECLSPEC int SDLCALL SDL_Direct3D9GetAdapterIndex(int displayIndex);
 
 /* Returns the D3D device associated with a renderer, or NULL if it's not a D3D renderer.
    Once you are done using the device, you should release it to avoid a resource leak.
  */
 typedef struct IDirect3DDevice9 IDirect3DDevice9;
-extern DECLSPEC IDirect3DDevice9* SDLCALL SDL_RenderGetD3D9Device (
-    SDL_Renderer* renderer);
+extern DECLSPEC IDirect3DDevice9 *SDLCALL SDL_RenderGetD3D9Device(SDL_Renderer *renderer);
 
 /* Returns the DXGI Adapter and Output indices for the specified display index.
    These can be passed to EnumAdapters and EnumOutputs respectively to get the objects
    required to create a DX10 or DX11 device and swap chain.
  */
-extern DECLSPEC void SDLCALL SDL_DXGIGetOutputInfo ( int displayIndex,
-        int* adapterIndex, int* outputIndex );
+extern DECLSPEC void SDLCALL SDL_DXGIGetOutputInfo(int displayIndex, int *adapterIndex, int *outputIndex);
 
-#endif /* __WIN32__ */
-
+#   endif /* __WIN32__ */
 
 /* Platform specific functions for iOS */
-#if defined(__IPHONEOS__) && __IPHONEOS__
+#   if defined(__IPHONEOS__) && __IPHONEOS__
 
-extern DECLSPEC int SDLCALL SDL_iPhoneSetAnimationCallback (SDL_Window* window,
-        int interval, void (*callback) (void*), void* callbackParam);
-extern DECLSPEC void SDLCALL SDL_iPhoneSetEventPump (SDL_bool enabled);
+extern DECLSPEC int SDLCALL SDL_iPhoneSetAnimationCallback(SDL_Window *window, int interval, void (*callback)(void *),
+                                                           void *callbackParam);
+extern DECLSPEC void SDLCALL SDL_iPhoneSetEventPump(SDL_bool enabled);
 
-#endif /* __IPHONEOS__ */
-
+#   endif /* __IPHONEOS__ */
 
 /* Platform specific functions for Android */
-#if defined(__ANDROID__) && __ANDROID__
+#   if defined(__ANDROID__) && __ANDROID__
 
 /* Get the JNI environment for the current thread
    This returns JNIEnv*, but the prototype is void* so we don't need jni.h
  */
-extern DECLSPEC void* SDLCALL SDL_AndroidGetJNIEnv();
+extern DECLSPEC void *SDLCALL SDL_AndroidGetJNIEnv();
 
 /* Get the SDL Activity object for the application
    This returns jobject, but the prototype is void* so we don't need jni.h
@@ -90,19 +85,19 @@ extern DECLSPEC void* SDLCALL SDL_AndroidGetJNIEnv();
    It is the caller's responsibility to properly release it
    (using env->Push/PopLocalFrame or manually with env->DeleteLocalRef)
  */
-extern DECLSPEC void* SDLCALL SDL_AndroidGetActivity();
+extern DECLSPEC void *SDLCALL SDL_AndroidGetActivity();
 
 /* See the official Android developer guide for more information:
    http://developer.android.com/guide/topics/data/data-storage.html
 */
-#define SDL_ANDROID_EXTERNAL_STORAGE_READ   0x01
-#define SDL_ANDROID_EXTERNAL_STORAGE_WRITE  0x02
+#      define SDL_ANDROID_EXTERNAL_STORAGE_READ 0x01
+#      define SDL_ANDROID_EXTERNAL_STORAGE_WRITE 0x02
 
 /* Get the path used for internal storage for this application.
    This path is unique to your application and cannot be written to
    by other applications.
  */
-extern DECLSPEC const char* SDLCALL SDL_AndroidGetInternalStoragePath();
+extern DECLSPEC const char *SDLCALL SDL_AndroidGetInternalStoragePath();
 
 /* Get the current state of external storage, a bitmask of these values:
     SDL_ANDROID_EXTERNAL_STORAGE_READ
@@ -115,15 +110,15 @@ extern DECLSPEC int SDLCALL SDL_AndroidGetExternalStorageState();
    This path is unique to your application, but is public and can be
    written to by other applications.
  */
-extern DECLSPEC const char* SDLCALL SDL_AndroidGetExternalStoragePath();
+extern DECLSPEC const char *SDLCALL SDL_AndroidGetExternalStoragePath();
 
-#endif /* __ANDROID__ */
+#   endif /* __ANDROID__ */
 
 /* Ends C function definitions when using C++ */
-#ifdef __cplusplus
+#   ifdef __cplusplus
 }
-#endif
-#include "close_code.h"
+#   endif
+#   include "close_code.h"
 
 #endif /* _SDL_system_h */
 

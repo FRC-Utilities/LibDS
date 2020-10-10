@@ -27,10 +27,10 @@
 #include <pthread.h>
 
 #if defined _WIN32
-    static WSADATA WSA_DATA;
-    #define GET_ERR WSAGetLastError()
+static WSADATA WSA_DATA;
+#   define GET_ERR WSAGetLastError()
 #else
-    #define GET_ERR errno
+#   define GET_ERR errno
 #endif
 
 /**
@@ -38,33 +38,33 @@
  *
  * \param sfd the socket file descriptor
  */
-static int valid_sfd (int sfd)
+static int valid_sfd(int sfd)
 {
-    return (sfd > 0);
+   return (sfd > 0);
 }
 
 /**
  * Prints a detailed error message if \c VERBOSE is defined
  */
-static void print_error (int sfd, const char* message, int error)
+static void print_error(int sfd, const char *message, int error)
 {
 #if defined SOCKY_VERBOSE
-#if defined _WIN32
-    const char* string = gai_strerrorA (error);
-#else
-    const char* string = strerror (error);
-#endif
+#   if defined _WIN32
+   const char *string = gai_strerrorA(error);
+#   else
+   const char *string = strerror(error);
+#   endif
 
-    fprintf (stderr,
-             "Socket %d:\n"
-             "\t Message: %s\n"
-             "\t Error Code: %d\n"
-             "\t Error Desc: %s\n",
-             sfd, message, error, string);
+   fprintf(stderr,
+           "Socket %d:\n"
+           "\t Message: %s\n"
+           "\t Error Code: %d\n"
+           "\t Error Desc: %s\n",
+           sfd, message, error, string);
 #else
-    (void) sfd;
-    (void) error;
-    (void) message;
+   (void)sfd;
+   (void)error;
+   (void)message;
 #endif
 }
 
@@ -77,26 +77,25 @@ static void print_error (int sfd, const char* message, int error)
  * If any invalid value is set to the \a flag parameter, then this function
  * shall return \c AF_UNSPEC (let the OS decide an address family)
  */
-static int get_family (int flag)
+static int get_family(int flag)
 {
-    assert (flag == SOCKY_IPv4 ||
-            flag == SOCKY_IPv6 ||
-            flag == SOCKY_ANY);
+   assert(flag == SOCKY_IPv4 || flag == SOCKY_IPv6 || flag == SOCKY_ANY);
 
-    switch (flag) {
-    case SOCKY_IPv4:
-        return AF_INET;
-        break;
-    case SOCKY_IPv6:
-        return AF_INET6;
-        break;
-    case SOCKY_ANY:
-        return AF_UNSPEC;
-        break;
-    default:
-        return -1;
-        break;
-    }
+   switch (flag)
+   {
+      case SOCKY_IPv4:
+         return AF_INET;
+         break;
+      case SOCKY_IPv6:
+         return AF_INET6;
+         break;
+      case SOCKY_ANY:
+         return AF_UNSPEC;
+         break;
+      default:
+         return -1;
+         break;
+   }
 }
 
 /**
@@ -107,67 +106,60 @@ static int get_family (int flag)
  * If any invalid value is set to the \a flag parameter, then this function
  * shall return \c SOCK_STREAM (a TCP socket)
  */
-static int get_socktype (int flag)
+static int get_socktype(int flag)
 {
-    assert (flag == SOCKY_TCP ||
-            flag == SOCKY_UDP);
+   assert(flag == SOCKY_TCP || flag == SOCKY_UDP);
 
-    switch (flag) {
-    case SOCKY_TCP:
-        return SOCK_STREAM;
-        break;
-    case SOCKY_UDP:
-        return SOCK_DGRAM;
-        break;
-    default:
-        return -1;
-        break;
-    }
+   switch (flag)
+   {
+      case SOCKY_TCP:
+         return SOCK_STREAM;
+         break;
+      case SOCKY_UDP:
+         return SOCK_DGRAM;
+         break;
+      default:
+         return -1;
+         break;
+   }
 }
 
 /**
  * Sets the \c SO_REUSEADDR option to the given socket
  */
-static int set_socket_options (int sfd)
+static int set_socket_options(int sfd)
 {
-    if (valid_sfd (sfd)) {
-        /* Initialize variables */
-        int err = 1;
-        int val = 1;
+   if (valid_sfd(sfd))
+   {
+      /* Initialize variables */
+      int err = 1;
+      int val = 1;
 
-        /* Set options according to each platform */
-        {
+      /* Set options according to each platform */
+      {
 #if defined _WIN32
-            err = setsockopt (sfd,
-                              SOL_SOCKET,
-                              SO_REUSEADDR,
-                              (const char*) &val, sizeof (val));
+         err = setsockopt(sfd, SOL_SOCKET, SO_REUSEADDR, (const char *)&val, sizeof(val));
 #else
-#ifndef __ANDROID__
-            err *= setsockopt (sfd,
-                               SOL_SOCKET,
-                               SO_REUSEPORT,
-                               &val, sizeof (val));
+#   ifndef __ANDROID__
+         err *= setsockopt(sfd, SOL_SOCKET, SO_REUSEPORT, &val, sizeof(val));
+#   endif
+         err *= setsockopt(sfd, SOL_SOCKET, SO_REUSEADDR, &val, sizeof(val));
 #endif
-            err *= setsockopt (sfd,
-                               SOL_SOCKET,
-                               SO_REUSEADDR,
-                               &val, sizeof (val));
-#endif
-        }
+      }
 
-        /* Setting the options failed */
-        if (err != 0) {
-            print_error (sfd, "cannot set socket options", GET_ERR);
-            return -1;
-        }
+      /* Setting the options failed */
+      if (err != 0)
+      {
+         print_error(sfd, "cannot set socket options", GET_ERR);
+         return -1;
+      }
 
-        /* Options set correctly */
-        return 0;
-    }
+      /* Options set correctly */
+      return 0;
+   }
 
-    /* Socket is invalid, return -1 */
-    return -1;
+   /* Socket is invalid, return -1 */
+   return -1;
 }
 
 /**
@@ -180,68 +172,68 @@ static int set_socket_options (int sfd)
  *
  * \returns -1 on error, socket file descriptor on success
  */
-static int create_server (const char* port, const int family,
-                          const int socktype, const int flags)
+static int create_server(const char *port, const int family, const int socktype, const int flags)
 {
-    int sfd;
-    struct addrinfo* info = NULL;
-    struct addrinfo* addr = get_address_info (NULL, port, socktype, family);
+   int sfd;
+   struct addrinfo *info = NULL;
+   struct addrinfo *addr = get_address_info(NULL, port, socktype, family);
 
-    /* Obtained address info is NULL */
-    if (addr == NULL)
-        return -1;
+   /* Obtained address info is NULL */
+   if (addr == NULL)
+      return -1;
 
-    /* Loop through found addresses until we establish a connection */
-    for (info = addr; info != NULL; info = info->ai_next) {
-        /* Open the socket */
-        sfd = socket (info->ai_family,
-                      info->ai_socktype | flags,
-                      info->ai_protocol);
+   /* Loop through found addresses until we establish a connection */
+   for (info = addr; info != NULL; info = info->ai_next)
+   {
+      /* Open the socket */
+      sfd = socket(info->ai_family, info->ai_socktype | flags, info->ai_protocol);
 
+      /* Invalid socket, continue probing... */
+      if (!valid_sfd(sfd) || (set_socket_options(sfd) == -1))
+         continue;
 
-        /* Invalid socket, continue probing... */
-        if (!valid_sfd (sfd) || (set_socket_options (sfd) == -1))
-            continue;
+      /* Bound without error, break loop */
+      if (bind(sfd, info->ai_addr, info->ai_addrlen) == 0)
+      {
+         /* Configure the TCP listener */
+         if (socktype == SOCKY_TCP)
+         {
+            if (listen(sfd, SOCKY_BACKLOG) == 0)
+               break;
+         }
 
-        /* Bound without error, break loop */
-        if (bind (sfd, info->ai_addr, info->ai_addrlen) == 0) {
-            /* Configure the TCP listener */
-            if (socktype == SOCKY_TCP) {
-                if (listen (sfd, SOCKY_BACKLOG) == 0)
-                    break;
-            }
+         /* UDP does not listen */
+         else
+            break;
+      }
 
-            /* UDP does not listen */
-            else
-                break;
-        }
+      /* Close temp. socket */
+      socket_close(sfd);
+   }
 
-        /* Close temp. socket */
-        socket_close (sfd);
-    }
+   /* Everything should be good, but let's check */
+   if (info == NULL)
+   {
+      print_error(sfd, "cannot bind to any address!", GET_ERR);
+      socket_close(sfd);
+      return -1;
+   }
 
-    /* Everything should be good, but let's check */
-    if (info == NULL) {
-        print_error (sfd, "cannot bind to any address!", GET_ERR);
-        socket_close (sfd);
-        return -1;
-    }
-
-    /* Server socket setup correctly */
-    freeaddrinfo (info);
-    return sfd;
+   /* Server socket setup correctly */
+   freeaddrinfo(info);
+   return sfd;
 }
 
 /**
  * Casts the given \a data pointer into an int containing the
  * socket file descriptor and closes it
  */
-static void* close_socket (void* data)
+static void *close_socket(void *data)
 {
-    assert (data);
-    int* sfd = (int*) data;
-    socket_close (*sfd);
-    return NULL;
+   assert(data);
+   int *sfd = (int *)data;
+   socket_close(*sfd);
+   return NULL;
 }
 
 /**
@@ -250,13 +242,13 @@ static void* close_socket (void* data)
  *
  * \returns 0 on success
  */
-int sockets_exit (void)
+int sockets_exit(void)
 {
 #if defined _WIN32
-    return WSACleanup();
+   return WSACleanup();
 #endif
 
-    return 0;
+   return 0;
 }
 
 /**
@@ -268,21 +260,22 @@ int sockets_exit (void)
  *
  * \returns 0 on success, -1 on failure
  */
-int sockets_init (const int exit_on_fail)
+int sockets_init(const int exit_on_fail)
 {
 #if defined _WIN32
-    if (WSAStartup (WINSOCK_VERSION, &WSA_DATA) != 0) {
-        fprintf (stderr, "Cannot start WinSock API, error %d\n", GET_ERR);
-        if (exit_on_fail == 1)
-            exit (EXIT_FAILURE);
+   if (WSAStartup(WINSOCK_VERSION, &WSA_DATA) != 0)
+   {
+      fprintf(stderr, "Cannot start WinSock API, error %d\n", GET_ERR);
+      if (exit_on_fail == 1)
+         exit(EXIT_FAILURE);
 
-        return -1;
-    }
+      return -1;
+   }
 #else
-    (void) exit_on_fail;
+   (void)exit_on_fail;
 #endif
 
-    return 0;
+   return 0;
 }
 
 /**
@@ -291,14 +284,14 @@ int sockets_init (const int exit_on_fail)
  * \param sfd the socket file descriptor
  * \param block determines if the socket shall be blocking or not
  */
-int set_socket_block (const int sfd, const int block)
+int set_socket_block(const int sfd, const int block)
 {
 #if defined _WIN32
-    u_long flags = block ? 1 : 0;
-    return ioctlsocket (sfd, FIONBIO, &flags);
+   u_long flags = block ? 1 : 0;
+   return ioctlsocket(sfd, FIONBIO, &flags);
 #else
-    int flags = block ? 0 : O_NONBLOCK;
-    return fcntl (sfd, F_SETFL, flags);
+   int flags = block ? 0 : O_NONBLOCK;
+   return fcntl(sfd, F_SETFL, flags);
 #endif
 }
 
@@ -311,40 +304,39 @@ int set_socket_block (const int sfd, const int block)
  * \param socktype the socket type
  * \param family the address family (e.g. \c AF_INET or \c AF_INET6)
  */
-struct addrinfo* get_address_info (const char* host,
-                                   const char* service,
-                                   int socktype, int family)
+struct addrinfo *get_address_info(const char *host, const char *service, int socktype, int family)
 {
-    struct addrinfo hints, *info;
+   struct addrinfo hints, *info;
 
-    /* Fill the hints with zeroes */
-    memset (&hints, 0, sizeof (hints));
+   /* Fill the hints with zeroes */
+   memset(&hints, 0, sizeof(hints));
 
-    /* Set hints */
-    hints.ai_flags = AI_PASSIVE;
-    hints.ai_family = get_family (family);
-    hints.ai_socktype = get_socktype (socktype);
+   /* Set hints */
+   hints.ai_flags = AI_PASSIVE;
+   hints.ai_family = get_family(family);
+   hints.ai_socktype = get_socktype(socktype);
 
-    /* Get address info */
-    int error = getaddrinfo (host, service, &hints, &info);
+   /* Get address info */
+   int error = getaddrinfo(host, service, &hints, &info);
 
-    /* Check if there was an error with the address */
-    if (error) {
+   /* Check if there was an error with the address */
+   if (error)
+   {
 #if defined SOCKY_VERBOSE
-        int code = GET_ERR;
-        fprintf (stderr,
-                 "Cannot obtain address info:\n"
-                 "\t Address: %s\n"
-                 "\t Service: %s\n"
-                 "\t Error Code: %d\n"
-                 "\t Error Desc: %s\n",
-                 host, service, code, strerror (code));
+      int code = GET_ERR;
+      fprintf(stderr,
+              "Cannot obtain address info:\n"
+              "\t Address: %s\n"
+              "\t Service: %s\n"
+              "\t Error Code: %d\n"
+              "\t Error Desc: %s\n",
+              host, service, code, strerror(code));
 #endif
-        return NULL;
-    }
+      return NULL;
+   }
 
-    /* All good, return the obtained data */
-    return info;
+   /* All good, return the obtained data */
+   return info;
 }
 
 /**
@@ -353,36 +345,39 @@ struct addrinfo* get_address_info (const char* host,
  * \param family the address family (\c SOCKY_IPv4 or \c SOCKY_IPv6)
  * \param flags the additional flags to use while creating the socket
  */
-int create_client_udp (const int family, const int flags)
+int create_client_udp(const int family, const int flags)
 {
-    int sfd = -1;
+   int sfd = -1;
 
-    /* Create the socket */
-    switch (family) {
-    case SOCKY_IPv4:
-        sfd = socket (AF_INET, SOCK_DGRAM | flags, 0);
-        break;
-    case SOCKY_IPv6:
-        sfd = socket (AF_INET6, SOCK_DGRAM | flags, 0);
-        break;
-    default:
-        return -1;
-    }
+   /* Create the socket */
+   switch (family)
+   {
+      case SOCKY_IPv4:
+         sfd = socket(AF_INET, SOCK_DGRAM | flags, 0);
+         break;
+      case SOCKY_IPv6:
+         sfd = socket(AF_INET6, SOCK_DGRAM | flags, 0);
+         break;
+      default:
+         return -1;
+   }
 
-    /* Fuck, there was an error creating the socket */
-    if (!valid_sfd (sfd)) {
-        print_error (sfd, "cannot create UDP client socket", GET_ERR);
-        return -1;
-    }
+   /* Fuck, there was an error creating the socket */
+   if (!valid_sfd(sfd))
+   {
+      print_error(sfd, "cannot create UDP client socket", GET_ERR);
+      return -1;
+   }
 
-    /* Set socket options */
-    if (set_socket_options (sfd) == -1) {
-        socket_close (sfd);
-        return -1;
-    }
+   /* Set socket options */
+   if (set_socket_options(sfd) == -1)
+   {
+      socket_close(sfd);
+      return -1;
+   }
 
-    /* Return the socket file descriptor */
-    return sfd;
+   /* Return the socket file descriptor */
+   return sfd;
 }
 
 /**
@@ -393,49 +388,48 @@ int create_client_udp (const int family, const int flags)
  * \param family the address family
  * \param flags any additional flags that you may want to use
  */
-int create_client_tcp (const char* host, const char* port,
-                       const int family, const int flags)
+int create_client_tcp(const char *host, const char *port, const int family, const int flags)
 {
-    int sfd = -1;
+   int sfd = -1;
 
-    /* Get address information */
-    struct addrinfo* info = NULL;
-    struct addrinfo* addr = get_address_info (host, port, SOCKY_TCP, family);
+   /* Get address information */
+   struct addrinfo *info = NULL;
+   struct addrinfo *addr = get_address_info(host, port, SOCKY_TCP, family);
 
-    /* Address information is NULL, abort */
-    if (addr == NULL)
-        return -1;
+   /* Address information is NULL, abort */
+   if (addr == NULL)
+      return -1;
 
-    /* Loop through found addresses until we establish a connection */
-    for (info = addr; info != NULL; info = info->ai_next ) {
-        /* Create new socket */
-        sfd = socket (info->ai_family,
-                      info->ai_socktype | flags,
-                      info->ai_protocol);
+   /* Loop through found addresses until we establish a connection */
+   for (info = addr; info != NULL; info = info->ai_next)
+   {
+      /* Create new socket */
+      sfd = socket(info->ai_family, info->ai_socktype | flags, info->ai_protocol);
 
-        /* Invalid socket, continue probing... */
-        if (!valid_sfd (sfd) || (set_socket_options (sfd) == -1))
-            continue;
+      /* Invalid socket, continue probing... */
+      if (!valid_sfd(sfd) || (set_socket_options(sfd) == -1))
+         continue;
 
-        /* Connected without error, break loop */
-        if (connect (sfd, info->ai_addr, info->ai_addrlen) != -1)
-            break;
+      /* Connected without error, break loop */
+      if (connect(sfd, info->ai_addr, info->ai_addrlen) != -1)
+         break;
 
-        /* Close temp. socket */
-        socket_close (sfd);
-    }
+      /* Close temp. socket */
+      socket_close(sfd);
+   }
 
-    /* We should have established a connection, but let's check */
-    if (info == NULL) {
-        print_error (sfd, "cannot connect to any address!", GET_ERR);
-        socket_close (sfd);
-        return -1;
-    }
+   /* We should have established a connection, but let's check */
+   if (info == NULL)
+   {
+      print_error(sfd, "cannot connect to any address!", GET_ERR);
+      socket_close(sfd);
+      return -1;
+   }
 
-    /* Yay! */
-    freeaddrinfo (addr);
-    freeaddrinfo (info);
-    return sfd;
+   /* Yay! */
+   freeaddrinfo(addr);
+   freeaddrinfo(info);
+   return sfd;
 }
 
 /**
@@ -447,9 +441,9 @@ int create_client_tcp (const char* host, const char* port,
  *
  * \returns -1 on error, socket file descriptor on success
  */
-int create_server_udp (const char* port, const int family, const int flags)
+int create_server_udp(const char *port, const int family, const int flags)
 {
-    return create_server (port, family, SOCKY_UDP, flags);
+   return create_server(port, family, SOCKY_UDP, flags);
 }
 
 /**
@@ -461,9 +455,9 @@ int create_server_udp (const char* port, const int family, const int flags)
  *
  * \returns -1 on error, socket file descriptor on success
  */
-int create_server_tcp (const char* port, const int family, const int flags)
+int create_server_tcp(const char *port, const int family, const int flags)
 {
-    return create_server (port, family, SOCKY_TCP, flags);
+   return create_server(port, family, SOCKY_TCP, flags);
 }
 
 /**
@@ -473,40 +467,39 @@ int create_server_tcp (const char* port, const int family, const int flags)
  *
  * \returns -1 on failure, 0 on success
  */
-int socket_close (const int sfd)
+int socket_close(const int sfd)
 {
-    /* The socket FD is not valid */
-    if (!valid_sfd (sfd))
-        return -1;
+   /* The socket FD is not valid */
+   if (!valid_sfd(sfd))
+      return -1;
 
-    /* Disable I/O operations on the socket */
-    shutdown (sfd, SOCKY_READ | SOCKY_WRITE);
+   /* Disable I/O operations on the socket */
+   shutdown(sfd, SOCKY_READ | SOCKY_WRITE);
 
-    /* Close the socket */
-    int error = 0;
+   /* Close the socket */
+   int error = 0;
 #if defined _WIN32
-    error = closesocket (sfd);
+   error = closesocket(sfd);
 #else
-    error = close (sfd);
+   error = close(sfd);
 #endif
 
-    /* Return result */
-    return error;
+   /* Return result */
+   return error;
 }
 
 /**
  * Closes the given \a sfd in a different thread
  */
-void socket_close_threaded (int sfd)
+void socket_close_threaded(int sfd)
 {
-    /* Try to close the socket on different thread */
-    pthread_t thread;
-    int error = pthread_create (&thread, NULL,
-                                &close_socket, (void*) &sfd);
+   /* Try to close the socket on different thread */
+   pthread_t thread;
+   int error = pthread_create(&thread, NULL, &close_socket, (void *)&sfd);
 
-    /* Close socket normally if there is an error */
-    if (error)
-        shutdown (sfd, SOCKY_READ | SOCKY_WRITE);
+   /* Close socket normally if there is an error */
+   if (error)
+      shutdown(sfd, SOCKY_READ | SOCKY_WRITE);
 }
 
 /**
@@ -517,12 +510,12 @@ void socket_close_threaded (int sfd)
  *
  * \returns -1 on failure, 0 on success
  */
-int socket_shutdown (const int sfd, const int method)
+int socket_shutdown(const int sfd, const int method)
 {
-    if (valid_sfd (sfd))
-        return shutdown (sfd, method);
+   if (valid_sfd(sfd))
+      return shutdown(sfd, method);
 
-    return -1;
+   return -1;
 }
 
 /**
@@ -538,33 +531,32 @@ int socket_shutdown (const int sfd, const int method)
  *
  * \returns a new socket file descriptor on success, -1 of failure
  */
-int tcp_accept (const int sfd, char* host, const int host_len,
-                char* service, const int service_len, const int flags)
+int tcp_accept(const int sfd, char *host, const int host_len, char *service, const int service_len, const int flags)
 {
-    int client_sfd;
-    struct sockaddr_storage client_info;
-    socklen_t addrlen = sizeof (struct sockaddr_storage);
+   int client_sfd;
+   struct sockaddr_storage client_info;
+   socklen_t addrlen = sizeof(struct sockaddr_storage);
 
-    /* Accept the connection */
-    client_sfd = accept (sfd, (struct sockaddr*) &client_info, &addrlen);
+   /* Accept the connection */
+   client_sfd = accept(sfd, (struct sockaddr *)&client_info, &addrlen);
 
-    /* Check if new socket is valid */
-    if (!valid_sfd (client_sfd)) {
-        print_error (sfd, "cannot create client socket durring accept()", GET_ERR);
-        return -1;
-    }
+   /* Check if new socket is valid */
+   if (!valid_sfd(client_sfd))
+   {
+      print_error(sfd, "cannot create client socket durring accept()", GET_ERR);
+      return -1;
+   }
 
-    /* Write information to provided parameters */
-    int err = getnameinfo ((struct sockaddr*) &client_info,
-                           sizeof (struct sockaddr_storage),
-                           host, host_len, service, service_len, flags);
+   /* Write information to provided parameters */
+   int err = getnameinfo((struct sockaddr *)&client_info, sizeof(struct sockaddr_storage), host, host_len, service,
+                         service_len, flags);
 
-    /* Check if there was an error obtaining remote information */
-    if (err != 0)
-        print_error (sfd, "cannot obtain remote host information", GET_ERR);
+   /* Check if there was an error obtaining remote information */
+   if (err != 0)
+      print_error(sfd, "cannot obtain remote host information", GET_ERR);
 
-    /* Return new socket */
-    return client_sfd;
+   /* Return new socket */
+   return client_sfd;
 }
 
 /**
@@ -577,31 +569,28 @@ int tcp_accept (const int sfd, char* host, const int host_len,
  * \param service the remote service/port string
  * \param flags any additional flags that you may need to use
  */
-int udp_sendto (const int sfd,
-                const char* buf, const int buf_len,
-                const char* host, const char* service, const int flags)
+int udp_sendto(const int sfd, const char *buf, const int buf_len, const char *host, const char *service,
+               const int flags)
 {
-    /* Check if socket and buffer are valid */
-    if (!valid_sfd (sfd) || buf == NULL || buf_len <= 0)
-        return -1;
+   /* Check if socket and buffer are valid */
+   if (!valid_sfd(sfd) || buf == NULL || buf_len <= 0)
+      return -1;
 
-    /* Get address info */
-    struct addrinfo* info = get_address_info (host, service,
-                                              SOCKY_UDP, SOCKY_ANY);
+   /* Get address info */
+   struct addrinfo *info = get_address_info(host, service, SOCKY_UDP, SOCKY_ANY);
 
-    /* Invalid address info */
-    if (!info)
-        return -1;
+   /* Invalid address info */
+   if (!info)
+      return -1;
 
-    /* Send datagram */
-    int bytes = sendto (sfd, buf, buf_len, flags,
-                        info->ai_addr, (int) info->ai_addrlen);
+   /* Send datagram */
+   int bytes = sendto(sfd, buf, buf_len, flags, info->ai_addr, (int)info->ai_addrlen);
 
-    /* Free address information */
-    freeaddrinfo (info);
+   /* Free address information */
+   freeaddrinfo(info);
 
-    /* Return number of bytes written */
-    return bytes;
+   /* Return number of bytes written */
+   return bytes;
 }
 
 /**
@@ -614,31 +603,27 @@ int udp_sendto (const int sfd,
  * \param service the local service/port from which to receive data
  * \param flags any additional flags that you may need to use
  */
-int udp_recvfrom (const int sfd, char* buf, const int buf_len,
-                  const char* host, const char* service, const int flags)
+int udp_recvfrom(const int sfd, char *buf, const int buf_len, const char *host, const char *service, const int flags)
 {
-    /* Check if socket and buffer length are valid */
-    if (!valid_sfd (sfd) || buf_len <= 0)
-        return -1;
+   /* Check if socket and buffer length are valid */
+   if (!valid_sfd(sfd) || buf_len <= 0)
+      return -1;
 
-    /* Get address info */
-    struct addrinfo* info = get_address_info (host, service,
-                                              SOCKY_UDP, SOCKY_ANY);
+   /* Get address info */
+   struct addrinfo *info = get_address_info(host, service, SOCKY_UDP, SOCKY_ANY);
 
-    /* Invalid address info */
-    if (info == NULL)
-        return -1;
+   /* Invalid address info */
+   if (info == NULL)
+      return -1;
 
-    /* Receive remote data */
+      /* Receive remote data */
 #if defined _WIN32
-    int bytes = recvfrom (sfd, buf, buf_len, flags,
-                          info->ai_addr, (int*) &info->ai_addrlen);
+   int bytes = recvfrom(sfd, buf, buf_len, flags, info->ai_addr, (int *)&info->ai_addrlen);
 #else
-    int bytes = recvfrom (sfd, buf, buf_len, flags,
-                          info->ai_addr, &info->ai_addrlen);
+   int bytes = recvfrom(sfd, buf, buf_len, flags, info->ai_addr, &info->ai_addrlen);
 #endif
 
-    /* Return the number of bytes received */
-    freeaddrinfo (info);
-    return bytes;
+   /* Return the number of bytes received */
+   freeaddrinfo(info);
+   return bytes;
 }

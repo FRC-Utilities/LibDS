@@ -34,17 +34,17 @@
 */
 
 #ifndef _SDL_test_compare_h
-#define _SDL_test_compare_h
+#   define _SDL_test_compare_h
 
-#include "SDL.h"
+#   include "SDL.h"
 
-#include "SDL_test_images.h"
+#   include "SDL_test_images.h"
 
-#include "begin_code.h"
+#   include "begin_code.h"
 /* Set up for C function definitions, even when using C++ */
-#ifdef __cplusplus
+#   ifdef __cplusplus
 extern "C" {
-#endif
+#   endif
 
 /**
  * \brief Compares a surface and with reference image data for equality
@@ -53,17 +53,16 @@ extern "C" {
  * \param referenceSurface Test Surface used in comparison
  * \param allowable_error Allowable difference (squared) in blending accuracy.
  *
- * \returns 0 if comparison succeeded, >0 (=number of pixels where comparison failed) if comparison failed, -1 if any of the surfaces were NULL, -2 if the surface sizes differ.
+ * \returns 0 if comparison succeeded, >0 (=number of pixels where comparison failed) if comparison failed, -1 if any of
+ * the surfaces were NULL, -2 if the surface sizes differ.
  */
-int SDLTest_CompareSurfaces (SDL_Surface* surface,
-                             SDL_Surface* referenceSurface, int allowable_error);
-
+int SDLTest_CompareSurfaces(SDL_Surface *surface, SDL_Surface *referenceSurface, int allowable_error);
 
 /* Ends C function definitions when using C++ */
-#ifdef __cplusplus
+#   ifdef __cplusplus
 }
-#endif
-#include "close_code.h"
+#   endif
+#   include "close_code.h"
 
 #endif /* _SDL_test_compare_h */
 

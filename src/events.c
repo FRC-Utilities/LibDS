@@ -33,17 +33,17 @@ static DS_Queue events;
 /**
  * Initializes the event queue with an initial support for 50 events
  */
-void Events_Init (void)
+void Events_Init(void)
 {
-    DS_QueueInit (&events, 50, sizeof (DS_Event));
+   DS_QueueInit(&events, 50, sizeof(DS_Event));
 }
 
 /**
  * De-allocates the event queue (that's all)
  */
-void Events_Close (void)
+void Events_Close(void)
 {
-    DS_QueueFree (&events);
+   DS_QueueFree(&events);
 }
 
 /**
@@ -51,10 +51,10 @@ void Events_Close (void)
  *
  * \param event the event to register in the event queue
  */
-void DS_AddEvent (DS_Event* event)
+void DS_AddEvent(DS_Event *event)
 {
-    assert (event);
-    DS_QueuePush (&events, (void*) event);
+   assert(event);
+   DS_QueuePush(&events, (void *)event);
 }
 
 /**
@@ -65,15 +65,16 @@ void DS_AddEvent (DS_Event* event)
  *
  * \param event we write the obtained event data here
  */
-int DS_PollEvent (DS_Event* event)
+int DS_PollEvent(DS_Event *event)
 {
-    DS_Event* front = (DS_Event*) DS_QueueGetFirst (&events);
+   DS_Event *front = (DS_Event *)DS_QueueGetFirst(&events);
 
-    if (front) {
-        DS_QueuePop (&events);
-        memcpy (event, front, sizeof (DS_Event));
-        return 1;
-    }
+   if (front)
+   {
+      DS_QueuePop(&events);
+      memcpy(event, front, sizeof(DS_Event));
+      return 1;
+   }
 
-    return 0;
+   return 0;
 }

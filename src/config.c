@@ -54,9 +54,9 @@ static DS_ControlMode control_mode = DS_CONTROL_TELEOPERATED;
 /**
  * Ensures that the given \a input number is either \c 0 or \c 1
  */
-static int to_boolean (const int input)
+static int to_boolean(const int input)
 {
-    return (input > 0) ? 1 : 0;
+   return (input > 0) ? 1 : 0;
 }
 
 /**
@@ -67,55 +67,55 @@ static int to_boolean (const int input)
  * \param min the minimum value that the input number should have
  * \param max the maximun value that the input number should have
  */
-static int respect_range (const int input, const int min, const int max)
+static int respect_range(const int input, const int min, const int max)
 {
-    if (input < min)
-        return min;
+   if (input < min)
+      return min;
 
-    else if (input > max)
-        return max;
+   else if (input > max)
+      return max;
 
-    return input;
+   return input;
 }
 
 /**
  * Creates and fills a robot event with the given \a type header
  */
-static void create_robot_event (const DS_EventType type)
+static void create_robot_event(const DS_EventType type)
 {
-    DS_Event event;
+   DS_Event event;
 
-    event.robot.type = type;
-    event.robot.code = CFG_GetRobotCode();
-    event.robot.mode = CFG_GetControlMode();
-    event.robot.enabled = CFG_GetRobotEnabled();
-    event.robot.voltage = CFG_GetRobotVoltage();
-    event.robot.can_util = CFG_GetCANUtilization();
-    event.robot.cpu_usage = CFG_GetRobotCPUUsage();
-    event.robot.ram_usage = CFG_GetRobotRAMUsage();
-    event.robot.disk_usage = CFG_GetRobotDiskUsage();
-    event.robot.estopped = CFG_GetEmergencyStopped();
-    event.robot.connected = CFG_GetRobotCommunications();
+   event.robot.type = type;
+   event.robot.code = CFG_GetRobotCode();
+   event.robot.mode = CFG_GetControlMode();
+   event.robot.enabled = CFG_GetRobotEnabled();
+   event.robot.voltage = CFG_GetRobotVoltage();
+   event.robot.can_util = CFG_GetCANUtilization();
+   event.robot.cpu_usage = CFG_GetRobotCPUUsage();
+   event.robot.ram_usage = CFG_GetRobotRAMUsage();
+   event.robot.disk_usage = CFG_GetRobotDiskUsage();
+   event.robot.estopped = CFG_GetEmergencyStopped();
+   event.robot.connected = CFG_GetRobotCommunications();
 
-    DS_AddEvent (&event);
+   DS_AddEvent(&event);
 }
 
 /**
  * Notifies the user about something through the NetConsole
  */
-void CFG_AddNotification (const DS_String* msg)
+void CFG_AddNotification(const DS_String *msg)
 {
-    /* Check arguments */
-    assert (msg);
+   /* Check arguments */
+   assert(msg);
 
-    /* Create and display notification string */
-    char* cstr = DS_StrToChar (msg);
-    DS_String str = DS_StrFormat ("<font color=#888>** LibDS: %s</font>", cstr);
-    CFG_AddNetConsoleMessage (&str);
+   /* Create and display notification string */
+   char *cstr = DS_StrToChar(msg);
+   DS_String str = DS_StrFormat("<font color=#888>** LibDS: %s</font>", cstr);
+   CFG_AddNetConsoleMessage(&str);
 
-    /* Delete the string buffer */
-    DS_StrRmBuf (&str);
-    DS_FREE (cstr);
+   /* Delete the string buffer */
+   DS_StrRmBuf(&str);
+   DS_FREE(cstr);
 }
 
 /**
@@ -124,16 +124,16 @@ void CFG_AddNotification (const DS_String* msg)
  *
  * \a msg the message to display
  */
-void CFG_AddNetConsoleMessage (const DS_String* msg)
+void CFG_AddNetConsoleMessage(const DS_String *msg)
 {
-    /* Check arguments */
-    assert (msg);
+   /* Check arguments */
+   assert(msg);
 
-    /* Register new NetConsole event */
-    DS_Event event;
-    event.netconsole.type = DS_NETCONSOLE_NEW_MESSAGE;
-    event.netconsole.message = DS_StrToChar (msg);
-    DS_AddEvent (&event);
+   /* Register new NetConsole event */
+   DS_Event event;
+   event.netconsole.type = DS_NETCONSOLE_NEW_MESSAGE;
+   event.netconsole.message = DS_StrToChar(msg);
+   DS_AddEvent(&event);
 }
 
 /**
@@ -141,101 +141,104 @@ void CFG_AddNetConsoleMessage (const DS_String* msg)
  * This function is called when the team number is changed or when a watchdog
  * expires (to force the sockets module to perform a lookup)
  */
-void CFG_ReconfigureAddresses (const int flags)
+void CFG_ReconfigureAddresses(const int flags)
 {
-    if (!DS_CurrentProtocol())
-        return;
+   if (!DS_CurrentProtocol())
+      return;
 
-    if (flags & RECONFIGURE_FMS) {
-        char* address = DS_GetAppliedFMSAddress();
-        DS_SocketChangeAddress (&DS_CurrentProtocol()->fms_socket, address);
-        DS_FREE (address);
-    }
+   if (flags & RECONFIGURE_FMS)
+   {
+      char *address = DS_GetAppliedFMSAddress();
+      DS_SocketChangeAddress(&DS_CurrentProtocol()->fms_socket, address);
+      DS_FREE(address);
+   }
 
-    if (flags & RECONFIGURE_RADIO) {
-        char* address = DS_GetAppliedRadioAddress();
-        DS_SocketChangeAddress (&DS_CurrentProtocol()->radio_socket, address);
-        DS_FREE (address);
-    }
+   if (flags & RECONFIGURE_RADIO)
+   {
+      char *address = DS_GetAppliedRadioAddress();
+      DS_SocketChangeAddress(&DS_CurrentProtocol()->radio_socket, address);
+      DS_FREE(address);
+   }
 
-    if (flags & RECONFIGURE_ROBOT) {
-        char* address = DS_GetAppliedRobotAddress();
-        DS_SocketChangeAddress (&DS_CurrentProtocol()->robot_socket, address);
-        DS_FREE (address);
-    }
+   if (flags & RECONFIGURE_ROBOT)
+   {
+      char *address = DS_GetAppliedRobotAddress();
+      DS_SocketChangeAddress(&DS_CurrentProtocol()->robot_socket, address);
+      DS_FREE(address);
+   }
 }
 
 /**
  * Returns the current team number, which may be used by the protocols to
  * specifiy the default addresses and generate specialized packets
  */
-int CFG_GetTeamNumber (void)
+int CFG_GetTeamNumber(void)
 {
-    return DS_Max (team, 0);
+   return DS_Max(team, 0);
 }
 
 /**
  * Returns \c 0 if there is no robot code running, otherwise, it returns \c 1
  */
-int CFG_GetRobotCode (void)
+int CFG_GetRobotCode(void)
 {
-    return robot_code == 1;
+   return robot_code == 1;
 }
 
 /**
  * Returns \c 1 if the robot is enabled, otherwise, it returns \c 0
  */
-int CFG_GetRobotEnabled (void)
+int CFG_GetRobotEnabled(void)
 {
-    return robot_enabled == 1;
+   return robot_enabled == 1;
 }
 
 /**
  * Returns the current CPU usage of the robot
  */
-int CFG_GetRobotCPUUsage (void)
+int CFG_GetRobotCPUUsage(void)
 {
-    return DS_Max (cpu_usage, 0);
+   return DS_Max(cpu_usage, 0);
 }
 
 /**
  * Returns the current RAM usage of the robot
  */
-int CFG_GetRobotRAMUsage (void)
+int CFG_GetRobotRAMUsage(void)
 {
-    return DS_Max (ram_usage, 0);
+   return DS_Max(ram_usage, 0);
 }
 
 /**
  * Returns the current utilization of the robot's CAN-BUS
  */
-int CFG_GetCANUtilization (void)
+int CFG_GetCANUtilization(void)
 {
-    return DS_Max (can_utilization, 0);
+   return DS_Max(can_utilization, 0);
 }
 
 /**
  * Returns the current disk usage of the robot
  */
-int CFG_GetRobotDiskUsage (void)
+int CFG_GetRobotDiskUsage(void)
 {
-    return DS_Max (disk_usage, 0);
+   return DS_Max(disk_usage, 0);
 }
 
 /**
  * Returns the current voltage of the robot
  */
-float CFG_GetRobotVoltage (void)
+float CFG_GetRobotVoltage(void)
 {
-    return DS_Max (robot_voltage, 0);
+   return DS_Max(robot_voltage, 0);
 }
 
 /**
  * Returns the current game data string
  */
-DS_String* CFG_GetGameData (void)
+DS_String *CFG_GetGameData(void)
 {
-    return &game_data;
+   return &game_data;
 }
 
 /**
@@ -243,9 +246,9 @@ DS_String* CFG_GetGameData (void)
  *    - \c DS_ALLIANCE_RED
  *    - \c DS_ALLIANCE_BLUE
  */
-DS_Alliance CFG_GetAlliance (void)
+DS_Alliance CFG_GetAlliance(void)
 {
-    return robot_alliance;
+   return robot_alliance;
 }
 
 /**
@@ -254,44 +257,44 @@ DS_Alliance CFG_GetAlliance (void)
  *    - \c DS_POSITION_2
  *    - \c DS_POSITION_3
  */
-DS_Position CFG_GetPosition (void)
+DS_Position CFG_GetPosition(void)
 {
-    return robot_position;
+   return robot_position;
 }
 
 /**
  * Returns \c 1 if the robot is emergency stopped, otherwise, it returns \c 0
  */
-int CFG_GetEmergencyStopped (void)
+int CFG_GetEmergencyStopped(void)
 {
-    return emergency_stopped == 1;
+   return emergency_stopped == 1;
 }
 
 /**
  * Returns \c 1 if the client has communications with the FMS, otherwise,
  * it returns \c 0
  */
-int CFG_GetFMSCommunications (void)
+int CFG_GetFMSCommunications(void)
 {
-    return fms_communications == 1;
+   return fms_communications == 1;
 }
 
 /**
  * Returns \c 1 if the client has communications with the radio, otherwise,
  * it returns \c 0
  */
-int CFG_GetRadioCommunications (void)
+int CFG_GetRadioCommunications(void)
 {
-    return radio_communications == 1;
+   return radio_communications == 1;
 }
 
 /**
  * Returns \c 1 if the client has communications with the robot, otherwise,
  * it returns \c 0
  */
-int CFG_GetRobotCommunications (void)
+int CFG_GetRobotCommunications(void)
 {
-    return robot_communications == 1;
+   return robot_communications == 1;
 }
 
 /**
@@ -300,247 +303,262 @@ int CFG_GetRobotCommunications (void)
  *    - \c DS_CONTROL_AUTONOMOUS
  *    - \c DS_CONTROL_TELEOPERATED
  */
-DS_ControlMode CFG_GetControlMode (void)
+DS_ControlMode CFG_GetControlMode(void)
 {
-    return control_mode;
+   return control_mode;
 }
 
 /**
  * Updates the available state of the robot code
  */
-void CFG_SetRobotCode (const int code)
+void CFG_SetRobotCode(const int code)
 {
-    if (robot_code != to_boolean (code)) {
-        robot_code = to_boolean (code);
-        create_robot_event (DS_ROBOT_CODE_CHANGED);
-        create_robot_event (DS_STATUS_STRING_CHANGED);
-    }
+   if (robot_code != to_boolean(code))
+   {
+      robot_code = to_boolean(code);
+      create_robot_event(DS_ROBOT_CODE_CHANGED);
+      create_robot_event(DS_STATUS_STRING_CHANGED);
+   }
 }
 
 /**
  * Updates the game \a data string
  */
-void CFG_SetGameData (const char* data)
+void CFG_SetGameData(const char *data)
 {
-    /* Check arguments */
-    assert (data);
+   /* Check arguments */
+   assert(data);
 
-    /* Update game data */
-    DS_StrRmBuf (&game_data);
-    game_data = DS_StrNew (data);
+   /* Update game data */
+   DS_StrRmBuf(&game_data);
+   game_data = DS_StrNew(data);
 }
 
 /**
  * Updates the team \a number
  */
-void CFG_SetTeamNumber (const int number)
+void CFG_SetTeamNumber(const int number)
 {
-    if (team != number) {
-        team = number;
-        CFG_ReconfigureAddresses (RECONFIGURE_ALL);
-    }
+   if (team != number)
+   {
+      team = number;
+      CFG_ReconfigureAddresses(RECONFIGURE_ALL);
+   }
 }
 
 /**
  * Updates the robot's \a enabled state
  */
-void CFG_SetRobotEnabled (const int enabled)
+void CFG_SetRobotEnabled(const int enabled)
 {
-    if (robot_enabled != to_boolean (enabled)) {
-        robot_enabled = to_boolean (enabled) && !CFG_GetEmergencyStopped();
-        create_robot_event (DS_ROBOT_ENABLED_CHANGED);
-        create_robot_event (DS_STATUS_STRING_CHANGED);
-    }
+   if (robot_enabled != to_boolean(enabled))
+   {
+      robot_enabled = to_boolean(enabled) && !CFG_GetEmergencyStopped();
+      create_robot_event(DS_ROBOT_ENABLED_CHANGED);
+      create_robot_event(DS_STATUS_STRING_CHANGED);
+   }
 }
 
 /**
  * Updates the robot's CPU usage.
  * You must input a value between \c 0 and \c 100
  */
-void CFG_SetRobotCPUUsage (const int percent)
+void CFG_SetRobotCPUUsage(const int percent)
 {
-    if (cpu_usage != percent) {
-        cpu_usage = respect_range (percent, 0, 100);
-        create_robot_event (DS_ROBOT_CPU_INFO_CHANGED);
-    }
+   if (cpu_usage != percent)
+   {
+      cpu_usage = respect_range(percent, 0, 100);
+      create_robot_event(DS_ROBOT_CPU_INFO_CHANGED);
+   }
 }
 
 /**
  * Updates the robot's RAM/memory usage.
  * You must input a value between \c 0 and \c 100
  */
-void CFG_SetRobotRAMUsage (const int percent)
+void CFG_SetRobotRAMUsage(const int percent)
 {
-    if (ram_usage != percent) {
-        ram_usage = respect_range (percent, 0, 100);
-        create_robot_event (DS_ROBOT_RAM_INFO_CHANGED);
-    }
+   if (ram_usage != percent)
+   {
+      ram_usage = respect_range(percent, 0, 100);
+      create_robot_event(DS_ROBOT_RAM_INFO_CHANGED);
+   }
 }
 
 /**
  * Updates the robot's disk usage.
  * You must input a value between \c 0 and \c 100
  */
-void CFG_SetRobotDiskUsage (const int percent)
+void CFG_SetRobotDiskUsage(const int percent)
 {
-    if (disk_usage != percent) {
-        disk_usage = respect_range (percent, 0, 100);
-        create_robot_event (DS_ROBOT_DISK_INFO_CHANGED);
-    }
+   if (disk_usage != percent)
+   {
+      disk_usage = respect_range(percent, 0, 100);
+      create_robot_event(DS_ROBOT_DISK_INFO_CHANGED);
+   }
 }
 
 /**
  * Updates the robot's \a voltage, there are no range limits
  */
-void CFG_SetRobotVoltage (const float voltage)
+void CFG_SetRobotVoltage(const float voltage)
 {
-    if (robot_voltage != voltage) {
-        robot_voltage = roundf (voltage * 100) / 100;
-        create_robot_event (DS_ROBOT_VOLTAGE_CHANGED);
-    }
+   if (robot_voltage != voltage)
+   {
+      robot_voltage = roundf(voltage * 100) / 100;
+      create_robot_event(DS_ROBOT_VOLTAGE_CHANGED);
+   }
 }
 
 /**
  * Updates the emergency \a stopped state of the robot.
  */
-void CFG_SetEmergencyStopped (const int stopped)
+void CFG_SetEmergencyStopped(const int stopped)
 {
-    if (emergency_stopped != to_boolean (stopped)) {
-        emergency_stopped = to_boolean (stopped);
-        create_robot_event (DS_ROBOT_ESTOP_CHANGED);
-        create_robot_event (DS_STATUS_STRING_CHANGED);
-    }
+   if (emergency_stopped != to_boolean(stopped))
+   {
+      emergency_stopped = to_boolean(stopped);
+      create_robot_event(DS_ROBOT_ESTOP_CHANGED);
+      create_robot_event(DS_STATUS_STRING_CHANGED);
+   }
 }
 
 /**
  * Changes the \a alliance of the robot
  */
-void CFG_SetAlliance (const DS_Alliance alliance)
+void CFG_SetAlliance(const DS_Alliance alliance)
 {
-    if (robot_alliance != alliance) {
-        robot_alliance = alliance;
-        create_robot_event (DS_ROBOT_STATION_CHANGED);
-    }
+   if (robot_alliance != alliance)
+   {
+      robot_alliance = alliance;
+      create_robot_event(DS_ROBOT_STATION_CHANGED);
+   }
 }
 
 /**
  * Changes the \a position of the robot
  */
-void CFG_SetPosition (const DS_Position position)
+void CFG_SetPosition(const DS_Position position)
 {
-    if (robot_position != position) {
-        robot_position = position;
-        create_robot_event (DS_ROBOT_STATION_CHANGED);
-    }
+   if (robot_position != position)
+   {
+      robot_position = position;
+      create_robot_event(DS_ROBOT_STATION_CHANGED);
+   }
 }
 
 /**
  * Updates the CAN \a utilization
  */
-void CFG_SetCANUtilization (const int utilization)
+void CFG_SetCANUtilization(const int utilization)
 {
-    if (can_utilization != utilization) {
-        can_utilization = utilization;
-        create_robot_event (DS_ROBOT_CAN_UTIL_CHANGED);
-    }
+   if (can_utilization != utilization)
+   {
+      can_utilization = utilization;
+      create_robot_event(DS_ROBOT_CAN_UTIL_CHANGED);
+   }
 }
 
 /**
  * Changes the control \a mode of the robot
  */
-void CFG_SetControlMode (const DS_ControlMode mode)
+void CFG_SetControlMode(const DS_ControlMode mode)
 {
-    if (control_mode != mode) {
-        control_mode = mode;
-        create_robot_event (DS_ROBOT_MODE_CHANGED);
-        create_robot_event (DS_STATUS_STRING_CHANGED);
-    }
+   if (control_mode != mode)
+   {
+      control_mode = mode;
+      create_robot_event(DS_ROBOT_MODE_CHANGED);
+      create_robot_event(DS_STATUS_STRING_CHANGED);
+   }
 }
 
 /**
  * Updates the state of the FMS communications.
  */
-void CFG_SetFMSCommunications (const int communications)
+void CFG_SetFMSCommunications(const int communications)
 {
-    if (fms_communications != to_boolean (communications)) {
-        fms_communications = to_boolean (communications);
+   if (fms_communications != to_boolean(communications))
+   {
+      fms_communications = to_boolean(communications);
 
-        DS_Event event;
-        event.fms.type = DS_FMS_COMMS_CHANGED;
-        event.fms.connected = fms_communications;
-        DS_AddEvent (&event);
+      DS_Event event;
+      event.fms.type = DS_FMS_COMMS_CHANGED;
+      event.fms.connected = fms_communications;
+      DS_AddEvent(&event);
 
-        DS_ResetFMSPackets();
-    }
+      DS_ResetFMSPackets();
+   }
 }
 
 /**
  * Updates the state of the radio communications.
  */
-void CFG_SetRadioCommunications (const int communications)
+void CFG_SetRadioCommunications(const int communications)
 {
-    if (radio_communications != to_boolean (communications)) {
-        radio_communications = to_boolean (communications);
+   if (radio_communications != to_boolean(communications))
+   {
+      radio_communications = to_boolean(communications);
 
-        DS_Event event;
-        event.radio.type = DS_RADIO_COMMS_CHANGED;
-        event.radio.connected = fms_communications;
-        DS_AddEvent (&event);
+      DS_Event event;
+      event.radio.type = DS_RADIO_COMMS_CHANGED;
+      event.radio.connected = fms_communications;
+      DS_AddEvent(&event);
 
-        DS_ResetRadioPackets();
-    }
+      DS_ResetRadioPackets();
+   }
 }
 
 /**
  * Updates the state of the robot communications.
  */
-void CFG_SetRobotCommunications (const int communications)
+void CFG_SetRobotCommunications(const int communications)
 {
-    if (robot_communications != to_boolean (communications)) {
-        robot_communications = to_boolean (communications);
-        create_robot_event (DS_ROBOT_COMMS_CHANGED);
-        create_robot_event (DS_STATUS_STRING_CHANGED);
+   if (robot_communications != to_boolean(communications))
+   {
+      robot_communications = to_boolean(communications);
+      create_robot_event(DS_ROBOT_COMMS_CHANGED);
+      create_robot_event(DS_STATUS_STRING_CHANGED);
 
-        DS_ResetRobotPackets();
-    }
+      DS_ResetRobotPackets();
+   }
 }
 
 /**
  * Called when the FMS watchdog expires
  */
-void CFG_FMSWatchdogExpired (void)
+void CFG_FMSWatchdogExpired(void)
 {
-    CFG_SetFMSCommunications (0);
-    CFG_ReconfigureAddresses (RECONFIGURE_FMS);
+   CFG_SetFMSCommunications(0);
+   CFG_ReconfigureAddresses(RECONFIGURE_FMS);
 }
 
 /**
  * Called when the radio watchdog expires
  */
-void CFG_RadioWatchdogExpired (void)
+void CFG_RadioWatchdogExpired(void)
 {
-    CFG_SetRadioCommunications (0);
-    CFG_ReconfigureAddresses (RECONFIGURE_RADIO);
+   CFG_SetRadioCommunications(0);
+   CFG_ReconfigureAddresses(RECONFIGURE_RADIO);
 }
 
 /**
  * Called when the robot watchdog expires
  */
-void CFG_RobotWatchdogExpired (void)
+void CFG_RobotWatchdogExpired(void)
 {
-    /* Reset everything to safe state */
-    CFG_SetRobotCode (0);
-    CFG_SetRobotVoltage (0);
-    CFG_SetRobotEnabled (0);
-    CFG_SetRobotCPUUsage (0);
-    CFG_SetRobotRAMUsage (0);
-    CFG_SetRobotDiskUsage (0);
-    CFG_SetEmergencyStopped (0);
-    CFG_SetRobotCommunications (0);
+   /* Reset everything to safe state */
+   CFG_SetRobotCode(0);
+   CFG_SetRobotVoltage(0);
+   CFG_SetRobotEnabled(0);
+   CFG_SetRobotCPUUsage(0);
+   CFG_SetRobotRAMUsage(0);
+   CFG_SetRobotDiskUsage(0);
+   CFG_SetEmergencyStopped(0);
+   CFG_SetRobotCommunications(0);
 
-    /* Force the sockets to perform another lookup */
-    CFG_ReconfigureAddresses (RECONFIGURE_ROBOT);
+   /* Force the sockets to perform another lookup */
+   CFG_ReconfigureAddresses(RECONFIGURE_ROBOT);
 
-    /* Update the status label */
-    create_robot_event (DS_STATUS_STRING_CHANGED);
+   /* Update the status label */
+   create_robot_event(DS_STATUS_STRING_CHANGED);
 }

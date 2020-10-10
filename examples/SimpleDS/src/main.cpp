@@ -27,20 +27,20 @@
 #include "Window.h"
 #include "VirtualJoystick.h"
 
-int main (int argc, char* argv[])
+int main(int argc, char *argv[])
 {
-    QApplication app (argc, argv);
+   QApplication app(argc, argv);
 
-    /* Initialize the Driver Station */
-    DriverStation::getInstance()->start();
+   /* Initialize the Driver Station */
+   DriverStation::getInstance()->start();
 
-    /* Initialize the main window */
-    Window window;
-    window.show();
+   /* Initialize the main window */
+   Window window;
+   window.show();
 
-    /* Initialize the virtual joystick */
-    VirtualJoystick joystick;
-    Q_UNUSED (joystick);
+   /* Initialize the virtual joystick */
+   VirtualJoystick joystick;
+   Q_UNUSED(joystick);
 
-    return app.exec();
+   return app.exec();
 }

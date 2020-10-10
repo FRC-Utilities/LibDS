@@ -32,24 +32,25 @@
  *
  * \param array the array object to free
  */
-void DS_ArrayFree (DS_Array* array)
+void DS_ArrayFree(DS_Array *array)
 {
-    /* Check arguments */
-    assert (array);
-    assert (array->data);
+   /* Check arguments */
+   assert(array);
+   assert(array->data);
 
-    /* De-allocate array data */
-    if (array->size > 0) {
-        int i;
-        for (i = 0; i < (int) array->size; ++i)
-            DS_FREE (array->data [i]);
+   /* De-allocate array data */
+   if (array->size > 0)
+   {
+      int i;
+      for (i = 0; i < (int)array->size; ++i)
+         DS_FREE(array->data[i]);
 
-        DS_FREE (array->data);
-    }
+      DS_FREE(array->data);
+   }
 
-    /* Update array properties */
-    array->used = 0;
-    array->size = 0;
+   /* Update array properties */
+   array->used = 0;
+   array->size = 0;
 }
 
 /**
@@ -60,20 +61,21 @@ void DS_ArrayFree (DS_Array* array)
  * \param array the array object in which to insert the given element
  * \param element pointer to the item to register with the array
  */
-void DS_ArrayInsert (DS_Array* array, void* element)
+void DS_ArrayInsert(DS_Array *array, void *element)
 {
-    /* Check arguments */
-    assert (array);
-    assert (array->data);
+   /* Check arguments */
+   assert(array);
+   assert(array->data);
 
-    /* Resize array if required */
-    if (array->used == array->size) {
-        array->size *= 2;
-        array->data = realloc (array->data, array->size);
-    }
+   /* Resize array if required */
+   if (array->used == array->size)
+   {
+      array->size *= 2;
+      array->data = realloc(array->data, array->size);
+   }
 
-    /* Insert element */
-    array->data [array->used++] = element;
+   /* Insert element */
+   array->data[array->used++] = element;
 }
 
 /**
@@ -84,15 +86,15 @@ void DS_ArrayInsert (DS_Array* array, void* element)
  *        array of pointers, the initial size can also be thought as the
  *        initial number of supported items
  */
-void DS_ArrayInit (DS_Array* array, size_t initial_size)
+void DS_ArrayInit(DS_Array *array, size_t initial_size)
 {
-    /* Check arguments */
-    assert (array);
+   /* Check arguments */
+   assert(array);
 
-    /* Allocate array data */
-    array->data = calloc (initial_size, sizeof (void*));
+   /* Allocate array data */
+   array->data = calloc(initial_size, sizeof(void *));
 
-    /* Update array data */
-    array->used = 0;
-    array->size = initial_size;
+   /* Update array data */
+   array->used = 0;
+   array->size = initial_size;
 }

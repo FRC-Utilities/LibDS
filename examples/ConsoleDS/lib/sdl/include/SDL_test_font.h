@@ -28,17 +28,17 @@
  */
 
 #ifndef _SDL_test_font_h
-#define _SDL_test_font_h
+#   define _SDL_test_font_h
 
-#include "begin_code.h"
+#   include "begin_code.h"
 /* Set up for C function definitions, even when using C++ */
-#ifdef __cplusplus
+#   ifdef __cplusplus
 extern "C" {
-#endif
+#   endif
 
 /* Function prototypes */
 
-#define FONT_CHARACTER_SIZE  8
+#   define FONT_CHARACTER_SIZE 8
 
 /**
  *  \brief Draw a string in the currently set font.
@@ -50,7 +50,7 @@ extern "C" {
  *
  *  \returns Returns 0 on success, -1 on failure.
  */
-int SDLTest_DrawCharacter ( SDL_Renderer* renderer, int x, int y, char c );
+int SDLTest_DrawCharacter(SDL_Renderer *renderer, int x, int y, char c);
 
 /**
  *  \brief Draw a string in the currently set font.
@@ -62,14 +62,13 @@ int SDLTest_DrawCharacter ( SDL_Renderer* renderer, int x, int y, char c );
  *
  *  \returns Returns 0 on success, -1 on failure.
  */
-int SDLTest_DrawString ( SDL_Renderer* renderer, int x, int y, const char* s );
-
+int SDLTest_DrawString(SDL_Renderer *renderer, int x, int y, const char *s);
 
 /* Ends C function definitions when using C++ */
-#ifdef __cplusplus
+#   ifdef __cplusplus
 }
-#endif
-#include "close_code.h"
+#   endif
+#   include "close_code.h"
 
 #endif /* _SDL_test_font_h */
 

@@ -9,7 +9,7 @@ CONFIG += c++11
 
 INCLUDEPATH += $$PWD
 
-include ($$PWD/../../LibDS-Legacy.pri)
+include ($$PWD/../../LibDS.pri)
 
 HEADERS += \
     $$PWD/DriverStation.h \

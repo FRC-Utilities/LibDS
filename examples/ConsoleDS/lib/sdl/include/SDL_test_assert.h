@@ -34,23 +34,23 @@
  */
 
 #ifndef _SDL_test_assert_h
-#define _SDL_test_assert_h
+#   define _SDL_test_assert_h
 
-#include "begin_code.h"
+#   include "begin_code.h"
 /* Set up for C function definitions, even when using C++ */
-#ifdef __cplusplus
+#   ifdef __cplusplus
 extern "C" {
-#endif
+#   endif
 
 /**
  * \brief Fails the assert.
  */
-#define ASSERT_FAIL     0
+#   define ASSERT_FAIL 0
 
 /**
  * \brief Passes the assert.
  */
-#define ASSERT_PASS     1
+#   define ASSERT_PASS 1
 
 /**
  * \brief Assert that logs and break execution flow on failures.
@@ -58,7 +58,7 @@ extern "C" {
  * \param assertCondition Evaluated condition or variable to assert; fail (==0) or pass (!=0).
  * \param assertDescription Message to log with the assert describing it.
  */
-void SDLTest_Assert (int assertCondition, const char* assertDescription, ...);
+void SDLTest_Assert(int assertCondition, const char *assertDescription, ...);
 
 /**
  * \brief Assert for test cases that logs but does not break execution flow on failures. Updates assertion counters.
@@ -68,15 +68,14 @@ void SDLTest_Assert (int assertCondition, const char* assertDescription, ...);
  *
  * \returns Returns the assertCondition so it can be used to externally to break execution flow if desired.
  */
-int SDLTest_AssertCheck (int assertCondition, const char* assertDescription,
-                         ...);
+int SDLTest_AssertCheck(int assertCondition, const char *assertDescription, ...);
 
 /**
  * \brief Explicitely pass without checking an assertion condition. Updates assertion counter.
  *
  * \param assertDescription Message to log with the assert describing it.
  */
-void SDLTest_AssertPass (const char* assertDescription, ...);
+void SDLTest_AssertPass(const char *assertDescription, ...);
 
 /**
  * \brief Resets the assert summary counters to zero.
@@ -88,7 +87,6 @@ void SDLTest_ResetAssertSummary();
  */
 void SDLTest_LogAssertSummary();
 
-
 /**
  * \brief Converts the current assert summary state to a test result.
  *
@@ -96,10 +94,10 @@ void SDLTest_LogAssertSummary();
  */
 int SDLTest_AssertSummaryToTestResult();
 
-#ifdef __cplusplus
+#   ifdef __cplusplus
 }
-#endif
-#include "close_code.h"
+#   endif
+#   include "close_code.h"
 
 #endif /* _SDL_test_assert_h */
 
