@@ -12,4 +12,4 @@ install:
     
 script:
     - qmake LibDS.pro
-    - make -4
+    - make
