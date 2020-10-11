@@ -37,41 +37,42 @@ extern "C" {
 /**
  * Represents a string and its length
  */
-typedef struct {
-    char* buf;  /**< String data buffer */
-    size_t len; /**< Length of the string */
+typedef struct
+{
+   char *buf; /**< String data buffer */
+   size_t len; /**< Length of the string */
 } DS_String;
 
 /*
  * Information functions
  */
-extern int DS_StrLen (const DS_String* string);
-extern int DS_StrEmpty (const DS_String* string);
-extern int DS_StrCompare (const DS_String* a, const DS_String* b);
+extern int DS_StrLen(const DS_String *string);
+extern int DS_StrEmpty(const DS_String *string);
+extern int DS_StrCompare(const DS_String *a, const DS_String *b);
 
 /*
  * String operations functions
  */
-extern int DS_StrRmBuf (DS_String* string);
-extern int DS_StrResize (DS_String* string, size_t size);
-extern int DS_StrAppend (DS_String* string, const uint8_t byte);
-extern int DS_StrJoin (DS_String* first, const DS_String* second);
-extern int DS_StrJoinCStr (DS_String* string, const char* cstring);
-extern int DS_StrSetChar (DS_String* string, const int pos, const char byte);
+extern int DS_StrRmBuf(DS_String *string);
+extern int DS_StrResize(DS_String *string, size_t size);
+extern int DS_StrAppend(DS_String *string, const uint8_t byte);
+extern int DS_StrJoin(DS_String *first, const DS_String *second);
+extern int DS_StrJoinCStr(DS_String *string, const char *cstring);
+extern int DS_StrSetChar(DS_String *string, const int pos, const char byte);
 
 /*
  * DS_String to native string functions
  */
-extern char* DS_StrToChar (const DS_String* string);
-extern char DS_StrCharAt (const DS_String* string, const int pos);
+extern char *DS_StrToChar(const DS_String *string);
+extern char DS_StrCharAt(const DS_String *string, const int pos);
 
 /*
  * String creation functions
  */
-extern DS_String DS_StrNew (const char* string);
-extern DS_String DS_StrNewLen (const size_t length);
-extern DS_String DS_StrDup (const DS_String* source);
-extern DS_String DS_StrFormat (const char* format, ...);
+extern DS_String DS_StrNew(const char *string);
+extern DS_String DS_StrNewLen(const size_t length);
+extern DS_String DS_StrDup(const DS_String *source);
+extern DS_String DS_StrFormat(const char *format, ...);
 
 #ifdef __cplusplus
 }

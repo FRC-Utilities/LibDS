@@ -38,13 +38,13 @@ extern "C" {
 #include "DS_Joysticks.h"
 #include "DS_DefaultProtocols.h"
 
-extern void DS_Init (void);
-extern void DS_Close (void);
-extern int DS_Initialized (void);
+extern void DS_Init(void);
+extern void DS_Close(void);
+extern int DS_Initialized(void);
 
-extern char* DS_GetVersion (void);
-extern char* DS_GetBuildDate (void);
-extern char* DS_GetBuildTime (void);
+extern char *DS_GetVersion(void);
+extern char *DS_GetBuildDate(void);
+extern char *DS_GetBuildTime(void);
 
 #ifdef __cplusplus
 }
