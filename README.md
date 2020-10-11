@@ -18,8 +18,6 @@ LibDS implements the following features:
 - Abstract-protocol object
 - Cross-platform socket handling 
 
-You can check the [TODOs](TODO.md) for the current state of the project.
-
 You may find a lot of mistakes here, be it design choices or just stupid mistakes. If you spot something, I would be very grateful if you could tell me about it (or make a pull request).
 
 ### Example Projects
