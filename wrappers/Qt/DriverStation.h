@@ -27,9 +27,10 @@
 #   include <QtQml>
 #endif
 
-#include <QTime>
 #include <QObject>
 #include <QStringList>
+#include <QElapsedTimer>
+
 #include <DS_Protocol.h>
 
 class DriverStation : public QObject
@@ -260,7 +261,7 @@ signals:
    void emergencyStoppedChanged(const bool emergencyStopped);
 
 private:
-   QTime m_time;
+   QElapsedTimer m_timer;
    QString m_elapsedTime;
 };
 

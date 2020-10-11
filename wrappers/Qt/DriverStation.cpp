@@ -1113,7 +1113,7 @@ void DriverStation::processEvents()
  */
 void DriverStation::resetElapsedTime()
 {
-   m_time.restart();
+   m_timer.restart();
    m_elapsedTime.clear();
    emit elapsedTimeChanged(elapsedTime());
 }
@@ -1126,7 +1126,7 @@ void DriverStation::updateElapsedTime()
 {
    if (isEnabled())
    {
-      int milliseconds = m_time.elapsed();
+      int milliseconds = m_timer.elapsed();
       int seconds = (milliseconds / 1000);
       int minutes = (seconds / 60) % 60;
 
