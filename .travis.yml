@@ -11,5 +11,5 @@ install:
     - sudo apt-get install -y build-essential qt4-qmake
     
 script:
-    - qmake.pro
+    - qmake LibDS.pro
     - make -4
