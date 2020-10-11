@@ -1,5 +1,7 @@
 # LibDS
 
+[![Build Status](https://travis-ci.org/FRC-Utilities/LibDS.svg?branch=master)](https://travis-ci.org/FRC-Utilities/LibDS)
+
 The DriverStation library allows you to connect and manage a robot easily by providing an abstraction layer between an application and the network comununications between the robot and the host computer.
 
 The library is written in C, allowing it to be used in many platforms and/or programming languages (using wrappers).

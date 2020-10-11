@@ -1,6 +1,6 @@
 TEMPLATE = lib
-TARGET = LibDS-Legacy
+TARGET = LibDS
 
 CONFIG -= qt
 
-include ($$PWD/LibDS-Legacy.pri)
+include ($$PWD/LibDS.pri)
