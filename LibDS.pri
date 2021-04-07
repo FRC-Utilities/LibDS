@@ -56,6 +56,6 @@ SOURCES += \
 include ($$PWD/lib/Socky/Socky.pri)
 
 win32-msvc* {
-    #LIBS += -l
+    DEFINES += HAVE_STRUCT_TIMESPEC
     include ($$PWD/lib/pthread-win32/pthread-win32.pri)
 }
