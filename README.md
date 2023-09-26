@@ -186,4 +186,4 @@ To compile the project, navigate to the project root and run the following comma
 If your project runs into runtime errors try running `make staticlib` instead of `make`
 
 To install compiled library files, and headers to the correct locations in /usr/local, use this command
-* sudoIf your project runs into runtime errors try running `make staticlib` instead of `make` make install
+* sudo make install
