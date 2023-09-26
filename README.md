@@ -183,5 +183,7 @@ To compile the project, navigate to the project root and run the following comma
 * qmake
 * make
 
+If your project runs into runtime errors try running `make staticlib` instead of `make`
+
 To install compiled library files, and headers to the correct locations in /usr/local, use this command
-* sudo make install
+* sudoIf your project runs into runtime errors try running `make staticlib` instead of `make` make install
